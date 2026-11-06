@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /ledger
+Disallow: /roster
+Disallow: /reset-password
+
+# AI Crawlers / LLM scrapers
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://www.digihust.tech/sitemap.xml

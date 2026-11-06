@@ -1,0 +1,2359 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import {
+  User, Group, Lead, Project, Payout, Applicant, GlobalAdminSettings, PipelineStage,
+  Deliverable, Comment, ProjectAssignment, GroupId, UserRole, UserRoleTier, UserStatus,
+  SplitOverride, Assignment, SubTask, Milestone, Certificate, CertificateType, CertificateStatus,
+  CertificateTemplate, Announcement, AnnouncementScope, SiteContent, SecurityAuditLog,
+  SiteCaseStudy, SiteTestimonial, SiteServiceItem, SitePackage, SiteTeamMember, SiteFAQ, SiteValueProp, SiteBlogPost
+} from '../types';
+import {
+  INITIAL_GROUPS, INITIAL_USERS, INITIAL_LEADS, INITIAL_PROJECTS, INITIAL_PAYOUTS,
+  INITIAL_APPLICANTS, INITIAL_SETTINGS, INITIAL_ASSIGNMENTS, INITIAL_CERTIFICATES,
+  INITIAL_ANNOUNCEMENTS, DEFAULT_SITE_CONTENT, INITIAL_AUDIT_LOGS, DEFAULT_CASE_STUDIES
+} from '../services/mockData';
+import { getNextMemberId, syncIdCounter } from '../lib/memberIdGenerator';
+import { getUserRoleTier, PERMISSIONS } from '../lib/permissions';
+import { quickHashSync } from '../lib/crypto';
+import { dbService } from '../lib/dbService';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { realtimeSync } from '../lib/realtimeSync';
+import { emailService } from '../lib/emailService';
+import { ToastContainer, ToastMessage } from '../components/common/ToastContainer';
+
+interface AppContextType {
+  // Auth & Session
+  isAuthenticated: boolean;
+  currentUser: User;
+  currentTier: UserRoleTier;
+  users: User[];
+  groups: Group[];
+  leads: Lead[];
+  projects: Project[];
+  assignments: Assignment[];
+  certificates: Certificate[];
+  announcements: Announcement[];
+  payouts: Payout[];
+  applicants: Applicant[];
+  settings: GlobalAdminSettings;
+  siteContent: SiteContent;
+  auditLogs: SecurityAuditLog[];
+
+  // Real Auth Actions (Production Authenticator)
+  loginWithMemberId: (memberIdOrEmail: string, password?: string) => { success: boolean; error?: string };
+  loginWithSupabaseSession: (identifier: string) => { success: boolean; error?: string };
+  logout: () => void;
+  switchRole: (userId: string) => void;
+  changePassword: (newPassword: string) => { success: boolean; error?: string };
+  requestPasswordReset: (emailOrMemberId: string) => Promise<{ success: boolean; message: string; email?: string }>;
+  completePasswordResetWithOtp: (email: string, otp: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+
+  // Master CEO User & Security Governance Actions
+  createUserAccount: (
+    userData: Omit<User, 'id' | 'completedProjectsCount' | 'totalEarnings' | 'rating' | 'statusHistory' | 'notes' | 'documents'>,
+    initialPlainPassword?: string
+  ) => { success: boolean; newUser?: User; error?: string };
+  deleteUserAccount: (targetUserId: string, reason?: string) => { success: boolean; error?: string };
+  resetUserPasswordByCeo: (targetUserId: string, newPlainPassword: string) => { success: boolean; error?: string };
+  toggleUserAccountStatus: (targetUserId: string, reason: string) => { success: boolean; error?: string };
+  updateUserRoleWithAuth: (targetUserId: string, newRoleTier: UserRoleTier, reason: string) => { success: boolean; error?: string };
+  updateUserSquadWithAuth: (targetUserId: string, newGroupId?: GroupId) => { success: boolean; error?: string };
+  setDelegatedPermissions: (targetUserId: string, permissions: string[]) => { success: boolean; error?: string };
+
+  // Pipeline & Project Actions
+  submitLead: (leadData: Omit<Lead, 'id' | 'createdAt' | 'status' | 'submittedByUserId' | 'submittedByUserName'>) => void;
+  updateLeadStatus: (leadId: string, newStatus: PipelineStage) => void;
+  deleteLead: (leadId: string) => void;
+  reviewLeadToProject: (
+    leadId: string,
+    groupId: GroupId,
+    assignedLeaderId: string,
+    totalValue: number,
+    externalFee: number,
+    isLeadGenIndependent: boolean,
+    leadGenUserPct: number,
+    splitMgmtPct: number,
+    splitLeaderPct: number,
+    splitFreelancerPct: number
+  ) => void;
+  assignProjectTeam: (projectId: string, assignments: ProjectAssignment[]) => void;
+  updateProjectStatus: (projectId: string, newStatus: PipelineStage) => void;
+  deleteProject: (projectId: string) => void;
+  addDeliverable: (projectId: string, title: string, linkUrl?: string, notes?: string) => void;
+  addComment: (projectId: string, text: string) => void;
+  releaseProjectPayout: (projectId: string) => void;
+
+  // Assignment Workspace Actions
+  createAssignment: (assignmentData: Omit<Assignment, 'id' | 'createdAt' | 'subTasks' | 'milestones' | 'deliverables' | 'comments'>) => void;
+  updateAssignmentStatus: (assignmentId: string, newStatus: PipelineStage) => void;
+  deleteAssignment: (assignmentId: string) => void;
+  addSubTask: (assignmentId: string, title: string, assignedMemberId: string, dueDate?: string) => void;
+  toggleSubTask: (assignmentId: string, subTaskId: string) => void;
+  addMilestone: (assignmentId: string, title: string, targetDate: string) => void;
+  toggleMilestone: (assignmentId: string, milestoneId: string) => void;
+  addAssignmentDeliverable: (assignmentId: string, title: string, linkUrl?: string, notes?: string) => void;
+  addAssignmentComment: (assignmentId: string, text: string) => void;
+
+  // Certificate & Template Actions
+  certificateTemplates: CertificateTemplate[];
+  issueCertificate: (certData: Omit<Certificate, 'id' | 'issuedDate' | 'status' | 'qrCodeUrl'>) => Certificate;
+  generateMemberCertificate: (memberId: string, templateId: string, overrides?: Partial<Certificate>) => Certificate;
+  attachMemberDriveDocument: (memberUserId: string, data: { type: CertificateType; documentTitle: string; driveUrl: string; isLocked?: boolean; isHidden?: boolean; durationText?: string; notes?: string }) => Certificate;
+  toggleCertificateLock: (certId: string, isLocked: boolean) => void;
+  toggleCertificateHidden: (certId: string, isHidden: boolean) => void;
+  updateCertificateDriveUrl: (certId: string, driveUrl: string, documentTitle?: string, isLocked?: boolean, isHidden?: boolean) => void;
+  createCertificateTemplate: (templateData: Omit<CertificateTemplate, 'id' | 'createdAt'>) => CertificateTemplate;
+  updateCertificateTemplate: (templateId: string, updates: Partial<CertificateTemplate>) => void;
+  deleteCertificateTemplate: (templateId: string) => void;
+  revokeCertificate: (certId: string, reason?: string) => void;
+  restoreCertificate: (certId: string) => void;
+  deleteCertificate: (certId: string) => void;
+
+  // Announcement Actions
+  postAnnouncement: (announcementData: Omit<Announcement, 'id' | 'postedBy' | 'postedByName' | 'postedByRole' | 'postedAt'>) => void;
+  deleteAnnouncement: (announcementId: string) => void;
+
+  // People & Community Management Actions
+  updateUserProfile: (userId: string, updates: Partial<User>) => void;
+  changeUserStatus: (userId: string, newStatus: UserStatus, reason: string, changedBy: string) => void;
+  addUserNote: (userId: string, text: string, authorId: string, authorName: string) => void;
+  deleteUserNote: (userId: string, noteId: string) => void;
+  setUserSplitOverride: (userId: string, splitOverride?: SplitOverride) => void;
+  reassignUserSquad: (userId: string, newGroupId?: GroupId) => void;
+  changeUserRole: (userId: string, newRole: UserRole) => void;
+  quickInviteUser: (userData: Omit<User, 'id' | 'completedProjectsCount' | 'totalEarnings' | 'rating' | 'statusHistory' | 'notes' | 'documents'>) => User;
+  bulkImportMembers: (importedRows: Partial<User>[]) => { count: number; newUsers: User[] };
+  sendBatchCredentials: () => { count: number; memberNames: string[] };
+
+  updateSiteContent: (section: keyof SiteContent | Partial<SiteContent>, data?: any) => void;
+  addItemToSiteContent: <K extends keyof SiteContent>(section: K, item: any) => void;
+  removeItemFromSiteContent: <K extends keyof SiteContent>(section: K, itemId: string, targetIndex?: number) => void;
+  updateItemInSiteContent: <K extends keyof SiteContent>(section: K, itemId: string, updatedItem: any, targetIndex?: number) => void;
+  resetSiteContent: () => void;
+
+  // Applicant Workflow Actions
+  submitApplication: (applicantData: Omit<Applicant, 'id' | 'appliedAt' | 'status'>) => void;
+  approveApplicant: (applicantId: string, role?: UserRole, targetGroupId?: GroupId) => void;
+  rejectApplicant: (applicantId: string, reason?: string) => void;
+  requestMoreInfoApplicant: (applicantId: string, followUpNotes?: string) => void;
+
+  // Platform & Settings Actions
+  updateGlobalSettings: (newSettings: GlobalAdminSettings) => void;
+  resetToDefaultData: () => void;
+
+  // Pin Member Management (Persisted to Supabase for cross-device sync)
+  updatePinnedMembers: (pinnedIds: string[]) => void;
+
+  // Global Custom Notification Toast Box
+  showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info', title?: string, duration?: number) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const LOCAL_STORAGE_KEY = 'digihust_clean_v6';
+
+// Helper to guarantee every item in any CMS array has a distinct, unique ID and default case studies are preserved
+export const sanitizeSiteContent = (raw: SiteContent | null | undefined): SiteContent => {
+  const content = raw ? { ...raw } : { ...DEFAULT_SITE_CONTENT };
+
+  const arraySections: (keyof SiteContent)[] = [
+    'services', 'caseStudies', 'valueProps', 'testimonials',
+    'teamMembers', 'blogPosts', 'faqs', 'packages'
+  ];
+
+  arraySections.forEach((sectionKey) => {
+    const arr = content[sectionKey];
+    if (Array.isArray(arr)) {
+      const seenIds = new Set<string>();
+      (content as any)[sectionKey] = arr.map((item: any, idx: number) => {
+        if (!item || typeof item !== 'object') return item;
+        let id = item.id;
+        // If id is missing, blank, or duplicate
+        if (!id || typeof id !== 'string' || id.trim() === '' || seenIds.has(id)) {
+          id = item.slug ? `${item.slug}` : `${String(sectionKey).slice(0, 4)}-${idx + 1}`;
+          if (seenIds.has(id)) {
+            id = `${id}-${idx + 1}`;
+          }
+        }
+        seenIds.add(id);
+        return {
+          ...item,
+          id
+        };
+      });
+    }
+  });
+
+  if (!content.caseStudies || content.caseStudies.length === 0) {
+    content.caseStudies = DEFAULT_CASE_STUDIES;
+  } else {
+    content.caseStudies = content.caseStudies.map((cs, idx) => ({
+      ...cs,
+      id: cs.id || cs.slug || `cs-${idx + 1}`
+    }));
+  }
+
+  return content;
+};
+
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Load initial state from local storage if available
+  const [users, setUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_users`);
+    return saved ? JSON.parse(saved) : INITIAL_USERS;
+  });
+
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    const savedUser = localStorage.getItem(`${LOCAL_STORAGE_KEY}_current_user`);
+    if (savedUser) return JSON.parse(savedUser);
+    return users.find(u => u.roleTier === 'ceo' || u.isCeoMaster) || users[0];
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const savedAuth = localStorage.getItem(`${LOCAL_STORAGE_KEY}_is_authenticated`);
+    return savedAuth ? JSON.parse(savedAuth) : false;
+  });
+
+  const [groups] = useState<Group[]>(INITIAL_GROUPS);
+
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_leads`);
+    return saved ? JSON.parse(saved) : INITIAL_LEADS;
+  });
+
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_projects`);
+    return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
+  });
+
+  const [assignments, setAssignments] = useState<Assignment[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_assignments`);
+    return saved ? JSON.parse(saved) : INITIAL_ASSIGNMENTS;
+  });
+
+  const [certificates, setCertificates] = useState<Certificate[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_certificates`);
+    return saved ? JSON.parse(saved) : INITIAL_CERTIFICATES;
+  });
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_announcements`);
+    return saved ? JSON.parse(saved) : INITIAL_ANNOUNCEMENTS;
+  });
+
+  const [payouts, setPayouts] = useState<Payout[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_payouts`);
+    return saved ? JSON.parse(saved) : INITIAL_PAYOUTS;
+  });
+
+  const [applicants, setApplicants] = useState<Applicant[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_applicants`);
+    return saved ? JSON.parse(saved) : INITIAL_APPLICANTS;
+  });
+
+  const [settings, setSettings] = useState<GlobalAdminSettings>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_settings`);
+    return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+  });
+
+  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_site_content`);
+    return sanitizeSiteContent(saved ? JSON.parse(saved) : DEFAULT_SITE_CONTENT);
+  });
+
+  const [auditLogs, setAuditLogs] = useState<SecurityAuditLog[]>(() => {
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_audit_logs`);
+    return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
+  });
+
+  // ── GLOBAL CUSTOM TOAST NOTIFICATION SYSTEM ─────────────────────────────────
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const showToast = useCallback((
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    title?: string,
+    duration: number = 3500
+  ) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+    const newToast: ToastMessage = { id, message, type, title, duration };
+    setToasts(prev => [...prev, newToast]);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        dismissToast(id);
+      }, duration);
+    }
+  }, [dismissToast]);
+
+  // ── CLOUD DATABASE INITIALIZATION & REAL-TIME MULTI-DEVICE SYNC ───────────
+  // Helper for safe storage write without crashing on quota exhaustion
+  const safeSetItem = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (err) {
+      console.warn(`LocalStorage write error for ${key}:`, err);
+    }
+  };
+
+  // ── REAL-TIME HOT LOADING & MULTI-DEVICE MESH SYNCHRONIZER ───────────────
+  useEffect(() => {
+    // 1. Subscribe to Real-Time Mesh Channel for instantaneous millisecond updates
+    const unsubscribeMesh = realtimeSync.subscribe((payload) => {
+      if (payload.type === 'USERS_UPDATED' && Array.isArray(payload.data)) {
+        setUsers(payload.data);
+        // Keep currentUser in sync with the new user list
+        setCurrentUser((prev) => {
+          if (!prev) return prev;
+          const updated = payload.data.find((u: any) => u.id === prev.id);
+          return updated || prev;
+        });
+      } else if (payload.type === 'PROFILE_UPDATED' && payload.data) {
+        const { userId, updates } = payload.data;
+        setUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, ...updates } : u))
+        );
+        setCurrentUser((prev) =>
+          prev && prev.id === userId ? { ...prev, ...updates } : prev
+        );
+      } else if (payload.type === 'CMS_UPDATED' && payload.data) {
+        setSiteContent((prev) => ({ ...prev, ...payload.data }));
+      }
+    });
+
+    // 2. Authoritative Cloud Database Sync & Supabase Real-Time Channel
+    // RULE: Cloud Supabase is the single source of truth. Local localStorage is
+    //       only a display cache. We NEVER push localStorage back to cloud because
+    //       that would resurrect deleted members and override real cloud changes.
+    const syncCloudData = async () => {
+      if (!isSupabaseConfigured || !supabase) return;
+      try {
+        const cloudData = await dbService.fetchInitialData();
+        if (!cloudData) return;
+
+        // 1. USERS — Cloud is authoritative. Update state from cloud.
+        if (cloudData.users && cloudData.users.length > 0) {
+          setUsers(cloudData.users);
+          syncIdCounter(cloudData.users);
+          // Migrate any Base64 avatars to Supabase Storage in background
+          cloudData.users.forEach((cloudUser) => {
+            if (cloudUser?.avatarUrl?.startsWith('data:image/')) {
+              dbService.migrateBase64Avatar(cloudUser.id, cloudUser.avatarUrl)
+                .then((url) => {
+                  if (url && url !== cloudUser.avatarUrl) {
+                    dbService.upsertUser({ ...cloudUser, avatarUrl: url });
+                  }
+                });
+            }
+          });
+        }
+
+        // 2. LEADS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.leads && cloudData.leads.length > 0) {
+          setLeads(cloudData.leads);
+        }
+
+        // 3. PROJECTS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.projects && cloudData.projects.length > 0) {
+          setProjects(cloudData.projects);
+        }
+
+        // 4. ASSIGNMENTS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.assignments && cloudData.assignments.length > 0) {
+          setAssignments(cloudData.assignments);
+        }
+
+        // 5. CERTIFICATES — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.certificates && cloudData.certificates.length > 0) {
+          setCertificates(cloudData.certificates);
+        }
+
+        // 6. ANNOUNCEMENTS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.announcements && cloudData.announcements.length > 0) {
+          setAnnouncements(cloudData.announcements);
+        }
+
+        // 7. SITE CONTENT CMS — Cloud authoritative (STRICTLY READ-ONLY on mount)
+        // CRITICAL BUG FIX: NEVER push local or default content to the cloud on mount!
+        // An unauthenticated visitor, cold-start query timeout, or empty local cache
+        // must NEVER be allowed to overwrite production cloud CMS data with dummy templates.
+        if (cloudData.siteContent) {
+          setSiteContent(sanitizeSiteContent({ ...DEFAULT_SITE_CONTENT, ...cloudData.siteContent }));
+        }
+
+        // 8. AUDIT LOGS — Cloud authoritative
+        if (cloudData.auditLogs && cloudData.auditLogs.length > 0) {
+          setAuditLogs(cloudData.auditLogs);
+        }
+
+        // 9. PAYOUTS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.payouts && cloudData.payouts.length > 0) {
+          setPayouts(cloudData.payouts);
+        }
+
+        // 10. APPLICANTS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.applicants && cloudData.applicants.length > 0) {
+          setApplicants(cloudData.applicants);
+        }
+
+        // 11. GLOBAL SETTINGS — Cloud authoritative (READ-ONLY on mount)
+        if (cloudData.settings) {
+          setSettings(cloudData.settings);
+        }
+      } catch (err) {
+        console.warn('Cloud sync failed, using local cache fallback:', err);
+      }
+    };
+
+    // Initial mount sync
+    syncCloudData();
+
+    // Supabase Real-Time Channel for instant multi-device synchronization
+    let channel: any = null;
+    if (isSupabaseConfigured && supabase) {
+      channel = supabase
+        .channel('app-db-realtime-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public' },
+          () => {
+            syncCloudData();
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      unsubscribeMesh();
+      if (channel && supabase) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, []);
+
+  // Sync to LocalStorage (Offline Resilience with safe try-catch)
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_users`, JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(currentUser));
+  }, [currentUser]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_is_authenticated`, JSON.stringify(isAuthenticated));
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_leads`, JSON.stringify(leads));
+  }, [leads]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_projects`, JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_assignments`, JSON.stringify(assignments));
+  }, [assignments]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_certificates`, JSON.stringify(certificates));
+  }, [certificates]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_announcements`, JSON.stringify(announcements));
+  }, [announcements]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_payouts`, JSON.stringify(payouts));
+  }, [payouts]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_applicants`, JSON.stringify(applicants));
+  }, [applicants]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_settings`, JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(siteContent));
+  }, [siteContent]);
+
+  useEffect(() => {
+    safeSetItem(`${LOCAL_STORAGE_KEY}_audit_logs`, JSON.stringify(auditLogs));
+  }, [auditLogs]);
+
+  // Auth Handlers
+  const currentTier = getUserRoleTier(currentUser);
+
+  const loginWithMemberId = (identifier: string, password?: string): { success: boolean; error?: string } => {
+    const cleanId = identifier.trim().toLowerCase();
+
+    // 1. Strict search: Match ONLY current database memberId or email (no legacy aliases or backdoors)
+    const foundUser = users.find(u =>
+      u.memberId?.trim().toLowerCase() === cleanId ||
+      u.email?.trim().toLowerCase() === cleanId
+    );
+
+    if (!foundUser) {
+      return { success: false, error: 'No registered DigiHust account found with this Member ID or Email.' };
+    }
+
+    if (foundUser.status === 'suspended') {
+      return { success: false, error: 'This account has been suspended by Executive Management.' };
+    }
+
+    // 2. Strict Password Verification (Individual user password only - no backdoors)
+    if (!password) {
+      return { success: false, error: 'Password is required to authenticate.' };
+    }
+
+    if (!foundUser.passwordHash) {
+      return {
+        success: false,
+        error: 'No password is set for this account. Please use "Forgot Password" to verify your identity and set a secure password.'
+      };
+    }
+
+    const computedHash = quickHashSync(password);
+    if (computedHash !== foundUser.passwordHash) {
+      return { success: false, error: 'Incorrect credentials. Please verify your credentials and try again.' };
+    }
+
+    const updatedUser = { ...foundUser };
+
+    setCurrentUser(updatedUser);
+    setIsAuthenticated(true);
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_authenticated`, JSON.stringify(true));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(updatedUser));
+    return { success: true };
+  };
+
+  const loginWithSupabaseSession = (identifier: string): { success: boolean; error?: string } => {
+    const cleanId = identifier.trim().toLowerCase();
+    const foundUser = users.find(u =>
+      u.memberId?.trim().toLowerCase() === cleanId ||
+      u.email?.trim().toLowerCase() === cleanId
+    );
+
+    if (!foundUser) {
+      return { success: false, error: 'User profile not found in directory.' };
+    }
+
+    if (foundUser.status === 'suspended') {
+      return { success: false, error: 'This account has been suspended by Executive Management.' };
+    }
+
+    const updatedUser = { ...foundUser };
+    setCurrentUser(updatedUser);
+    setIsAuthenticated(true);
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_authenticated`, JSON.stringify(true));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(updatedUser));
+    return { success: true };
+  };
+
+
+  // Auto-logout after 30 minutes of inactivity
+  useEffect(() => {
+    if (!currentUser) return;
+
+    let timeoutId: any;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      // 30 minutes = 30 * 60 * 1000 = 1800000 ms
+      timeoutId = setTimeout(() => {
+        logout();
+        showToast('You have been logged out due to inactivity.', 'info', 'Session Expired');
+      }, 1800000);
+    };
+
+    // Attach listeners
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keypress', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+    window.addEventListener('click', resetTimer);
+
+    // Initial set
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keypress', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
+  }, [currentUser]);
+
+
+
+  // Inactivity Timeout Logout (30 minutes)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let timeoutId: number;
+    const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+    const resetTimer = () => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        // Log out on timeout
+        setIsAuthenticated(false);
+        localStorage.setItem('digihust_portal_is_authenticated', JSON.stringify(false));
+        alert('You have been logged out due to 30 minutes of inactivity.');
+        window.location.href = '/portal/login';
+      }, TIMEOUT_MS);
+    };
+
+    resetTimer();
+
+    const events = ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove', 'scroll'];
+    events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }));
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, [isAuthenticated]);
+
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_authenticated`, JSON.stringify(false));
+  };
+
+  const switchRole = (userId: string) => {
+    const target = users.find(u => u.id === userId);
+    if (target) {
+      setCurrentUser(target);
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(target));
+    }
+  };
+
+  const changePassword = (newPassword: string): { success: boolean; error?: string } => {
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters.' };
+    }
+    const newHash = quickHashSync(newPassword);
+    const updatedUser = { ...currentUser, passwordHash: newHash, forcePasswordChange: false };
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
+    setCurrentUser(updatedUser);
+    dbService.upsertUser(updatedUser);
+    return { success: true };
+  };
+
+  const requestPasswordReset = async (emailOrMemberId: string): Promise<{ success: boolean; message: string; email?: string }> => {
+    const clean = emailOrMemberId.trim().toLowerCase();
+    const foundUser = users.find(u =>
+      u.email?.trim().toLowerCase() === clean ||
+      u.memberId?.trim().toLowerCase() === clean
+    );
+
+    if (!foundUser || !foundUser.email) {
+      return {
+        success: false,
+        message: 'No active DigiHust account found with this email address or Member ID.'
+      };
+    }
+
+    // 1. Generate and store OTP in Supabase cloud
+    const otpRes = await dbService.createPasswordResetOtp(foundUser.email, foundUser.name);
+    if (!otpRes.success || !otpRes.otp) {
+      return {
+        success: false,
+        message: otpRes.error || 'Failed to generate security reset code. Please try again.'
+      };
+    }
+
+    // 2. Dispatch real recovery email via configured Supabase SMTP
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://digihust.com';
+        await supabase.auth.resetPasswordForEmail(foundUser.email, {
+          redirectTo: `${origin}/portal/login#type=recovery`
+        });
+      } catch (err) {
+        console.warn('[Supabase Auth] SMTP dispatch info:', err);
+      }
+    }
+
+    // 3. Dispatch backup email service
+    await emailService.sendPasswordResetEmail(foundUser.email, foundUser.name, otpRes.otp);
+
+    return {
+      success: true,
+      email: foundUser.email,
+      message: `A secure password reset email has been dispatched to ${foundUser.email}. Please check your inbox (and spam folder) for the reset link or 6-digit code.`
+    };
+  };
+
+  const completePasswordResetWithOtp = async (email: string, otp: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, error: 'New password must be at least 6 characters.' };
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const newHash = quickHashSync(newPassword);
+
+    const resetRes = await dbService.verifyAndResetPassword(cleanEmail, otp, newHash);
+    if (!resetRes.success) {
+      return { success: false, error: resetRes.error || 'Password reset failed.' };
+    }
+
+    // Update in React state
+    setUsers(prev => prev.map(u => u.email.toLowerCase() === cleanEmail ? { ...u, passwordHash: newHash, forcePasswordChange: false } : u));
+
+    if (currentUser && currentUser.email.toLowerCase() === cleanEmail) {
+      const updatedUser = { ...currentUser, passwordHash: newHash, forcePasswordChange: false };
+      setCurrentUser(updatedUser);
+      safeSetItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(updatedUser));
+    }
+
+    showToast(`Password for ${cleanEmail} has been reset successfully!`, 'success', 'Password Updated');
+    return { success: true };
+  };
+
+  // ── CEO MASTER USER & SECURITY GOVERNANCE ─────────────────────────────────
+
+  const createUserAccount = (
+    userData: Omit<User, 'id' | 'completedProjectsCount' | 'totalEarnings' | 'rating' | 'statusHistory' | 'notes' | 'documents'>,
+    initialPlainPassword?: string
+  ): { success: boolean; newUser?: User; error?: string } => {
+    if (!PERMISSIONS.canCreateUserAccount(currentTier) && currentUser.role !== 'management') {
+      return { success: false, error: 'Access Denied: Only CEO Master or Management authority can create user accounts.' };
+    }
+
+    const { memberId } = getNextMemberId(userData.joinYear, users);
+    const plainPwd = initialPlainPassword || `DigiHust@${Math.random().toString(36).substring(2, 7)}`;
+    const passwordHash = quickHashSync(plainPwd);
+
+    const newUser: User = {
+      ...userData,
+      id: `usr-${Date.now()}`,
+      memberId,
+      passwordHash,
+      temporaryPlainPassword: plainPwd,
+      completedProjectsCount: 0,
+      totalEarnings: 0,
+      rating: 5.0,
+      credentialsSentAt: null,
+      forcePasswordChange: true,
+      statusHistory: [
+        {
+          timestamp: new Date().toISOString(),
+          from: 'pending_onboarding',
+          to: userData.status,
+          reason: 'Created by Management',
+          changedBy: currentUser.name
+        }
+      ],
+      notes: [],
+      documents: []
+    };
+
+    setUsers(prev => {
+      const next = [newUser, ...prev];
+      realtimeSync.broadcast('USERS_UPDATED', next);
+      return next;
+    });
+    dbService.upsertUser(newUser);
+
+    // Record Security Audit Log
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'ACCOUNT_CREATED',
+      targetId: newUser.id,
+      targetName: newUser.name,
+      details: `Created new ${newUser.roleTier} account for ${newUser.name} with Member ID ${newUser.memberId}.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    showToast(`Created account for ${newUser.name} (${newUser.memberId}).`, 'success', 'Account Created');
+    return { success: true, newUser };
+  };
+
+  const deleteUserAccount = (targetUserId: string, reason: string = 'Account removed by Management'): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canDeleteUserAccount(currentTier) && currentUser.role !== 'management') {
+      return { success: false, error: 'Access Denied: Only CEO Master or Management authority can remove user accounts.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    if (targetUser.id === currentUser.id) {
+      return { success: false, error: 'Cannot remove the active logged-in master administrator account.' };
+    }
+
+    setUsers(prev => {
+      const next = prev.filter(u => u.id !== targetUserId);
+      realtimeSync.broadcast('USERS_UPDATED', next);
+      return next;
+    });
+    dbService.deleteUser(targetUserId);
+
+    // Also remove from CMS team members showcase if present
+    if (siteContent.teamMembers && siteContent.teamMembers.length > 0) {
+      const updatedTeamMembers = siteContent.teamMembers.filter(
+        tm => tm.id !== targetUserId && tm.name.toLowerCase().trim() !== targetUser.name.toLowerCase().trim()
+      );
+      if (updatedTeamMembers.length !== siteContent.teamMembers.length) {
+        const updatedSiteContent = {
+          ...siteContent,
+          teamMembers: updatedTeamMembers
+        };
+        setSiteContent(updatedSiteContent);
+        dbService.saveSiteContent(updatedSiteContent);
+        realtimeSync.broadcast('CMS_UPDATED', updatedSiteContent);
+      }
+    }
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'ACCOUNT_SUSPENDED',
+      targetId: targetUser.id,
+      targetName: targetUser.name,
+      details: `Permanently removed account for ${targetUser.name} (${targetUser.memberId}). Reason: ${reason}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    showToast(`Removed member ${targetUser.name} from the platform database.`, 'success', 'Member Deleted');
+    return { success: true };
+  };
+
+  const resetUserPasswordByCeo = (targetUserId: string, newPlainPassword: string): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canResetAnyPassword(currentTier)) {
+      return { success: false, error: 'Access Denied: Only CEO Master authority can reset user credentials.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    const newHash = quickHashSync(newPlainPassword);
+    const updatedUser = { ...targetUser, passwordHash: newHash, forcePasswordChange: true };
+    setUsers(prev => prev.map(u => u.id === targetUserId ? updatedUser : u));
+    dbService.upsertUser(updatedUser);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'PASSWORD_RESET',
+      targetId: targetUser.id,
+      targetName: targetUser.name,
+      details: `CEO reset password for ${targetUser.name} (${targetUser.memberId}).`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return { success: true };
+  };
+
+  const toggleUserAccountStatus = (targetUserId: string, reason: string): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canDistributeRoles(currentTier)) {
+      return { success: false, error: 'Access Denied: Only CEO Master authority can alter user account status.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    const newStatus: UserStatus = targetUser.status === 'active' ? 'suspended' : 'active';
+    const updatedUser: User = { ...targetUser, status: newStatus };
+    setUsers(prev => prev.map(u => u.id === targetUserId ? updatedUser : u));
+    dbService.upsertUser(updatedUser);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: newStatus === 'suspended' ? 'ACCOUNT_SUSPENDED' : 'ROLE_MODIFIED',
+      targetId: targetUser.id,
+      targetName: targetUser.name,
+      details: `Changed account status to ${newStatus}. Reason: ${reason}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return { success: true };
+  };
+
+  const setDelegatedPermissions = (targetUserId: string, permissions: string[]): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canDistributeRoles(currentTier)) {
+      return { success: false, error: 'Access Denied: Only CEO Master authority can assign delegated permissions.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    const updatedUser: User = { ...targetUser, delegatedPermissions: permissions };
+    setUsers(prev => prev.map(u => u.id === targetUserId ? updatedUser : u));
+    dbService.upsertUser(updatedUser);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'PERMISSIONS_UPDATED',
+      targetId: targetUserId,
+      targetName: targetUser.name,
+      details: `Delegated permissions updated: ${permissions.join(', ')}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return { success: true };
+  };
+
+  // Lead Submission
+  const submitLead = (leadData: Omit<Lead, 'id' | 'createdAt' | 'status' | 'submittedByUserId' | 'submittedByUserName'>) => {
+    const newLead: Lead = {
+      ...leadData,
+      id: `lead-${Date.now()}`,
+      status: settings.autoApproveLeads ? 'under_review' : 'new_lead',
+      submittedByUserId: currentUser.id,
+      submittedByUserName: currentUser.name,
+      createdAt: new Date().toISOString()
+    };
+    setLeads(prev => [newLead, ...prev]);
+    dbService.insertLead(newLead);
+  };
+
+  const updateLeadStatus = (leadId: string, newStatus: PipelineStage) => {
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+    dbService.updateLead(leadId, { status: newStatus });
+    showToast(`Inquiry status updated to ${newStatus.replace('_', ' ').toUpperCase()}`, 'info', 'Status Updated');
+  };
+
+  const deleteLead = (leadId: string) => {
+    setLeads(prev => prev.filter(l => l.id !== leadId));
+    dbService.deleteLead(leadId);
+    showToast('Lead deleted from pipeline.', 'info', 'Lead Removed');
+  };
+
+  const reviewLeadToProject = (
+    leadId: string,
+    groupId: GroupId,
+    assignedLeaderId: string,
+    totalValue: number,
+    externalFee: number,
+    isLeadGenIndependent: boolean,
+    leadGenUserPct: number,
+    splitMgmtPct: number,
+    splitLeaderPct: number,
+    splitFreelancerPct: number
+  ) => {
+    const lead = leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const leader = users.find(u => u.id === assignedLeaderId);
+    const netRevenue = totalValue - externalFee;
+
+    const newProject: Project = {
+      id: `proj-${Date.now()}`,
+      leadId: lead.id,
+      title: lead.title,
+      clientName: lead.clientName,
+      clientEmail: lead.clientEmail,
+      clientCompany: lead.clientCompany,
+      groupId,
+      assignedLeaderId,
+      assignedLeaderName: leader ? leader.name : 'Assigned Leader',
+      brief: lead.brief,
+      totalValue,
+      externalFee,
+      netRevenue,
+      isLeadGenIndependent,
+      leadGenUserPct,
+      splitManagementPct: splitMgmtPct,
+      splitLeaderPct: splitLeaderPct,
+      splitFreelancerPct: splitFreelancerPct,
+      assignments: [],
+      status: 'assigned',
+      deliverables: [],
+      comments: [],
+      createdAt: new Date().toISOString()
+    };
+
+    setProjects(prev => [newProject, ...prev]);
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: 'assigned' } : l));
+    dbService.upsertProject(newProject);
+    dbService.updateLead(leadId, { status: 'assigned' });
+  };
+
+  const assignProjectTeam = (projectId: string, projectAssignments: ProjectAssignment[]) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        const updated = {
+          ...p,
+          assignments: projectAssignments,
+          status: 'in_progress' as PipelineStage
+        };
+        dbService.upsertProject(updated);
+        return updated;
+      }
+      return p;
+    }));
+  };
+
+  const updateProjectStatus = (projectId: string, newStatus: PipelineStage) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        const updated = {
+          ...p,
+          status: newStatus,
+          completedAt: newStatus === 'completed' ? new Date().toISOString() : p.completedAt,
+          paidAt: newStatus === 'paid' ? new Date().toISOString() : p.paidAt
+        };
+        dbService.upsertProject(updated);
+        return updated;
+      }
+      return p;
+    }));
+  };
+
+  const deleteProject = (projectId: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    dbService.deleteProject(projectId);
+    showToast('Project removed from delivery ledger.', 'info', 'Project Deleted');
+  };
+
+  const addDeliverable = (projectId: string, title: string, linkUrl?: string, notes?: string) => {
+    const newDeliverable: Deliverable = {
+      id: `del-${Date.now()}`,
+      title,
+      linkUrl,
+      submittedByUserId: currentUser.id,
+      submittedByUserName: currentUser.name,
+      submittedAt: new Date().toISOString(),
+      status: 'pending',
+      notes
+    };
+
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        const updated = { ...p, deliverables: [newDeliverable, ...p.deliverables] };
+        dbService.upsertProject(updated);
+        return updated;
+      }
+      return p;
+    }));
+  };
+
+  const addComment = (projectId: string, text: string) => {
+    const newComment: Comment = {
+      id: `c-${Date.now()}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatarUrl,
+      userRole: currentUser.roleTier || currentUser.role,
+      text,
+      timestamp: new Date().toISOString()
+    };
+
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        const updated = { ...p, comments: [...p.comments, newComment] };
+        dbService.upsertProject(updated);
+        return updated;
+      }
+      return p;
+    }));
+  };
+
+  const releaseProjectPayout = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project || project.status === 'paid') return;
+
+    const group = groups.find(g => g.id === project.groupId);
+    const groupName = group ? group.name : 'Squad';
+
+    const netRev = project.netRevenue;
+    const mgmtAmount = (netRev * project.splitManagementPct) / 100;
+    const leaderAmount = (netRev * project.splitLeaderPct) / 100;
+    const freelancerPool = (netRev * project.splitFreelancerPct) / 100;
+
+    const newPayouts: Payout[] = [];
+
+    // Management share
+    newPayouts.push({
+      id: `pay-${Date.now()}-mgmt`,
+      projectId: project.id,
+      projectTitle: project.title,
+      userId: currentUser.id,
+      userName: 'DigiHust Operations',
+      userRole: 'management',
+      groupName: 'Platform Reserve',
+      roleDescription: 'Platform Management & SLA Margin',
+      amount: Math.round(mgmtAmount),
+      sharePct: project.splitManagementPct,
+      paidAt: new Date().toISOString()
+    });
+
+    // Leader share
+    newPayouts.push({
+      id: `pay-${Date.now()}-ldr`,
+      projectId: project.id,
+      projectTitle: project.title,
+      userId: project.assignedLeaderId,
+      userName: project.assignedLeaderName,
+      userRole: 'group_leader',
+      groupName,
+      roleDescription: 'Squad Lead Oversight & QA',
+      amount: Math.round(leaderAmount),
+      sharePct: project.splitLeaderPct,
+      paidAt: new Date().toISOString()
+    });
+
+    // Freelancer/Member shares
+    project.assignments.forEach((asgn, i) => {
+      const memberAmount = (freelancerPool * asgn.sharePct) / 100;
+      newPayouts.push({
+        id: `pay-${Date.now()}-mbr-${i}`,
+        projectId: project.id,
+        projectTitle: project.title,
+        userId: asgn.freelancerId,
+        userName: asgn.freelancerName,
+        userRole: 'freelancer',
+        groupName,
+        roleDescription: asgn.roleTitle,
+        amount: Math.round(memberAmount),
+        sharePct: asgn.sharePct,
+        paidAt: new Date().toISOString()
+      });
+    });
+
+    setPayouts(prev => [...newPayouts, ...prev]);
+    // Persist every payout to Supabase cloud
+    newPayouts.forEach(p => dbService.upsertPayout(p));
+    updateProjectStatus(projectId, 'paid');
+  };
+
+  // ── ASSIGNMENT WORKSPACE ACTIONS ───────────────────────────────────────────
+
+  const createAssignment = (assignmentData: Omit<Assignment, 'id' | 'createdAt' | 'subTasks' | 'milestones' | 'deliverables' | 'comments'>) => {
+    const newAssignment: Assignment = {
+      ...assignmentData,
+      id: `asgn-${Date.now()}`,
+      subTasks: [],
+      milestones: [],
+      deliverables: [],
+      comments: [],
+      createdAt: new Date().toISOString()
+    };
+    setAssignments(prev => [newAssignment, ...prev]);
+    dbService.upsertAssignment(newAssignment);
+  };
+
+  const updateAssignmentStatus = (assignmentId: string, newStatus: PipelineStage) => {
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = { ...a, status: newStatus };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const deleteAssignment = (assignmentId: string) => {
+    setAssignments(prev => prev.filter(a => a.id !== assignmentId));
+    dbService.deleteAssignment(assignmentId);
+    showToast('Sprint assignment removed from workspace.', 'info', 'Assignment Deleted');
+  };
+
+  const addSubTask = (assignmentId: string, title: string, assignedMemberId: string, dueDate?: string) => {
+    const member = users.find(u => u.id === assignedMemberId);
+    const newSubTask: SubTask = {
+      id: `st-${Date.now()}`,
+      title,
+      assignedMemberId,
+      assignedMemberName: member ? member.name : 'Assigned Member',
+      status: 'todo',
+      dueDate
+    };
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = { ...a, subTasks: [...a.subTasks, newSubTask] };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const toggleSubTask = (assignmentId: string, subTaskId: string) => {
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = {
+          ...a,
+          subTasks: a.subTasks.map(st => {
+            if (st.id === subTaskId) {
+              const nextStatus = st.status === 'completed' ? 'in_progress' : 'completed';
+              return { ...st, status: nextStatus as any };
+            }
+            return st;
+          })
+        };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const addMilestone = (assignmentId: string, title: string, targetDate: string) => {
+    const newMilestone: Milestone = {
+      id: `m-${Date.now()}`,
+      title,
+      targetDate,
+      isCompleted: false
+    };
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = { ...a, milestones: [...a.milestones, newMilestone] };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const toggleMilestone = (assignmentId: string, milestoneId: string) => {
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = {
+          ...a,
+          milestones: a.milestones.map(m => m.id === milestoneId ? { ...m, isCompleted: !m.isCompleted } : m)
+        };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const addAssignmentDeliverable = (assignmentId: string, title: string, linkUrl?: string, notes?: string) => {
+    const newDeliverable: Deliverable = {
+      id: `del-${Date.now()}`,
+      title,
+      linkUrl,
+      submittedByUserId: currentUser.id,
+      submittedByUserName: currentUser.name,
+      submittedAt: new Date().toISOString(),
+      status: 'pending',
+      notes
+    };
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = { ...a, deliverables: [newDeliverable, ...a.deliverables] };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  const addAssignmentComment = (assignmentId: string, text: string) => {
+    const newComment: Comment = {
+      id: `c-${Date.now()}`,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatarUrl,
+      userRole: currentUser.roleTier || currentUser.role,
+      text,
+      timestamp: new Date().toISOString()
+    };
+    setAssignments(prev => prev.map(a => {
+      if (a.id === assignmentId) {
+        const updated = { ...a, comments: [...a.comments, newComment] };
+        dbService.upsertAssignment(updated);
+        return updated;
+      }
+      return a;
+    }));
+  };
+
+  // ── CERTIFICATE & TEMPLATE ACTIONS ────────────────────────────────────────
+
+  const certificateTemplates = (siteContent?.certificateTemplates && siteContent.certificateTemplates.length > 0)
+    ? siteContent.certificateTemplates
+    : (DEFAULT_SITE_CONTENT.certificateTemplates || []);
+
+  const defaultFallbackTemplate: CertificateTemplate = certificateTemplates[0] || {
+    id: 'tpl-offer',
+    name: 'Internship Offer Letter',
+    type: 'offer_letter',
+    documentTitle: 'Internship Offer Letter',
+    badgeText: 'Official Verified Offer',
+    defaultDuration: '45 Days (Remote)',
+    introParagraph: 'We are pleased to offer you a 45-day internship at DigiHust as a {{roleTitle}}. This period will serve as both a learning opportunity and a practical evaluation for potential inclusion in our core managed squads.',
+    bulletPoints: [
+      'Quality of work',
+      'Meeting deadlines',
+      'Communication & teamwork',
+      'Problem-solving',
+      'Ability to follow client requirements'
+    ],
+    revenueClause: 'Successful interns may be selected for the DigiHust core team and assigned real client projects. Compensation will be project-based, with independent project contributors generally receiving 65–70% of the project budget, according to DigiHust\'s revenue-sharing policy.',
+    closingParagraph: 'This internship does not guarantee permanent placement. Continued collaboration will be based on performance, reliability, professionalism, and project requirements. We look forward to having you on board.',
+    signatoryName: 'Mahad Abbas',
+    signatoryTitle: 'Founder & CEO',
+    watermarkText: 'DigiHust',
+    contactEmail: 'contact@digihust.com',
+    contactPhone: '+92 300 1234567',
+    contactAddress: 'Islamabad / Global Remote Operations',
+    createdAt: '2026-08-20'
+  };
+
+  const createCertificateTemplate = (templateData: Omit<CertificateTemplate, 'id' | 'createdAt'>): CertificateTemplate => {
+    const newTpl: CertificateTemplate = {
+      ...templateData,
+      id: `tpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    const newContent = {
+      ...siteContent,
+      certificateTemplates: [...(siteContent.certificateTemplates || certificateTemplates), newTpl]
+    };
+    setSiteContent(newContent);
+    dbService.saveSiteContent(newContent);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CMS_UPDATED',
+      details: `Created new certificate template: ${newTpl.name}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return newTpl;
+  };
+
+  const updateCertificateTemplate = (templateId: string, updates: Partial<CertificateTemplate>) => {
+    const newContent = {
+      ...siteContent,
+      certificateTemplates: (siteContent.certificateTemplates || certificateTemplates).map(t => t.id === templateId ? { ...t, ...updates } : t)
+    };
+    setSiteContent(newContent);
+    dbService.saveSiteContent(newContent);
+  };
+
+  const deleteCertificateTemplate = (templateId: string) => {
+    const newContent = {
+      ...siteContent,
+      certificateTemplates: (siteContent.certificateTemplates || certificateTemplates).filter(t => t.id !== templateId)
+    };
+    setSiteContent(newContent);
+    dbService.saveSiteContent(newContent);
+  };
+
+  const generateMemberCertificate = (memberId: string, templateId?: string, overrides?: Partial<Certificate>): Certificate => {
+    const member = users.find(u => u.id === memberId);
+    const template = certificateTemplates.find(t => t.id === templateId) || certificateTemplates[0] || defaultFallbackTemplate;
+
+    const uuidPrefix = template?.type === 'offer_letter' ? 'off' : template?.type === 'completion_certificate' ? 'cmp' : 'exp';
+    const uuidToken = `cert-${uuidPrefix}-${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
+
+    const newCert: Certificate = {
+      id: uuidToken,
+      templateId: template?.id,
+      memberId: member?.id || memberId,
+      memberName: member?.name || overrides?.memberName || 'Specialist',
+      memberDghId: member?.memberId || overrides?.memberDghId || 'DGH2600101',
+      type: template?.type || overrides?.type || 'offer_letter',
+      documentTitle: overrides?.documentTitle || template?.documentTitle || template?.name,
+      roleTitle: overrides?.roleTitle || member?.title || 'Specialist',
+      startDate: overrides?.startDate || new Date().toISOString().split('T')[0],
+      endDate: overrides?.endDate,
+      issuedDate: new Date().toISOString().split('T')[0],
+      status: 'valid',
+      clientName: overrides?.clientName || 'DigiHust Engineering Squad Core',
+      projectDetails: overrides?.projectDetails || 'Assigned to enterprise trial milestones and client deliverables under managed SLA standards.',
+      issuedBy: `${currentUser.name}, ${currentUser.roleTier?.toUpperCase() || 'Management'}`,
+      qrCodeUrl: `/verify/${uuidToken}`,
+      durationText: overrides?.durationText || template?.defaultDuration || '45 Days (Remote)',
+      stipendTerms: overrides?.stipendTerms || template?.revenueClause,
+      evaluationCriteria: overrides?.evaluationCriteria || template?.bulletPoints,
+      introParagraph: overrides?.introParagraph || template?.introParagraph,
+      closingParagraph: overrides?.closingParagraph || template?.closingParagraph,
+      signatoryName: overrides?.signatoryName || template?.signatoryName || 'Mahad Abbas',
+      signatoryTitle: overrides?.signatoryTitle || template?.signatoryTitle || 'Founder & CEO',
+      watermarkText: overrides?.watermarkText || template?.watermarkText || 'DigiHust',
+      contactEmail: overrides?.contactEmail || template?.contactEmail || 'contact@digihust.com',
+      contactPhone: overrides?.contactPhone || template?.contactPhone || '+92 300 1234567',
+      contactAddress: overrides?.contactAddress || template?.contactAddress || 'Islamabad / Global Remote Operations',
+      ...overrides
+    };
+
+    setCertificates(prev => [newCert, ...prev]);
+    dbService.upsertCertificate(newCert);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CERTIFICATE_ISSUED',
+      targetId: newCert.memberId,
+      targetName: newCert.memberName,
+      details: `Generated ${newCert.documentTitle || newCert.type} for ${newCert.memberName} (${newCert.memberDghId}) with unique QR code.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return newCert;
+  };
+
+  const issueCertificate = (certData: Omit<Certificate, 'id' | 'issuedDate' | 'status' | 'qrCodeUrl'>): Certificate => {
+    const uuidToken = `cert-${certData.type === 'offer_letter' ? 'off' : 'exp'}-${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
+    const newCert: Certificate = {
+      ...certData,
+      id: uuidToken,
+      issuedDate: new Date().toISOString().split('T')[0],
+      status: 'valid',
+      qrCodeUrl: `/verify/${uuidToken}`
+    };
+    setCertificates(prev => [newCert, ...prev]);
+    dbService.upsertCertificate(newCert);
+
+    // Record in Security Audit Logs
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CERTIFICATE_ISSUED',
+      targetId: certData.memberId,
+      targetName: certData.memberName,
+      details: `Issued ${certData.type.replace('_', ' ')} to ${certData.memberName} (${certData.memberDghId}) for ${certData.clientName}.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return newCert;
+  };
+
+  const revokeCertificate = (certId: string, reason?: string) => {
+    setCertificates(prev => prev.map(c => {
+      if (c.id === certId) {
+        const updated = { ...c, status: 'revoked' as const, revocationReason: reason || 'Revoked by Executive Management' };
+        dbService.upsertCertificate(updated);
+        return updated;
+      }
+      return c;
+    }));
+    const cert = certificates.find(c => c.id === certId);
+    if (cert) {
+      const auditEntry: SecurityAuditLog = {
+        id: `audit-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        actorId: currentUser.id,
+        actorName: currentUser.name,
+        actorRole: currentTier,
+        action: 'CERTIFICATE_REVOKED',
+        targetId: cert.memberId,
+        targetName: cert.memberName,
+        details: `Revoked certificate ${certId}. Reason: ${reason || 'Executive discretion'}`
+      };
+      setAuditLogs(prev => [auditEntry, ...prev]);
+      dbService.insertAuditLog(auditEntry);
+    }
+  };
+
+  const restoreCertificate = (certId: string) => {
+    setCertificates(prev => prev.map(c => {
+      if (c.id === certId) {
+        const updated = { ...c, status: 'valid' as const, revocationReason: undefined };
+        dbService.upsertCertificate(updated);
+        return updated;
+      }
+      return c;
+    }));
+  };
+
+  const attachMemberDriveDocument = (
+    memberUserId: string,
+    data: {
+      type: CertificateType;
+      documentTitle: string;
+      driveUrl: string;
+      isLocked?: boolean;
+      isHidden?: boolean;
+      durationText?: string;
+      notes?: string;
+    }
+  ): Certificate => {
+    const member = users.find(u => u.id === memberUserId);
+    const uuidToken = `doc-${data.type === 'offer_letter' ? 'off' : 'cert'}-${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
+
+    const newDoc: Certificate = {
+      id: uuidToken,
+      memberId: member?.id || memberUserId,
+      memberName: member?.name || 'Specialist',
+      memberDghId: member?.memberId || 'DGH2600001',
+      type: data.type,
+      documentTitle: data.documentTitle,
+      roleTitle: member?.title || 'Specialist',
+      issuedDate: new Date().toISOString().split('T')[0],
+      status: 'valid',
+      isLocked: data.isLocked ?? true, // Locked by default until Management releases it
+      isHidden: Boolean(data.isHidden), // Completely hidden or visible as pending
+      releasedAt: data.isLocked === false ? new Date().toISOString() : undefined,
+      driveUrl: data.driveUrl,
+      durationText: data.durationText || '45 Days (Remote)',
+      notes: data.notes,
+      clientName: 'DigiHust Operations & Client Delivery Core',
+      projectDetails: 'Official credential document verified by DigiHust Executive Management.',
+      issuedBy: `${currentUser.name}, ${currentUser.roleTier?.toUpperCase() || 'Management'}`,
+      qrCodeUrl: `/verify/${uuidToken}`
+    };
+
+    setCertificates(prev => [newDoc, ...prev]);
+    dbService.upsertCertificate(newDoc);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CERTIFICATE_ISSUED',
+      targetId: newDoc.memberId,
+      targetName: newDoc.memberName,
+      details: `Attached ${newDoc.documentTitle} (${newDoc.isLocked ? (newDoc.isHidden ? 'Locked & Hidden' : 'Locked & Visible') : 'Released'}) for ${newDoc.memberName}.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+    showToast(`${newDoc.documentTitle} linked for ${newDoc.memberName}.`, 'success', 'Credential Attached');
+
+    return newDoc;
+  };
+
+  const toggleCertificateLock = (certId: string, isLocked: boolean) => {
+    setCertificates(prev => prev.map(c => {
+      if (c.id === certId) {
+        const updated = {
+          ...c,
+          isLocked,
+          releasedAt: !isLocked ? (c.releasedAt || new Date().toISOString()) : undefined
+        };
+        dbService.upsertCertificate(updated);
+        return updated;
+      }
+      return c;
+    }));
+
+    const cert = certificates.find(c => c.id === certId);
+    if (cert) {
+      const auditEntry: SecurityAuditLog = {
+        id: `audit-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        actorId: currentUser.id,
+        actorName: currentUser.name,
+        actorRole: currentTier,
+        action: isLocked ? 'CERTIFICATE_REVOKED' : 'CMS_UPDATED',
+        targetId: cert.memberId,
+        targetName: cert.memberName,
+        details: `${isLocked ? 'Locked / Held' : 'Released to Portal'} document ${cert.documentTitle || cert.type} for ${cert.memberName}.`
+      };
+      setAuditLogs(prev => [auditEntry, ...prev]);
+      dbService.insertAuditLog(auditEntry);
+      showToast(`${cert.documentTitle || 'Document'} is now ${isLocked ? 'Locked' : 'Released to Portal'}.`, isLocked ? 'info' : 'success');
+    }
+  };
+
+  const toggleCertificateHidden = (certId: string, isHidden: boolean) => {
+    setCertificates(prev => prev.map(c => {
+      if (c.id === certId) {
+        const updated = { ...c, isHidden };
+        dbService.upsertCertificate(updated);
+        return updated;
+      }
+      return c;
+    }));
+
+    const cert = certificates.find(c => c.id === certId);
+    if (cert) {
+      const auditEntry: SecurityAuditLog = {
+        id: `audit-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        actorId: currentUser.id,
+        actorName: currentUser.name,
+        actorRole: currentTier,
+        action: 'CMS_UPDATED',
+        targetId: cert.memberId,
+        targetName: cert.memberName,
+        details: `Visibility set to ${isHidden ? 'Completely Hidden' : 'Visible in Portal'} for ${cert.documentTitle || cert.type}.`
+      };
+      setAuditLogs(prev => [auditEntry, ...prev]);
+      dbService.insertAuditLog(auditEntry);
+      showToast(`${cert.documentTitle || 'Document'} is now ${isHidden ? 'Completely Hidden from Member' : 'Visible in Member Portal'}.`, 'info');
+    }
+  };
+
+  const updateCertificateDriveUrl = (certId: string, driveUrl: string, documentTitle?: string, isLocked?: boolean, isHidden?: boolean) => {
+    setCertificates(prev => prev.map(c => {
+      if (c.id === certId) {
+        const updated = {
+          ...c,
+          driveUrl,
+          documentTitle: documentTitle || c.documentTitle,
+          isLocked: isLocked !== undefined ? isLocked : c.isLocked,
+          isHidden: isHidden !== undefined ? isHidden : c.isHidden
+        };
+        dbService.upsertCertificate(updated);
+        return updated;
+      }
+      return c;
+    }));
+    showToast('Document updated and synced to cloud.', 'success');
+  };
+
+  const deleteCertificate = (certId: string) => {
+    setCertificates(prev => prev.filter(c => c.id !== certId));
+    dbService.deleteCertificate(certId);
+    showToast('Certificate removed from registry.', 'info', 'Certificate Deleted');
+  };
+
+  // ── ANNOUNCEMENT ACTIONS ──────────────────────────────────────────────────
+
+  const postAnnouncement = (announcementData: Omit<Announcement, 'id' | 'postedBy' | 'postedByName' | 'postedByRole' | 'postedAt'>) => {
+    const newAnnouncement: Announcement = {
+      ...announcementData,
+      id: `ann-${Date.now()}`,
+      postedBy: currentUser.id,
+      postedByName: currentUser.name,
+      postedByRole: currentUser.roleTier || (currentUser.role === 'management' ? 'ceo' : 'group_leader'),
+      postedAt: new Date().toISOString()
+    };
+    setAnnouncements(prev => [newAnnouncement, ...prev]);
+    dbService.upsertAnnouncement(newAnnouncement);
+  };
+
+  const deleteAnnouncement = (announcementId: string) => {
+    setAnnouncements(prev => prev.filter(a => a.id !== announcementId));
+    dbService.deleteAnnouncement(announcementId);
+  };
+
+  // ── PEOPLE & COMMUNITY MANAGEMENT ACTIONS (STRICT EXECUTIVE GOVERNANCE) ────
+
+  const updateUserProfile = (userId: string, updates: Partial<User>) => {
+    setUsers(prev => {
+      const updated = prev.map(u => {
+        if (u.id === userId) {
+          const next = { ...u, ...updates };
+          dbService.upsertUser(next);
+          return next;
+        }
+        return u;
+      });
+      realtimeSync.broadcast('USERS_UPDATED', updated);
+      return updated;
+    });
+
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser(prev => {
+        const next = { ...prev, ...updates };
+        safeSetItem(`${LOCAL_STORAGE_KEY}_current_user`, JSON.stringify(next));
+        return next;
+      });
+    }
+
+    realtimeSync.broadcast('PROFILE_UPDATED', { userId, updates });
+  };
+
+  const changeUserStatus = (userId: string, newStatus: UserStatus, reason: string, changedBy: string) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const log = {
+          timestamp: new Date().toISOString(),
+          from: u.status,
+          to: newStatus,
+          reason,
+          changedBy
+        };
+        const updated: User = {
+          ...u,
+          status: newStatus,
+          statusHistory: [log, ...(u.statusHistory || [])]
+        };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  const addUserNote = (userId: string, text: string, authorId: string, authorName: string) => {
+    const newNote = { id: `note-${Date.now()}`, timestamp: new Date().toISOString(), authorId, authorName, text };
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const updated = { ...u, notes: [newNote, ...(u.notes || [])] };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  const deleteUserNote = (userId: string, noteId: string) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const updated = { ...u, notes: (u.notes || []).filter(n => n.id !== noteId) };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  const setUserSplitOverride = (userId: string, splitOverride?: SplitOverride) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const updated = { ...u, splitOverride };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  const reassignUserSquad = (userId: string, newGroupId?: GroupId) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const updated = { ...u, groupId: newGroupId };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  const changeUserRole = (userId: string, newRole: UserRole) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const newTier: UserRoleTier = newRole === 'management' ? 'manager' : newRole === 'group_leader' ? 'group_leader' : 'member';
+        const updated = { ...u, role: newRole, roleTier: newTier };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+  };
+
+  // Strict Executive Authority: Only CEO can modify Role Tiers with logged audit records
+  const updateUserRoleWithAuth = (targetUserId: string, newRoleTier: UserRoleTier, reason: string): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canDistributeRoles(currentTier)) {
+      return { success: false, error: 'Access Denied: Only Executive CEO authority can distribute roles.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    const mappedRole: UserRole = (newRoleTier === 'ceo' || newRoleTier === 'manager') ? 'management' : (newRoleTier === 'group_leader' ? 'group_leader' : 'freelancer');
+
+    setUsers(prev => prev.map(u => {
+      if (u.id === targetUserId) {
+        const updated = { ...u, roleTier: newRoleTier, role: mappedRole };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+
+    // Record Security Audit Log
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'ROLE_MODIFIED',
+      targetId: targetUser.id,
+      targetName: targetUser.name,
+      details: `Changed role tier from ${targetUser.roleTier || targetUser.role} to ${newRoleTier}. Reason: ${reason}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return { success: true };
+  };
+
+  const updateUserSquadWithAuth = (targetUserId: string, newGroupId?: GroupId): { success: boolean; error?: string } => {
+    if (!PERMISSIONS.canReassignSquad(currentTier)) {
+      return { success: false, error: 'Access Denied: Only Executive CEO authority can reassign squads.' };
+    }
+
+    const targetUser = users.find(u => u.id === targetUserId);
+    if (!targetUser) return { success: false, error: 'User not found.' };
+
+    setUsers(prev => prev.map(u => {
+      if (u.id === targetUserId) {
+        const updated = { ...u, groupId: newGroupId };
+        dbService.upsertUser(updated);
+        return updated;
+      }
+      return u;
+    }));
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'SQUAD_REASSIGNED',
+      targetId: targetUser.id,
+      targetName: targetUser.name,
+      details: `Reassigned squad to ${newGroupId || 'None'}.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    return { success: true };
+  };
+
+  const generateSecureTempHash = () => {
+    const seed = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}_${Math.random()}`;
+    return quickHashSync(`sec_init_${seed}`);
+  };
+
+  const quickInviteUser = (userData: Omit<User, 'id' | 'completedProjectsCount' | 'totalEarnings' | 'rating' | 'statusHistory' | 'notes' | 'documents'>): User => {
+    const { memberId } = getNextMemberId(userData.joinYear, users);
+    const roleTier: UserRoleTier = userData.roleTier || (userData.role === 'management' ? 'manager' : (userData.role === 'group_leader' ? 'group_leader' : (userData.role === 'intern' ? 'intern' : 'member')));
+    const finalStatus: UserStatus = userData.status || 'active';
+
+    const newUser: User = {
+      ...userData,
+      id: `usr-${Date.now()}`,
+      memberId,
+      roleTier,
+      status: finalStatus,
+      passwordHash: generateSecureTempHash(),
+      completedProjectsCount: 0,
+      totalEarnings: 0,
+      rating: 5.0,
+      credentialsSentAt: null,
+      forcePasswordChange: true,
+      statusHistory: [
+        {
+          timestamp: new Date().toISOString(),
+          from: 'pending_onboarding',
+          to: finalStatus,
+          reason: 'Direct Invitation Added',
+          changedBy: currentUser?.name || 'Management'
+        }
+      ],
+      notes: [],
+      documents: []
+    };
+
+    setUsers(prev => {
+      const next = [newUser, ...prev];
+      realtimeSync.broadcast('USERS_UPDATED', next);
+      return next;
+    });
+    dbService.upsertUser(newUser);
+
+    // Record Security Audit Log
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser?.id || 'usr-ceo-1',
+      actorName: currentUser?.name || 'Management',
+      actorRole: currentTier,
+      action: 'ACCOUNT_CREATED',
+      targetId: newUser.id,
+      targetName: newUser.name,
+      details: `Invited new ${newUser.roleTier} ${newUser.name} with Member ID ${newUser.memberId}.`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+
+    showToast(`Talent account for ${newUser.name} (${newUser.memberId}) created & synced to cloud.`, 'success', 'Member Added');
+    return newUser;
+  };
+
+  const bulkImportMembers = (importedRows: Partial<User>[]): { count: number; newUsers: User[] } => {
+    const createdUsers: User[] = [];
+
+    importedRows.forEach((row) => {
+      const { memberId } = getNextMemberId(row.joinYear, [...users, ...createdUsers]);
+      const roleTier: UserRoleTier = row.roleTier || (row.role === 'management' ? 'manager' : row.role === 'group_leader' ? 'group_leader' : 'member');
+      const newUser: User = {
+        id: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        memberId,
+        passwordHash: generateSecureTempHash(),
+        name: row.name || 'Specialist',
+        email: row.email || `specialist-${Date.now()}@digihust.com`,
+        phone: row.phone || '',
+        avatarUrl: row.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=250',
+        role: row.role || 'freelancer',
+        roleTier,
+        groupId: row.groupId || 'tech',
+        title: row.title || 'Domain Specialist',
+        specialties: row.specialties || ['Digital Delivery'],
+        hourlyRate: row.hourlyRate || 25,
+        completedProjectsCount: 0,
+        totalEarnings: 0,
+        rating: 5.0,
+        status: 'active',
+        joinedAt: new Date().toISOString().split('T')[0],
+        joinYear: row.joinYear || new Date().getFullYear(),
+        credentialsSentAt: null,
+        forcePasswordChange: true,
+        statusHistory: [],
+        notes: [],
+        documents: []
+      };
+      createdUsers.push(newUser);
+    });
+
+    setUsers(prev => {
+      const next = [...createdUsers, ...prev];
+      realtimeSync.broadcast('USERS_UPDATED', next);
+      return next;
+    });
+    createdUsers.forEach(u => dbService.upsertUser(u));
+    return { count: createdUsers.length, newUsers: createdUsers };
+  };
+
+  const sendBatchCredentials = (): { count: number; memberNames: string[] } => {
+    const pendingMembers = users.filter(u => u.credentialsSentAt === null || u.credentialsSentAt === undefined);
+    const timestamp = new Date().toISOString();
+    const names = pendingMembers.map(u => `${u.name} (${u.memberId})`);
+
+    setUsers(prev => {
+      const updated = prev.map(u => {
+        if (u.credentialsSentAt === null || u.credentialsSentAt === undefined) {
+          const up = { ...u, credentialsSentAt: timestamp };
+          dbService.upsertUser(up);
+          return up;
+        }
+        return u;
+      });
+      realtimeSync.broadcast('USERS_UPDATED', updated);
+      return updated;
+    });
+
+    return { count: pendingMembers.length, memberNames: names };
+  };
+
+  // ── FULL-SCOPE LIVE WEBSITE CMS STUDIO ACTIONS (WITH DYNAMIC ADD & REMOVE) ──
+
+  const updateSiteContent = (section: keyof SiteContent | Partial<SiteContent>, data?: any) => {
+    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+
+    setSiteContent((prev) => {
+      const newContent: SiteContent = typeof section === 'string'
+        ? { ...prev, [section]: data }
+        : { ...prev, ...section };
+
+      safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
+      dbService.saveSiteContent(newContent);
+      realtimeSync.broadcast('CMS_UPDATED', newContent);
+      return newContent;
+    });
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CMS_UPDATED',
+      details: `Updated website content section: ${typeof section === 'string' ? String(section) : Object.keys(section).join(', ')}`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+  };
+
+  const addItemToSiteContent = <K extends keyof SiteContent>(section: K, item: any) => {
+    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+
+    const guaranteedItem = {
+      ...item,
+      id: item.id || item.slug || `${String(section).slice(0, 4)}-${Date.now()}`
+    };
+
+    setSiteContent((prev) => {
+      const currentList = Array.isArray(prev[section]) ? ([...prev[section] as any[]]) : [];
+      const newContent = {
+        ...prev,
+        [section]: [...currentList, guaranteedItem]
+      };
+      safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
+      dbService.saveSiteContent(newContent);
+      realtimeSync.broadcast('CMS_UPDATED', newContent);
+      return newContent;
+    });
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CMS_UPDATED',
+      details: `Added new item to ${String(section)} (ID: ${guaranteedItem.id})`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+  };
+
+  const removeItemFromSiteContent = <K extends keyof SiteContent>(
+    section: K,
+    itemId: string,
+    targetIndex?: number
+  ) => {
+    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+
+    setSiteContent((prev) => {
+      const currentList = Array.isArray(prev[section]) ? ([...prev[section] as any[]]) : [];
+      let indexToRemove = -1;
+      if (typeof targetIndex === 'number' && targetIndex >= 0 && targetIndex < currentList.length) {
+        indexToRemove = targetIndex;
+      } else if (itemId && typeof itemId === 'string' && itemId.trim() !== '') {
+        indexToRemove = currentList.findIndex(item => item && (item.id === itemId || item.slug === itemId));
+      }
+
+      if (indexToRemove === -1) return prev;
+
+      const updatedList = currentList.filter((_, idx) => idx !== indexToRemove);
+      const newContent: SiteContent = {
+        ...prev,
+        [section]: updatedList
+      };
+
+      safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
+      dbService.saveSiteContent(newContent);
+      realtimeSync.broadcast('CMS_UPDATED', newContent);
+      return newContent;
+    });
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CMS_UPDATED',
+      details: `Removed item from ${String(section)} (ID: ${itemId || targetIndex})`
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+  };
+
+  const updateItemInSiteContent = <K extends keyof SiteContent>(
+    section: K,
+    itemId: string,
+    updatedItem: any,
+    targetIndex?: number
+  ) => {
+    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+
+    setSiteContent((prev) => {
+      const currentList = Array.isArray(prev[section]) ? ([...prev[section] as any[]]) : [];
+
+      let indexToUpdate = -1;
+      if (typeof targetIndex === 'number' && targetIndex >= 0 && targetIndex < currentList.length) {
+        indexToUpdate = targetIndex;
+      } else if (itemId && typeof itemId === 'string' && itemId.trim() !== '') {
+        indexToUpdate = currentList.findIndex(item => item && (item.id === itemId || item.slug === itemId));
+      }
+
+      // Strict Safeguard: If target cannot be identified, NEVER update all items!
+      if (indexToUpdate === -1) {
+        console.warn(`[updateItemInSiteContent] Could not locate unique target item '${itemId}' in section '${String(section)}'`);
+        return prev;
+      }
+
+      const updatedList = currentList.map((item, idx) => {
+        if (idx === indexToUpdate) {
+          return {
+            ...item,
+            ...updatedItem,
+            id: item.id || itemId || `${String(section)}-${idx + 1}`
+          };
+        }
+        return item;
+      });
+
+      const newContent: SiteContent = {
+        ...prev,
+        [section]: updatedList
+      };
+
+      safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
+      dbService.saveSiteContent(newContent);
+      realtimeSync.broadcast('CMS_UPDATED', newContent);
+      return newContent;
+    });
+  };
+
+  const resetSiteContent = () => {
+    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    setSiteContent(DEFAULT_SITE_CONTENT);
+    safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(DEFAULT_SITE_CONTENT));
+    dbService.saveSiteContent(DEFAULT_SITE_CONTENT);
+    realtimeSync.broadcast('CMS_UPDATED', DEFAULT_SITE_CONTENT);
+
+    const auditEntry: SecurityAuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      actorRole: currentTier,
+      action: 'CMS_UPDATED',
+      details: 'CEO performed manual reset of all website content back to default template.'
+    };
+    setAuditLogs(prev => [auditEntry, ...prev]);
+    dbService.insertAuditLog(auditEntry);
+  };
+
+  // ── PINNED MEMBERS  Persisted to Supabase for cross-device sync ─────────
+  const updatePinnedMembers = (pinnedIds: string[]) => {
+    const newContent = { ...siteContent, pinnedMemberIds: pinnedIds };
+    setSiteContent(newContent);
+    dbService.saveSiteContent(newContent);
+    realtimeSync.broadcast('CMS_UPDATED', newContent);
+    // Also sync to localStorage as fast local cache
+    try { localStorage.setItem('digihust_pinned_members', JSON.stringify(pinnedIds)); } catch { }
+  };
+
+  // Applicant Actions
+  const submitApplication = (applicantData: Omit<Applicant, 'id' | 'appliedAt' | 'status'>) => {
+    const newApplicant: Applicant = {
+      ...applicantData,
+      id: `app-${Date.now()}`,
+      appliedAt: new Date().toISOString(),
+      status: 'pending'
+    };
+    setApplicants(prev => [newApplicant, ...prev]);
+    dbService.upsertApplicant(newApplicant); // persist to cloud
+  };
+
+  const approveApplicant = (applicantId: string, role: UserRole = 'freelancer', targetGroupId?: GroupId) => {
+    const applicant = applicants.find(a => a.id === applicantId);
+    if (!applicant) return;
+
+    const { memberId } = getNextMemberId();
+    const roleTier: UserRoleTier = role === 'management' ? 'manager' : role === 'group_leader' ? 'group_leader' : 'member';
+
+    const newUser: User = {
+      id: `usr-${Date.now()}`,
+      memberId,
+      passwordHash: generateSecureTempHash(),
+      name: applicant.name,
+      email: applicant.email,
+      phone: applicant.phone,
+      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=250',
+      role,
+      roleTier,
+      groupId: targetGroupId || applicant.preferredGroupId,
+      title: applicant.specialties[0] ? `${applicant.specialties[0]} Specialist` : 'Domain Specialist',
+      specialties: applicant.specialties,
+      bio: applicant.bio,
+      completedProjectsCount: 0,
+      totalEarnings: 0,
+      rating: 5.0,
+      digiskillBatch: applicant.digiskillId,
+      status: 'active',
+      joinedAt: new Date().toISOString().split('T')[0],
+      credentialsSentAt: null,
+      forcePasswordChange: true
+    };
+
+    setUsers(prev => [newUser, ...prev]);
+    dbService.upsertUser(newUser);
+    const updated = { ...applicant, status: 'approved' as const };
+    setApplicants(prev => prev.map(a => a.id === applicantId ? updated : a));
+    dbService.updateApplicantStatus(applicantId, 'approved'); // persist to cloud
+  };
+
+  const rejectApplicant = (applicantId: string, reason?: string) => {
+    setApplicants(prev => prev.map(a => a.id === applicantId ? { ...a, status: 'rejected', rejectionReason: reason } : a));
+    dbService.updateApplicantStatus(applicantId, 'rejected', { rejectionReason: reason }); // persist to cloud
+  };
+
+  const requestMoreInfoApplicant = (applicantId: string, followUpNotes?: string) => {
+    setApplicants(prev => prev.map(a => a.id === applicantId ? { ...a, status: 'more_info_requested', followUpNotes } : a));
+    dbService.updateApplicantStatus(applicantId, 'more_info_requested', { followUpNotes }); // persist to cloud
+  };
+
+  const updateGlobalSettings = (newSettings: GlobalAdminSettings) => {
+    setSettings(newSettings);
+    dbService.saveSettings(newSettings); // persist to cloud
+    showToast('Platform settings saved and synced to cloud.', 'success', 'Settings Saved');
+  };
+
+  const resetToDefaultData = () => {
+    setUsers(INITIAL_USERS);
+    setCurrentUser(INITIAL_USERS[0]);
+    setIsAuthenticated(true);
+    setLeads(INITIAL_LEADS);
+    setProjects(INITIAL_PROJECTS);
+    setAssignments(INITIAL_ASSIGNMENTS);
+    setCertificates(INITIAL_CERTIFICATES);
+    setAnnouncements(INITIAL_ANNOUNCEMENTS);
+    setPayouts(INITIAL_PAYOUTS);
+    setApplicants(INITIAL_APPLICANTS);
+    setSettings(INITIAL_SETTINGS);
+    setSiteContent(DEFAULT_SITE_CONTENT);
+    setAuditLogs(INITIAL_AUDIT_LOGS);
+  };
+
+  return (
+    <AppContext.Provider
+      value={{
+        isAuthenticated,
+        currentUser,
+        currentTier,
+        users,
+        groups,
+        leads,
+        projects,
+        assignments,
+        certificates,
+        announcements,
+        payouts,
+        applicants,
+        settings,
+        siteContent,
+        auditLogs,
+
+        // Auth
+        loginWithMemberId,
+        loginWithSupabaseSession,
+        logout,
+        switchRole,
+        changePassword,
+        requestPasswordReset,
+        completePasswordResetWithOtp,
+
+        // CEO Master User Governance
+        createUserAccount,
+        deleteUserAccount,
+        resetUserPasswordByCeo,
+        toggleUserAccountStatus,
+        updateUserRoleWithAuth,
+        updateUserSquadWithAuth,
+        setDelegatedPermissions,
+
+        // Pipeline & Project
+        submitLead,
+        updateLeadStatus,
+        deleteLead,
+        reviewLeadToProject,
+        assignProjectTeam,
+        updateProjectStatus,
+        deleteProject,
+        addDeliverable,
+        addComment,
+        releaseProjectPayout,
+
+        // Assignment Workspace
+        createAssignment,
+        updateAssignmentStatus,
+        deleteAssignment,
+        addSubTask,
+        toggleSubTask,
+        addMilestone,
+        toggleMilestone,
+        addAssignmentDeliverable,
+        addAssignmentComment,
+
+        // Certificates & Templates
+        certificateTemplates,
+        issueCertificate,
+        generateMemberCertificate,
+        attachMemberDriveDocument,
+        toggleCertificateLock,
+        toggleCertificateHidden,
+        updateCertificateDriveUrl,
+        createCertificateTemplate,
+        updateCertificateTemplate,
+        deleteCertificateTemplate,
+        revokeCertificate,
+        restoreCertificate,
+        deleteCertificate,
+
+        // Announcements
+        postAnnouncement,
+        deleteAnnouncement,
+
+        // People & Roster
+        updateUserProfile,
+        changeUserStatus,
+        addUserNote,
+        deleteUserNote,
+        setUserSplitOverride,
+        reassignUserSquad,
+        changeUserRole,
+        quickInviteUser,
+        bulkImportMembers,
+        sendBatchCredentials,
+
+        // CMS Studio with Add & Remove
+        updateSiteContent,
+        addItemToSiteContent,
+        removeItemFromSiteContent,
+        updateItemInSiteContent,
+        resetSiteContent,
+
+        // Applicants
+        submitApplication,
+        approveApplicant,
+        rejectApplicant,
+        requestMoreInfoApplicant,
+
+        // Settings
+        updateGlobalSettings,
+        resetToDefaultData,
+        updatePinnedMembers,
+
+        // Global Custom Toast Box Notification
+        showToast
+      }}
+    >
+      {children}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </AppContext.Provider>
+  );
+};
+
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider');
+  }
+  return context;
+};
