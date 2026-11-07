@@ -120,7 +120,7 @@ const NewsletterForm: React.FC = () => {
           <button
             type="button"
             onClick={() => setStatus('idle')}
-            className="text-[10px] text-[var(--brand-teal)] hover:underline font-semibold cursor-pointer inline-block"
+            className="text-[10px] text-[var(--brand-teal-text)] hover:underline font-semibold cursor-pointer inline-block"
           >
             Subscribe another email
           </button>
@@ -203,7 +203,7 @@ export const Footer: React.FC = () => {
                   DigiHust
                 </span>
               </Link>
-              <span className="text-[10px] font-extrabold text-[var(--brand-teal)] uppercase tracking-widest border-l border-[var(--border-subtle)] pl-3">
+              <span className="text-[10px] font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest border-l border-[var(--border-subtle)] pl-3">
                 Hustle. Create. Deliver.
               </span>
             </div>

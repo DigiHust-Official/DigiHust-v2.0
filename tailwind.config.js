@@ -28,6 +28,26 @@ export default {
           success: 'var(--color-status-success)',
           warning: 'var(--color-status-warning)',
         },
+        dh: {
+          bg: 'var(--dh-bg)',
+          surface: 'var(--dh-surface)',
+          'surface-alt': 'var(--dh-surface-alt)',
+          border: 'var(--dh-border)',
+          text: 'var(--dh-text)',
+          muted: 'var(--dh-text-muted)',
+          primary: {
+            DEFAULT: 'var(--dh-primary)',
+            hover: 'var(--dh-primary-hover)',
+            contrast: 'var(--dh-primary-contrast)',
+          },
+          highlight: 'var(--dh-highlight)',
+          'tag-bg': 'var(--dh-tag-bg)',
+          'tag-text': 'var(--dh-tag-text)',
+          'brand-navy': 'var(--dh-brand-navy)',
+        },
+      },
+      backgroundImage: {
+        'gradient-brand': 'var(--dh-gradient-brand)',
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'sans-serif'],

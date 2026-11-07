@@ -157,7 +157,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setMobileOpen(false)}
                 className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   isActive(link.href)
-                    ? 'text-[var(--brand-teal)] font-bold bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/40'
+                    ? 'text-[var(--brand-teal-text)] font-bold bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/40'
                     : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)]'
                 }`}
               >

@@ -27,12 +27,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove('dark');
       root.classList.add('light');
       const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', '#EFF1F5');
+      if (meta) meta.setAttribute('content', '#F6F9FB');
     } else {
       root.classList.remove('light');
       root.classList.add('dark');
       const meta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', '#022B3A');
+      if (meta) meta.setAttribute('content', '#050D14');
     }
 
     localStorage.setItem(THEME_STORAGE_KEY, theme);

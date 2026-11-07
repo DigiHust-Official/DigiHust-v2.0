@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   motion,
   useMotionValue,
@@ -82,12 +82,11 @@ export interface OrbitRingProps {
   className?: string;
 }
 
-/* ── Individual Rotating Arm Component (preserves top-level Hook calls) ─── */
+/* ── Individual Rotating Arm Component ───────────────────────────────────── */
 interface OrbitArmProps {
   service: OrbitService;
   idx: number;
   stepDeg: number;
-  radius: number;
   ringRotation: MotionValue<number>;
 }
 
@@ -95,13 +94,12 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
   service,
   idx,
   stepDeg,
-  radius,
   ringRotation,
 }) => {
   const angleDeg = idx * stepDeg;
   const IconComp = service.icon;
 
-  // Counter-rotate badge by -(angle + currentRotation) so icon ALWAYS stays upright
+  // Counter-rotate badge so icon ALWAYS stays upright
   const badgeRot = useTransform(ringRotation, (rot) => -(angleDeg + rot));
 
   return (
@@ -113,32 +111,30 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
         left: '50%',
         width: 0,
         height: 0,
-        transform: `rotate(${angleDeg}deg) translateY(-${radius}px)`,
+        transform: `rotate(${angleDeg}deg) translateY(calc(-1 * var(--orbit-radius)))`,
         transformOrigin: '0 0',
       }}
     >
       {/* 
-        Comet Trail:
-        - 150px wide x 44px high pill, border-radius: 999px
-        - background: linear-gradient(to left, rgba(2,43,58,0.55), rgba(2,43,58,0))
-        - filter: blur(8px)
-        - Placed on the clockwise side of the badge (the direction it came from).
-        - Child of rotating arm (follows curve), NO counter-rotation.
+        Tapered Motion Trail:
+        - Positioned on trailing (clockwise) side, curving with the ring.
+        - Length: calc(var(--badge) * 2.4); Height: calc(var(--badge) * 0.8)
+        - border-radius: 999px; filter: blur(10px)
+        - Starts under badge and fades to fully transparent.
       */}
       <div
         className="orbit-trail pointer-events-none"
         style={{
           position: 'absolute',
-          top: '-22px',
+          top: 'calc(var(--badge) * -0.4)',
           right: '0px',
-          width: '150px',
-          height: '44px',
+          width: 'calc(var(--badge) * 2.4)',
+          height: 'calc(var(--badge) * 0.8)',
           borderRadius: '999px',
-          background:
-            'linear-gradient(to left, rgba(2, 43, 58, 0.55), rgba(2, 43, 58, 0))',
-          filter: 'blur(8px)',
+          filter: 'blur(10px)',
           transformOrigin: '100% 50%',
-          transform: 'rotate(190deg)',
+          transform: 'rotate(188deg)',
+          zIndex: 10,
         }}
       />
 
@@ -159,18 +155,24 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
             role="img"
             aria-label={service.ariaLabel}
             title={service.name}
-            className="group relative w-[68px] h-[68px] rounded-full flex items-center justify-center bg-[#022B3A] border border-white/10 dark:border-white/20 transition-all duration-300 pointer-events-auto cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--brand-teal)] hover:scale-105"
+            className="orbit-badge group relative rounded-full flex items-center justify-center transition-transform duration-300 pointer-events-auto cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2EC4D6] hover:scale-105"
             style={{
-              boxShadow: '0 8px 24px rgba(2, 43, 58, 0.35)',
+              width: 'var(--badge)',
+              height: 'var(--badge)',
             }}
           >
-            {/* Centered White Icon */}
-            <IconComp className="w-7 h-7 text-white transition-transform duration-300 group-hover:scale-110" />
+            {/* Centered Icon (40% of badge size) */}
+            <div
+              className="flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-110"
+              style={{
+                width: 'calc(var(--badge) * 0.40)',
+                height: 'calc(var(--badge) * 0.40)',
+              }}
+            >
+              <IconComp className="w-full h-full stroke-[2.2] orbit-badge-icon" />
+            </div>
 
-            {/* Subtle hover beacon highlight */}
-            <span className="absolute inset-0 rounded-full border border-[var(--brand-teal)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-            {/* Accessible Contextual Tooltip */}
+            {/* Hover Tooltip */}
             <div className="hidden lg:group-hover:flex absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-subtle)] shadow-xl text-xs font-bold text-[var(--text-heading)] whitespace-nowrap z-50 pointer-events-none transition-all duration-200">
               {service.name}
             </div>
@@ -191,50 +193,6 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
 
   const shouldReduceMotion = Boolean(useReducedMotion());
 
-  /* ── Responsive Diameter Computation & Client-side Sync ──────────────── */
-  const getInitialDiameter = () => {
-    if (typeof window === 'undefined') return 900;
-    const w = window.innerWidth;
-    if (w >= 1500) {
-      return Math.min(900, Math.max(520, w * 0.47));
-    }
-    if (w >= 1024) {
-      return Math.min(750, Math.max(520, w * 0.40));
-    }
-    return 480;
-  };
-
-  const [ringDiameter, setRingDiameter] = useState<number>(getInitialDiameter);
-
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-
-    const handleResize = () => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0) {
-        setRingDiameter(rect.width);
-      }
-    };
-
-    handleResize();
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.width > 0) {
-          setRingDiameter(entry.contentRect.width);
-        }
-      }
-    });
-
-    observer.observe(el);
-    window.addEventListener('resize', handleResize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   // ── Scroll Parallax Elevation & Fade ───────────────────────────────────────
   const { scrollY, scrollYProgress } = useScroll(
     containerRef?.current
@@ -242,14 +200,15 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
       : {}
   );
 
-  const ringTranslateY = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const ringTranslateY = useTransform(scrollYProgress, [0, 1], [0, -25]);
   const ringOpacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 0.94, 0.7]);
 
   // ── Unified Rotation MotionValue (Idle + Scroll Boost) ─────────────────────
+  // Idle speed: 1 full turn per 16s (counter-clockwise = negative deg/sec)
   const ringRotation = useMotionValue(0);
-  const degPerSec = -360 / 36; // -10 deg/sec (counter-clockwise)
+  const degPerSec = -360 / 16; // -22.5 deg/sec
 
-  // IntersectionObserver to pause loop when off-screen
+  // IntersectionObserver to pause loop when hero is off-screen
   useEffect(() => {
     const target = containerRef?.current || rootRef.current;
     if (!target || typeof IntersectionObserver === 'undefined') return;
@@ -283,38 +242,45 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
     ringRotation.set(ringRotation.get() + idleStep + scrollBoost);
   });
 
-  // ── Geometric Parameters ──────────────────────────────────────────────────
-  // Band thickness: 100px on desktop (>=1024px), 80px on smaller screens
-  const bandThickness = ringDiameter < 600 ? 80 : 100;
-  // Radius formula: (ringDiameter - bandThickness) / 2
-  const trackRadius = (ringDiameter - bandThickness) / 2;
   const stepDeg = 45; // 360 / 8 = 45 deg spacing
 
   /* 
-    COMPUTED DIMENSIONS (Exact verification):
-    1. Viewport 1920px (min-width: 1500px):
-       - Diameter: clamp(520px, 47vw, 900px) = clamp(520px, 902.4px, 900px) = 900.00px
-       - Left offset: 56% = 1920 * 0.56 = 1075.20px
-       - Band thickness: 100.00px
-       - Centerline radius: (900 - 100) / 2 = 400.00px
-       - Text column clearance gap: Left edge at 1075.20px, text column boundary ends at ~1000px => gap = ~75.20px (>70px clear).
-       - Ring right edge: 1075.20 + 900 = 1975.20px (bleeds ~55.20px off-screen). At least 6-7 badges visible.
-    
-    2. Viewport 1440px (1024px to 1499px):
-       - Diameter: clamp(520px, 40vw, 750px) = clamp(520px, 576.0px, 750px) = 576.00px
-       - Left offset: 60% = 1440 * 0.60 = 864.00px
-       - Band thickness: 100.00px
-       - Centerline radius: (576 - 100) / 2 = 238.00px
-       - Text column clearance gap: Left edge at 864.00px, text column ends at ~780px => gap = ~84.00px.
-       - Ring right edge: 864.00 + 576 = 1440.00px (flush with edge).
+    COMPUTED DIMENSIONS & CLEARANCE VERIFICATION:
 
-    3. Viewport 1280px (1024px to 1499px):
-       - Diameter: clamp(520px, 40vw, 750px) = clamp(520px, 512.0px, 750px) = 520.00px (clamped to min)
-       - Left offset: 60% = 1280 * 0.60 = 768.00px
-       - Band thickness: 100.00px
-       - Centerline radius: (520 - 100) / 2 = 210.00px
-       - Text column clearance gap: Left edge at 768.00px, text column ends at ~660px => gap = ~108.00px.
-       - Ring right edge: 768.00 + 520 = 1288.00px (bleeds 8.00px off-screen).
+    1. Viewport 1920x900 (min-width: 1500px):
+       - Formula: clamp(700px, min(150vh, 78vw), 1500px)
+       - min(150vh = 1350px, 78vw = 1497.6px) => ring-size: 1350.00px
+       - Wrapper left: calc(100% - 1350 * 0.5) = 1920 - 675 = 1245.00px (Ring center is at 1920px, the exact right edge of hero)
+       - Band: 1350 * 0.14 = 189.00px
+       - Badge: clamp(60px, 1350 * 0.065 = 87.75px, 96px) = 87.75px
+       - Orbit radius: 1350/2 - 189/2 = 580.50px
+       - Leftmost badge reach: 1920 - 580.5 = 1339.50px (badge left edge at 1295.62px)
+       - Text column boundary: ends at ~950px (Active Squads row)
+       - Clearance gap: 1245.00 - 950 = 295.00px clear to ring wrapper; 345.62px clear to any badge!
+       - Visible arc: Only "(" arc visible. Exactly 2-3 badges on-screen at once.
+
+    2. Viewport 1440x800 (1024px to 1499px, with 10-15% reduction):
+       - Formula: clamp(620px, min(135vh, 70vw), 1150px)
+       - min(135vh = 1080px, 70vw = 1008px) => ring-size: 1008.00px
+       - Wrapper left: calc(100% - 1008 * 0.5) = 1440 - 504 = 936.00px
+       - Band: 1008 * 0.14 = 141.12px
+       - Badge: clamp(56px, 1008 * 0.065 = 65.52px, 84px) = 65.52px
+       - Orbit radius: 1008/2 - 141.12/2 = 433.44px
+       - Leftmost badge reach: 1440 - 433.44 = 1006.56px (badge left edge at 973.80px)
+       - Text column boundary: ends at ~780px
+       - Clearance gap: 936.00 - 780 = 156.00px clear to ring wrapper; 193.80px clear to any badge!
+
+    3. Viewport 1366x768 (1024px to 1499px):
+       - Formula: clamp(620px, min(135vh, 70vw), 1150px)
+       - min(135vh = 1036.8px, 70vw = 956.2px) => ring-size: 956.20px
+       - Wrapper left: calc(100% - 956.2 * 0.5) = 1366 - 478.1 = 887.90px
+       - Band: 956.2 * 0.14 = 133.87px
+       - Badge: clamp(56px, 956.2 * 0.065 = 62.15px, 84px) = 62.15px
+       - Orbit radius: 956.2/2 - 133.87/2 = 411.17px
+       - Leftmost badge reach: 1366 - 411.17 = 954.83px (badge left edge at 923.75px)
+       - Text column boundary: ends at ~740px
+       - Clearance gap: 887.90 - 740 = 147.90px clear to ring wrapper; 183.75px clear to any badge!
+       - Left-edge fade mask (0% to 15%) melts band into transparent between 887.9px and 1031px.
   */
 
   return (
@@ -323,22 +289,26 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
       className={`orbit-ring-outer ${className}`}
       style={{
         position: 'absolute',
-        top: '50%',
+        top: '55%',
         transform: 'translateY(-50%)',
         zIndex: 0,
         pointerEvents: 'none',
-        // NO mask-image and NO overflow-hidden on outer wrapper!
       }}
       aria-hidden="true"
     >
       <style>{`
-        /* Screens >= 1500px: diameter clamp(520px, 47vw, 900px), left: 56% */
+        /* ── Screens >= 1500px ────────────────────────────────────────── */
         @media (min-width: 1500px) {
           .orbit-ring-outer {
-            left: 56% !important;
-            right: auto !important;
-            width: clamp(520px, 47vw, 900px) !important;
-            height: clamp(520px, 47vw, 900px) !important;
+            --ring-size: clamp(700px, min(150vh, 78vw), 1500px);
+            --band: calc(var(--ring-size) * 0.14);
+            --badge: clamp(60px, calc(var(--ring-size) * 0.065), 96px);
+            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
+            --orbit-duration: 16s;
+            left: calc(100% - var(--ring-size) * 0.5) !important;
+            top: 55% !important;
+            width: var(--ring-size) !important;
+            height: var(--ring-size) !important;
             opacity: 1 !important;
           }
           .orbit-trail {
@@ -346,13 +316,18 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
           }
         }
 
-        /* Screens 1024px to 1499px: diameter clamp(520px, 40vw, 750px), left: 60% */
+        /* ── Screens 1024px to 1499px (Reduced by ~10-15% for safety) ── */
         @media (min-width: 1024px) and (max-width: 1499px) {
           .orbit-ring-outer {
-            left: 60% !important;
-            right: auto !important;
-            width: clamp(520px, 40vw, 750px) !important;
-            height: clamp(520px, 40vw, 750px) !important;
+            --ring-size: clamp(620px, min(135vh, 70vw), 1150px);
+            --band: calc(var(--ring-size) * 0.14);
+            --badge: clamp(56px, calc(var(--ring-size) * 0.065), 84px);
+            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
+            --orbit-duration: 16s;
+            left: calc(100% - var(--ring-size) * 0.5) !important;
+            top: 55% !important;
+            width: var(--ring-size) !important;
+            height: var(--ring-size) !important;
             opacity: 1 !important;
           }
           .orbit-trail {
@@ -360,13 +335,18 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
           }
         }
 
-        /* Mobile & Tablet (< 1024px) */
+        /* ── Mobile & Tablet (< 1024px) ───────────────────────────────── */
         @media (max-width: 1023px) {
           .orbit-ring-outer {
-            left: auto !important;
-            right: -45% !important;
-            width: 480px !important;
-            height: 480px !important;
+            --ring-size: 520px;
+            --band: calc(var(--ring-size) * 0.14);
+            --badge: 52px;
+            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
+            --orbit-duration: 16s;
+            left: calc(100% - 260px) !important;
+            top: 55% !important;
+            width: 520px !important;
+            height: 520px !important;
             opacity: 0.35 !important;
           }
           .orbit-trail {
@@ -374,9 +354,30 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
           }
         }
 
-        /* Dark mode boost for comet trail */
+        /* ── Badge Themes ─────────────────────────────────────────────── */
+        .orbit-badge {
+          background: linear-gradient(145deg, #0B3B4D, #022B3A);
+          box-shadow: 0 10px 28px rgba(2, 43, 58, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        .orbit-badge-icon {
+          color: #FFFFFF;
+        }
+
+        .dark .orbit-badge {
+          background: #0A1A24 !important;
+          border: 1px solid rgba(46, 196, 214, 0.35) !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55) !important;
+        }
+        .dark .orbit-badge-icon {
+          color: #2EC4D6 !important;
+        }
+
+        /* ── Trail Themes ─────────────────────────────────────────────── */
+        .orbit-trail {
+          background: linear-gradient(to left, rgba(2, 43, 58, 0.55), rgba(2, 43, 58, 0));
+        }
         .dark .orbit-trail {
-          background: linear-gradient(to left, rgba(34, 160, 180, 0.55), rgba(34, 160, 180, 0)) !important;
+          background: linear-gradient(to left, rgba(46, 196, 214, 0.40), rgba(46, 196, 214, 0)) !important;
         }
       `}</style>
 
@@ -392,83 +393,100 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
         <div
           className="orbit-band absolute inset-0 pointer-events-none"
           style={{
-            maskImage: 'linear-gradient(to right, transparent 0%, black 10%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%)',
+            maskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
           }}
         >
           <svg
             className="w-full h-full"
-            viewBox={`0 0 ${ringDiameter} ${ringDiameter}`}
+            viewBox="0 0 1000 1000"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
-              <linearGradient id="bandSoftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="rgba(2, 43, 58, 0.10)" />
-                <stop offset="50%" stopColor="rgba(31, 122, 140, 0.08)" />
-                <stop offset="100%" stopColor="rgba(2, 43, 58, 0.04)" />
-              </linearGradient>
+              {/* 
+                LIGHT: radial gradient across band thickness,
+                outer edge rgba(2,43,58,0.10) fading to inner edge rgba(2,43,58,0.02).
+                No blur smear, no grey halo.
+              */}
+              <radialGradient
+                id="bandRadGradLight"
+                cx="500"
+                cy="500"
+                r="500"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0%" stopColor="rgba(2, 43, 58, 0.02)" />
+                <stop offset="72%" stopColor="rgba(2, 43, 58, 0.02)" />
+                <stop offset="100%" stopColor="rgba(2, 43, 58, 0.10)" />
+              </radialGradient>
 
-              <linearGradient id="bandSoftGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.09)" />
-                <stop offset="50%" stopColor="rgba(34, 160, 180, 0.11)" />
-                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.05)" />
-              </linearGradient>
+              {/* 
+                DARK: outer edge rgba(255,255,255,0.07) fading to inner edge rgba(255,255,255,0.01).
+                No teal glow on the band.
+              */}
+              <radialGradient
+                id="bandRadGradDark"
+                cx="500"
+                cy="500"
+                r="500"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.01)" />
+                <stop offset="72%" stopColor="rgba(255, 255, 255, 0.01)" />
+                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
+              </radialGradient>
             </defs>
 
-            {/* Thick Soft Band */}
+            {/* Thick Soft Band (centerline at 430, strokeWidth 140 = inner 360, outer 500) */}
             <circle
-              cx={ringDiameter / 2}
-              cy={ringDiameter / 2}
-              r={trackRadius}
-              stroke="url(#bandSoftGrad)"
-              strokeWidth={bandThickness}
+              cx="500"
+              cy="500"
+              r="430"
+              stroke="url(#bandRadGradLight)"
+              strokeWidth="140"
               fill="none"
               className="dark:hidden"
             />
             <circle
-              cx={ringDiameter / 2}
-              cy={ringDiameter / 2}
-              r={trackRadius}
-              stroke="url(#bandSoftGradDark)"
-              strokeWidth={bandThickness}
+              cx="500"
+              cy="500"
+              r="430"
+              stroke="url(#bandRadGradDark)"
+              strokeWidth="140"
               fill="none"
               className="hidden dark:block"
             />
 
-            {/* Faint 1px Inner Border */}
+            {/* Light Mode: 1px inner highlight rgba(255,255,255,0.6) */}
             <circle
-              cx={ringDiameter / 2}
-              cy={ringDiameter / 2}
-              r={trackRadius - bandThickness / 2}
-              stroke="rgba(2, 43, 58, 0.08)"
+              cx="500"
+              cy="500"
+              r="360"
+              stroke="rgba(255, 255, 255, 0.6)"
               strokeWidth="1"
               fill="none"
-              className="dark:stroke-white/10"
+              className="dark:hidden"
             />
 
-            {/* Faint 1px Outer Border */}
+            {/* Dark Mode: 1px border rgba(255,255,255,0.08) at inner and outer edges */}
             <circle
-              cx={ringDiameter / 2}
-              cy={ringDiameter / 2}
-              r={trackRadius + bandThickness / 2}
-              stroke="rgba(2, 43, 58, 0.08)"
+              cx="500"
+              cy="500"
+              r="360"
+              stroke="rgba(255, 255, 255, 0.08)"
               strokeWidth="1"
               fill="none"
-              className="dark:stroke-white/10"
+              className="hidden dark:block"
             />
-
-            {/* Dashed Centerline Guide */}
             <circle
-              cx={ringDiameter / 2}
-              cy={ringDiameter / 2}
-              r={trackRadius}
-              stroke="rgba(2, 43, 58, 0.16)"
+              cx="500"
+              cy="500"
+              r="500"
+              stroke="rgba(255, 255, 255, 0.08)"
               strokeWidth="1"
-              strokeDasharray="5 10"
               fill="none"
-              opacity="0.35"
-              className="dark:stroke-teal-400/25"
+              className="hidden dark:block"
             />
           </svg>
         </div>
@@ -484,7 +502,6 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
               service={service}
               idx={idx}
               stepDeg={stepDeg}
-              radius={trackRadius}
               ringRotation={ringRotation}
             />
           ))}

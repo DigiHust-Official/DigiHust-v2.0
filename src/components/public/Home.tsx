@@ -374,7 +374,7 @@ export const Home: React.FC = () => {
               className="lg:col-span-6 xl:col-span-7"
             >
               {/* Trust Pill */}
-              <motion.div variants={itemVariants} className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--brand-teal)] text-[11px] font-semibold uppercase tracking-wider mb-3 shadow-sm">
+              <motion.div variants={itemVariants} className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--brand-teal-text)] text-[11px] font-semibold uppercase tracking-wider mb-3 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-[var(--brand-teal)] animate-pulse" />
                 <span>{hero?.badgeText || t('hero_trust_pill')}</span>
               </motion.div>
@@ -385,7 +385,7 @@ export const Home: React.FC = () => {
                 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[var(--text-heading)] leading-[1.14] tracking-tight mb-3"
               >
                 {hero?.headlineLine1 || t('hero_headline_1')}<br />
-                <span className="text-[var(--brand-teal)]">
+                <span className="text-[var(--brand-teal-text)]">
                   {hero?.headlineHighlight || hero?.headlineLine2 || t('hero_headline_2')}
                 </span>
               </motion.h1>
@@ -427,8 +427,8 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-[var(--text-muted)]"
               >
-                <span className="text-[var(--brand-teal)] flex items-center gap-1 font-bold">
-                  <Orbit className="w-3.5 h-3.5 text-[var(--brand-teal)]" />
+                <span className="text-[var(--brand-teal-text)] flex items-center gap-1 font-bold">
+                  <Orbit className="w-3.5 h-3.5 text-[var(--brand-teal-text)]" />
                   {t('hero_active_squads')}
                 </span>
                 {['Web Engineering', 'Design Systems', 'AI Automations', 'Growth Marketing', 'Cybersecurity', 'BI Dashboards'].map((tName, i) => (
@@ -489,7 +489,7 @@ export const Home: React.FC = () => {
               transition={{ duration: 0.4 }}
               className="text-center sm:text-left"
             >
-              <p className="font-display font-black text-3xl sm:text-4xl text-[var(--brand-teal)] mb-1">{item.metric}</p>
+              <p className="font-display font-black text-3xl sm:text-4xl text-[var(--brand-teal-text)] mb-1">{item.metric}</p>
               <p className="text-sm font-bold text-[var(--text-heading)] mb-0.5">{item.label}</p>
               <p className="text-xs text-[var(--text-muted)]">{item.sub}</p>
             </motion.div>
@@ -502,13 +502,13 @@ export const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">{t('services_tag')}</p>
+              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('services_tag')}</p>
               <h2 className="font-display font-extrabold text-4xl text-[var(--text-heading)] mb-2">{t('services_heading')}</h2>
               <p className="text-base text-[var(--text-body)] max-w-xl">
                 {t('services_sub')}
               </p>
             </div>
-            <Link to="/services" className="inline-flex items-center space-x-1.5 text-sm font-bold text-[var(--brand-teal)] hover:underline">
+            <Link to="/services" className="inline-flex items-center space-x-1.5 text-sm font-bold text-[var(--brand-teal-text)] hover:underline">
               <span>{t('services_view_all')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -540,7 +540,7 @@ export const Home: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">{t('model_tag')}</p>
+              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('model_tag')}</p>
               <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-6 leading-tight">
                 {t('model_heading')}
               </h2>
@@ -579,7 +579,7 @@ export const Home: React.FC = () => {
               {/* Status Header Pill */}
               <motion.div
                 variants={diagramNodeVariants}
-                className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/30 text-[10px] font-bold text-[var(--brand-teal)] uppercase tracking-wider mb-3 relative z-10"
+                className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/30 text-[10px] font-bold text-[var(--brand-teal-text)] uppercase tracking-wider mb-3 relative z-10"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-teal)] animate-ping" />
                 <span>Coordinated Delivery Architecture</span>
@@ -725,12 +725,12 @@ export const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12 gap-4">
             <div>
-              <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">{t('work_tag')}</p>
+              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('work_tag')}</p>
               <h2 className="font-display font-extrabold text-4xl text-[var(--text-heading)]">{t('work_heading')}</h2>
             </div>
             <Link
               to="/portfolio"
-              className="inline-flex items-center space-x-2 text-sm font-bold text-[var(--brand-teal)] hover:underline"
+              className="inline-flex items-center space-x-2 text-sm font-bold text-[var(--brand-teal-text)] hover:underline"
             >
               <span>{t('work_view_all')}</span>
               <ArrowRight className="w-4 h-4" />
@@ -760,7 +760,7 @@ export const Home: React.FC = () => {
       <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20 max-w-2xl mx-auto">
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
+            <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
               {t('testimonials_tag')}
             </p>
             <div className="inline-block relative">
@@ -827,7 +827,7 @@ export const Home: React.FC = () => {
                       className={`font-display font-extrabold leading-none mb-3 select-none ${
                         isMiddle
                           ? 'text-[#1F7A8C] dark:text-cyan-300 text-5xl sm:text-6xl'
-                          : 'text-[var(--brand-teal)] text-4xl sm:text-5xl'
+                          : 'text-[var(--brand-teal-text)] text-4xl sm:text-5xl'
                       }`}
                       aria-hidden="true"
                     >
@@ -867,7 +867,7 @@ export const Home: React.FC = () => {
       <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
+            <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
               Clear Answers
             </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-4">
@@ -943,7 +943,7 @@ export const Home: React.FC = () => {
               </button>
 
               <div className="pr-12 mb-6">
-                <span className="text-xs font-bold text-[var(--brand-teal)] uppercase tracking-wider">
+                <span className="text-xs font-bold text-[var(--brand-teal-text)] uppercase tracking-wider">
                   {selectedProject.category} · {selectedProject.client}
                 </span>
                 <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] mt-1">
@@ -977,7 +977,7 @@ export const Home: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-teal)] mb-2 flex items-center space-x-1.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-teal-text)] mb-2 flex items-center space-x-1.5">
                     <span>The DigiHust Solution</span>
                   </h4>
                   <p className="text-[var(--text-body)] leading-relaxed bg-[var(--bg-page)] p-4 rounded-xl border border-[var(--border-subtle)]">
