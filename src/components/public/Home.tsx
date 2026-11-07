@@ -222,6 +222,7 @@ export const Home: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const heroRef = useRef<HTMLElement>(null);
+  const runwayRef = useRef<HTMLDivElement>(null);
   const modelDiagramRef = useRef<HTMLDivElement>(null);
   const isModelInView = useInView(modelDiagramRef, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' });
   const shouldReduceMotion = useReducedMotion();
@@ -302,7 +303,7 @@ export const Home: React.FC = () => {
     : SERVICES;
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-x-clip">
       <SEOHead
         title="DigiHust | Digital Services Handled by Specialized Talent"
         description="One company, coordinated specialist talent. DigiHust delivers web engineering, design systems, AI automation and cybersecurity under one roof."
@@ -348,20 +349,50 @@ export const Home: React.FC = () => {
         ]}
       />
 
-      {/* ── SECTION 1: COMPACT FULL-VIEWPORT HERO (Responsive on all screen sizes) ── */}
-      <section
-        ref={heroRef}
-        data-hero="true"
-        className="relative lg:min-h-[calc(100dvh-4rem)] lg:max-h-[860px] flex flex-col justify-between px-4 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] overflow-hidden pt-24 sm:pt-26 lg:pt-20 pb-8 lg:pb-8 bg-[var(--bg-page)]"
+      {/* ── SECTION 1: PINNED HERO WITH SCROLL RUNWAY (Responsive on all screen sizes) ── */}
+      <div
+        ref={runwayRef}
+        className="hero-runway relative"
+        style={{ height: 'calc(100vh + var(--hero-runway, 200vh))' }}
       >
-        {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
-        <HeroWaves />
+        <style>{`
+          @media (min-width: 1024px) {
+            .hero-runway {
+              --hero-runway: 200vh;
+              height: calc(100vh + var(--hero-runway)) !important;
+            }
+          }
+          @media (max-width: 1023px) {
+            .hero-runway {
+              --hero-runway: 0px;
+              height: auto !important;
+            }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .hero-runway {
+              --hero-runway: 0px !important;
+              height: auto !important;
+            }
+            .hero-runway > section {
+              position: relative !important;
+              height: auto !important;
+              min-height: calc(100dvh - 4rem) !important;
+            }
+          }
+        `}</style>
+        <section
+          ref={heroRef}
+          data-hero="true"
+          className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 flex flex-col justify-between px-4 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] overflow-hidden pt-24 sm:pt-26 lg:pt-20 pb-8 lg:pb-8 bg-[var(--bg-page)]"
+        >
+          {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
+          <HeroWaves />
 
-        {/* Ambient celestial glow for depth */}
-        <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Ambient celestial glow for depth */}
+          <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        {/* OrbitRing: z-0 decorative background orbit positioned at left:66% top:50% */}
-        <OrbitRing containerRef={heroRef} />
+          {/* OrbitRing: bottom-right quarter arc pinned orbital hero visual */}
+          <OrbitRing runwayRef={runwayRef} containerRef={heroRef} />
 
         <div className="max-w-7xl mx-auto w-full my-auto py-2 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
@@ -373,12 +404,6 @@ export const Home: React.FC = () => {
               animate="visible"
               className="lg:col-span-6 xl:col-span-7"
             >
-              {/* Trust Pill */}
-              <motion.div variants={itemVariants} className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--brand-teal-text)] text-[11px] font-semibold uppercase tracking-wider mb-3 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-[var(--brand-teal)] animate-pulse" />
-                <span>{hero?.badgeText || t('hero_trust_pill')}</span>
-              </motion.div>
-
               {/* Headline */}
               <motion.h1
                 variants={itemVariants}
@@ -471,6 +496,7 @@ export const Home: React.FC = () => {
           </a>
         </motion.div>
       </section>
+      </div>
 
       {/* ── METRICS STRIP ── */}
       <section className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] py-10 px-6 lg:px-8">

@@ -5,6 +5,8 @@ import {
   useTransform,
   useAnimationFrame,
   useScroll,
+  useVelocity,
+  useSpring,
   useReducedMotion,
   MotionValue,
 } from 'framer-motion';
@@ -78,7 +80,8 @@ const ORBIT_SERVICES: OrbitService[] = [
 ];
 
 export interface OrbitRingProps {
-  containerRef?: React.RefObject<HTMLElement>;
+  runwayRef?: React.RefObject<HTMLElement | null>;
+  containerRef?: React.RefObject<HTMLElement | null>;
   className?: string;
 }
 
@@ -88,6 +91,8 @@ interface OrbitArmProps {
   idx: number;
   stepDeg: number;
   ringRotation: MotionValue<number>;
+  tailOpacity: MotionValue<number>;
+  tailScaleSigned: MotionValue<number>;
 }
 
 const OrbitArm: React.FC<OrbitArmProps> = ({
@@ -95,11 +100,13 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
   idx,
   stepDeg,
   ringRotation,
+  tailOpacity,
+  tailScaleSigned,
 }) => {
   const angleDeg = idx * stepDeg;
   const IconComp = service.icon;
 
-  // Counter-rotate badge so icon ALWAYS stays upright
+  // Counter-rotate badge so lighting (highlight at top-left) and icons stay fixed
   const badgeRot = useTransform(ringRotation, (rot) => -(angleDeg + rot));
 
   return (
@@ -111,18 +118,21 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
         left: '50%',
         width: 0,
         height: 0,
-        transform: `rotate(${angleDeg}deg) translateY(calc(-1 * var(--orbit-radius)))`,
+        transform: `rotate(${angleDeg}deg) translateY(calc(-1 * var(--R)))`,
         transformOrigin: '0 0',
       }}
     >
       {/* 
-        Tapered Motion Trail:
-        - Positioned on trailing (clockwise) side, curving with the ring.
+        Velocity-Driven Motion Tail:
+        - Tapered comet tail trailing behind stone motion along orbit curve.
         - Length: calc(var(--badge) * 2.4); Height: calc(var(--badge) * 0.8)
-        - border-radius: 999px; filter: blur(10px)
-        - Starts under badge and fades to fully transparent.
+        - Starts under stone, fades to fully transparent.
+        - Recolor: LIGHT rgba(31,122,140,0.45), DARK rgba(46,196,214,0.40).
+        - Invisible when idle or below 150 px/s (|v| < 150, opacity: 0).
+        - Smoothly grows and fades in with scroll velocity (|v| >= 150, full at 1500 px/s).
+        - Direction automatically follows velocity sign (flips when scrolling upward).
       */}
-      <div
+      <motion.div
         className="orbit-trail pointer-events-none"
         style={{
           position: 'absolute',
@@ -133,12 +143,14 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
           borderRadius: '999px',
           filter: 'blur(10px)',
           transformOrigin: '100% 50%',
-          transform: 'rotate(188deg)',
+          rotate: 188,
+          scaleX: tailScaleSigned,
+          opacity: tailOpacity,
           zIndex: 10,
         }}
       />
 
-      {/* Badge Anchor at Centerline (0, 0) */}
+      {/* Polished 3D Stone Badge Anchor at Centerline (0, 0) */}
       <div
         className="orbit-badge-anchor"
         style={{
@@ -161,15 +173,21 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
               height: 'var(--badge)',
             }}
           >
-            {/* Centered Icon (40% of badge size) */}
+            {/* Contact Shadow INSIDE stone: stays fixed bottom-right with counter-rotation */}
+            <div className="orbit-contact-shadow pointer-events-none" />
+
+            {/* Engraved Icon (48% of badge size, strokeWidth: 2.25) */}
             <div
-              className="flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-110"
+              className="flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-110 relative z-10"
               style={{
-                width: 'calc(var(--badge) * 0.40)',
-                height: 'calc(var(--badge) * 0.40)',
+                width: 'calc(var(--badge) * 0.48)',
+                height: 'calc(var(--badge) * 0.48)',
               }}
             >
-              <IconComp className="w-full h-full stroke-[2.2] orbit-badge-icon" />
+              <IconComp
+                strokeWidth={2.25}
+                className="w-full h-full orbit-badge-icon"
+              />
             </div>
 
             {/* Hover Tooltip */}
@@ -184,33 +202,65 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
 };
 
 export const OrbitRing: React.FC<OrbitRingProps> = ({
+  runwayRef,
   containerRef,
   className = '',
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const isInViewRef = useRef(true);
-  const lastScrollYRef = useRef(0);
-
   const shouldReduceMotion = Boolean(useReducedMotion());
 
-  // ── Scroll Parallax Elevation & Fade ───────────────────────────────────────
+  // ── Scroll Tracking across Runway ─────────────────────────────────────────
+  const scrollTarget = runwayRef?.current ? runwayRef : containerRef;
   const { scrollY, scrollYProgress } = useScroll(
-    containerRef?.current
-      ? { target: containerRef, offset: ['start start', 'end start'] }
+    scrollTarget?.current
+      ? { target: scrollTarget, offset: ['start start', 'end end'] }
       : {}
   );
 
-  const ringTranslateY = useTransform(scrollYProgress, [0, 1], [0, -25]);
-  const ringOpacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 0.94, 0.7]);
+  // During scroll runway, map scrollYProgress to an extra -450 deg rotation
+  const scrollAngleRaw = useTransform(scrollYProgress, [0, 1], [0, -450]);
+  const scrollAngle = useSpring(scrollAngleRaw, { stiffness: 120, damping: 30 });
 
-  // ── Unified Rotation MotionValue (Idle + Scroll Boost) ─────────────────────
-  // Idle speed: 1 full turn per 16s (counter-clockwise = negative deg/sec)
-  const ringRotation = useMotionValue(0);
-  const degPerSec = -360 / 16; // -22.5 deg/sec
+  // Measure velocity of scrollY in PX/SECOND (thresholds independent of runway length)
+  const scrollVelocityRaw = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocityRaw, { stiffness: 200, damping: 40 });
 
-  // IntersectionObserver to pause loop when hero is off-screen
+  // Map velocity magnitude |v| in px/s to tail length and tail opacity:
+  // - |v| < 150 px/s: tails are invisible (opacity: 0, scale: 0.3)
+  // - 150 px/s <= |v| <= 1500 px/s: tails smoothly grow in length and fade in (0 -> 1, scale 0.3 -> 1.0)
+  // - |v| > 1500 px/s: fully visible (opacity: 1, scale: 1.0)
+  // - When scrolling stops, smoothVelocity decays to 0 over ~250ms back to idle
+  const tailOpacity = useTransform(smoothVelocity, (v) => {
+    if (shouldReduceMotion) return 0;
+    const speed = Math.abs(v);
+    if (speed < 150) return 0;
+    if (speed >= 1500) return 1;
+    return (speed - 150) / (1500 - 150);
+  });
+
+  // Tail orientation: when scrolling down (v >= -10 px/s), dir = 1 (tails trail clockwise).
+  // When scrolling up (v < -10 px/s), dir = -1 (tails flip along orbit arc to trail counter-clockwise).
+  const tailScaleSigned = useTransform(smoothVelocity, (v) => {
+    if (shouldReduceMotion) return 0.3;
+    const speed = Math.abs(v);
+    const dir = v < -10 ? -1 : 1;
+    const scale = speed < 150 ? 0.3 : speed >= 1500 ? 1 : 0.3 + (0.7 * (speed - 150)) / (1500 - 150);
+    return scale * dir;
+  });
+
+  // ── Unified Rotation (Idle + Scroll Runway Drive) ─────────────────────────
+  // Idle duration: 60s per full turn counter-clockwise (-6 deg/sec)
+  // Start angle: offset by -22.5 deg so at rest, exactly TWO stones sit inside
+  // the visible quarter arc (roughly at 22.5 deg and 67.5 deg from horizontal).
+  const initialOffset = -22.5;
+  const idleAngle = useMotionValue(initialOffset);
+  const ringRotation = useMotionValue(initialOffset);
+  const degPerSec = -360 / 60; // -6 deg/sec
+
+  // IntersectionObserver to pause loop when off-screen
   useEffect(() => {
-    const target = containerRef?.current || rootRef.current;
+    const target = runwayRef?.current || containerRef?.current || rootRef.current;
     if (!target || typeof IntersectionObserver === 'undefined') return;
 
     const observer = new IntersectionObserver(
@@ -221,67 +271,25 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [runwayRef, containerRef]);
 
-  // Animation frame loop: GPU transform updates, zero React state re-renders
+  // Frame loop: continuous smooth rotation combining idle + spring-smoothed scroll
   useAnimationFrame((_time, delta) => {
-    if (shouldReduceMotion) return;
+    if (shouldReduceMotion) {
+      ringRotation.set(initialOffset);
+      return;
+    }
     if (!isInViewRef.current) return;
     if (typeof document !== 'undefined' && document.hidden) return;
 
     const dt = delta / 1000;
     const idleStep = degPerSec * dt;
+    idleAngle.set(idleAngle.get() + idleStep);
 
-    // Scroll boost: extra rotation proportional to scroll delta (~0.28 deg per px scrolled)
-    const currentScrollY = scrollY.get();
-    const scrollDelta = currentScrollY - lastScrollYRef.current;
-    lastScrollYRef.current = currentScrollY;
-
-    const scrollBoost = -scrollDelta * 0.28;
-
-    ringRotation.set(ringRotation.get() + idleStep + scrollBoost);
+    ringRotation.set(idleAngle.get() + scrollAngle.get());
   });
 
   const stepDeg = 45; // 360 / 8 = 45 deg spacing
-
-  /* 
-    COMPUTED DIMENSIONS & CLEARANCE VERIFICATION:
-
-    1. Viewport 1920x900 (min-width: 1500px):
-       - Formula: clamp(700px, min(150vh, 78vw), 1500px)
-       - min(150vh = 1350px, 78vw = 1497.6px) => ring-size: 1350.00px
-       - Wrapper left: calc(100% - 1350 * 0.5) = 1920 - 675 = 1245.00px (Ring center is at 1920px, the exact right edge of hero)
-       - Band: 1350 * 0.14 = 189.00px
-       - Badge: clamp(60px, 1350 * 0.065 = 87.75px, 96px) = 87.75px
-       - Orbit radius: 1350/2 - 189/2 = 580.50px
-       - Leftmost badge reach: 1920 - 580.5 = 1339.50px (badge left edge at 1295.62px)
-       - Text column boundary: ends at ~950px (Active Squads row)
-       - Clearance gap: 1245.00 - 950 = 295.00px clear to ring wrapper; 345.62px clear to any badge!
-       - Visible arc: Only "(" arc visible. Exactly 2-3 badges on-screen at once.
-
-    2. Viewport 1440x800 (1024px to 1499px, with 10-15% reduction):
-       - Formula: clamp(620px, min(135vh, 70vw), 1150px)
-       - min(135vh = 1080px, 70vw = 1008px) => ring-size: 1008.00px
-       - Wrapper left: calc(100% - 1008 * 0.5) = 1440 - 504 = 936.00px
-       - Band: 1008 * 0.14 = 141.12px
-       - Badge: clamp(56px, 1008 * 0.065 = 65.52px, 84px) = 65.52px
-       - Orbit radius: 1008/2 - 141.12/2 = 433.44px
-       - Leftmost badge reach: 1440 - 433.44 = 1006.56px (badge left edge at 973.80px)
-       - Text column boundary: ends at ~780px
-       - Clearance gap: 936.00 - 780 = 156.00px clear to ring wrapper; 193.80px clear to any badge!
-
-    3. Viewport 1366x768 (1024px to 1499px):
-       - Formula: clamp(620px, min(135vh, 70vw), 1150px)
-       - min(135vh = 1036.8px, 70vw = 956.2px) => ring-size: 956.20px
-       - Wrapper left: calc(100% - 956.2 * 0.5) = 1366 - 478.1 = 887.90px
-       - Band: 956.2 * 0.14 = 133.87px
-       - Badge: clamp(56px, 956.2 * 0.065 = 62.15px, 84px) = 62.15px
-       - Orbit radius: 956.2/2 - 133.87/2 = 411.17px
-       - Leftmost badge reach: 1366 - 411.17 = 954.83px (badge left edge at 923.75px)
-       - Text column boundary: ends at ~740px
-       - Clearance gap: 887.90 - 740 = 147.90px clear to ring wrapper; 183.75px clear to any badge!
-       - Left-edge fade mask (0% to 15%) melts band into transparent between 887.9px and 1031px.
-  */
 
   return (
     <div
@@ -289,64 +297,32 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
       className={`orbit-ring-outer ${className}`}
       style={{
         position: 'absolute',
-        top: '55%',
-        transform: 'translateY(-50%)',
         zIndex: 0,
         pointerEvents: 'none',
       }}
       aria-hidden="true"
     >
       <style>{`
-        /* ── Screens >= 1500px ────────────────────────────────────────── */
-        @media (min-width: 1500px) {
-          .orbit-ring-outer {
-            --ring-size: clamp(700px, min(150vh, 78vw), 1500px);
-            --band: calc(var(--ring-size) * 0.14);
-            --badge: clamp(60px, calc(var(--ring-size) * 0.065), 96px);
-            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
-            --orbit-duration: 16s;
-            left: calc(100% - var(--ring-size) * 0.5) !important;
-            top: 55% !important;
-            width: var(--ring-size) !important;
-            height: var(--ring-size) !important;
-            opacity: 1 !important;
-          }
-          .orbit-trail {
-            display: block !important;
-          }
+        /* ── Base / Screens >= 1024px (One Unified Width-Only Formula) ── */
+        .orbit-ring-outer {
+          --R: 37vw;
+          --band: calc(var(--R) * 0.30);
+          --ring-size: calc(2 * var(--R) + var(--band));
+          --badge: calc(var(--R) * 0.15);
+          --orbit-duration: 60s;
+          left: calc(100% + 2.5% - var(--ring-size) / 2) !important;
+          top: calc(100% - var(--ring-size) / 2) !important;
+          width: var(--ring-size) !important;
+          height: var(--ring-size) !important;
+          opacity: 1 !important;
         }
-
-        /* ── Screens 1024px to 1499px (Reduced by ~10-15% for safety) ── */
-        @media (min-width: 1024px) and (max-width: 1499px) {
-          .orbit-ring-outer {
-            --ring-size: clamp(620px, min(135vh, 70vw), 1150px);
-            --band: calc(var(--ring-size) * 0.14);
-            --badge: clamp(56px, calc(var(--ring-size) * 0.065), 84px);
-            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
-            --orbit-duration: 16s;
-            left: calc(100% - var(--ring-size) * 0.5) !important;
-            top: 55% !important;
-            width: var(--ring-size) !important;
-            height: var(--ring-size) !important;
-            opacity: 1 !important;
-          }
-          .orbit-trail {
-            display: block !important;
-          }
+        .orbit-trail {
+          display: block !important;
         }
 
         /* ── Mobile & Tablet (< 1024px) ───────────────────────────────── */
         @media (max-width: 1023px) {
           .orbit-ring-outer {
-            --ring-size: 520px;
-            --band: calc(var(--ring-size) * 0.14);
-            --badge: 52px;
-            --orbit-radius: calc(var(--ring-size) / 2 - var(--band) / 2);
-            --orbit-duration: 16s;
-            left: calc(100% - 260px) !important;
-            top: 55% !important;
-            width: 520px !important;
-            height: 520px !important;
             opacity: 0.35 !important;
           }
           .orbit-trail {
@@ -354,141 +330,229 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
           }
         }
 
-        /* ── Badge Themes ─────────────────────────────────────────────── */
+        /* ── Polished 3D Stone Badges (Light Theme) ───────────────────── */
         .orbit-badge {
-          background: linear-gradient(145deg, #0B3B4D, #022B3A);
-          box-shadow: 0 10px 28px rgba(2, 43, 58, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-        .orbit-badge-icon {
-          color: #FFFFFF;
+          background:
+            radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 36%),
+            radial-gradient(circle at 72% 82%, rgba(200, 213, 224, 0.75) 0%, rgba(200, 213, 224, 0) 55%),
+            linear-gradient(135deg, #FFFFFF 0%, #F0F4F7 45%, #E1E8EE 100%);
+          box-shadow:
+            inset 1px 1.5px 2px 0px #FFFFFF,
+            inset -2px -2px 4px 0px #C8D5E0,
+            0 12px 24px rgba(2, 43, 58, 0.12),
+            0 3px 6px rgba(2, 43, 58, 0.08);
+          border-radius: 50%;
+          position: relative;
+          overflow: hidden;
         }
 
-        .dark .orbit-badge {
-          background: #0A1A24 !important;
-          border: 1px solid rgba(46, 196, 214, 0.35) !important;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55) !important;
+        /* Subtle Mineral Grain Overlay */
+        .orbit-badge::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.07;
+          mix-blend-mode: overlay;
+          pointer-events: none;
         }
+
+        /* Engraved Icon (Light) */
+        .orbit-badge-icon {
+          color: #1F7A8C;
+          filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.9)) drop-shadow(0 1px 1px rgba(2, 43, 58, 0.35));
+        }
+
+        /* Dark Mode 3D Stone */
+        .dark .orbit-badge {
+          background:
+            radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 36%),
+            radial-gradient(circle at 72% 82%, rgba(5, 14, 21, 0.85) 0%, rgba(5, 14, 21, 0) 55%),
+            linear-gradient(135deg, #1B2E3B 0%, #112330 50%, #0A1822 100%) !important;
+          box-shadow:
+            inset 1px 1.5px 2px 0px rgba(255, 255, 255, 0.18),
+            inset -2px -3px 6px 0px #050E15,
+            0 16px 30px rgba(0, 0, 0, 0.55),
+            0 3px 6px rgba(0, 0, 0, 0.40) !important;
+          border: none !important;
+        }
+
+        /* Engraved Icon (Dark) */
         .dark .orbit-badge-icon {
           color: #2EC4D6 !important;
+          filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.15)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) !important;
         }
 
-        /* ── Trail Themes ─────────────────────────────────────────────── */
+        /* Contact Shadow on the Track */
+        .orbit-contact-shadow {
+          background: rgba(2, 43, 58, 0.22);
+        }
+        .dark .orbit-contact-shadow {
+          background: rgba(0, 0, 0, 0.65);
+        }
+
+        /* ── Tail Themes ─────────────────────────────────────────────── */
         .orbit-trail {
-          background: linear-gradient(to left, rgba(2, 43, 58, 0.55), rgba(2, 43, 58, 0));
+          background: linear-gradient(to left, rgba(31, 122, 140, 0.45), rgba(31, 122, 140, 0));
         }
         .dark .orbit-trail {
           background: linear-gradient(to left, rgba(46, 196, 214, 0.40), rgba(46, 196, 214, 0)) !important;
         }
       `}</style>
 
-      {/* ── Parallax Elevation & Scroll Fade Wrapper ─────────────────────── */}
-      <motion.div
-        style={{
-          y: ringTranslateY,
-          opacity: ringOpacity,
-        }}
-        className="relative w-full h-full select-none"
-      >
-        {/* ── A) BAND LAYER (ONLY this element gets mask-image) ────────────── */}
+      <div className="relative w-full h-full select-none">
+        {/* ── A) BAND LAYER (ONLY this element gets mask-image fades) ──────── */}
+        {/* Left-edge fade (0% to 15%) AND top-edge fade (0% to 12%) via nested mask containers */}
         <div
-          className="orbit-band absolute inset-0 pointer-events-none"
+          className="orbit-band-wrapper absolute inset-0 pointer-events-none"
           style={{
             maskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
           }}
         >
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 1000 1000"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            className="orbit-band-inner absolute inset-0 pointer-events-none"
+            style={{
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
+            }}
           >
-            <defs>
-              {/* 
-                LIGHT: radial gradient across band thickness,
-                outer edge rgba(2,43,58,0.10) fading to inner edge rgba(2,43,58,0.02).
-                No blur smear, no grey halo.
-              */}
-              <radialGradient
-                id="bandRadGradLight"
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 1000 1000"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                {/* 
+                  LIGHT: radial gradient across band thickness (r=369.57 to r=500),
+                  outer edge rgba(2,43,58,0.10) to inner edge rgba(2,43,58,0.03).
+                */}
+                <radialGradient
+                  id="bandRadGradLight"
+                  cx="500"
+                  cy="500"
+                  r="500"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0%" stopColor="rgba(2, 43, 58, 0.03)" />
+                  <stop offset="74%" stopColor="rgba(2, 43, 58, 0.03)" />
+                  <stop offset="100%" stopColor="rgba(2, 43, 58, 0.10)" />
+                </radialGradient>
+
+                {/* 
+                  DARK: radial gradient across band thickness (r=369.57 to r=500),
+                  outer edge rgba(255,255,255,0.07) to inner edge rgba(255,255,255,0.02).
+                  Clearly defined and visible in dark mode.
+                */}
+                <radialGradient
+                  id="bandRadGradDark"
+                  cx="500"
+                  cy="500"
+                  r="500"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0%" stopColor="rgba(255, 255, 255, 0.02)" />
+                  <stop offset="74%" stopColor="rgba(255, 255, 255, 0.02)" />
+                  <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
+                </radialGradient>
+              </defs>
+
+              {/* 1. Recessed Track Fill (Centerline r=434.78, strokeWidth=130.43: inner 369.57, outer 500) */}
+              <circle
+                cx="500"
+                cy="500"
+                r="434.78"
+                stroke="url(#bandRadGradLight)"
+                strokeWidth="130.43"
+                fill="none"
+                className="dark:hidden"
+              />
+              <circle
+                cx="500"
+                cy="500"
+                r="434.78"
+                stroke="url(#bandRadGradDark)"
+                strokeWidth="130.43"
+                fill="none"
+                className="hidden dark:block"
+              />
+
+              {/* 2. Soft Inner Groove Shadows (giving depth to the recessed track) */}
+              <circle
+                cx="500"
+                cy="500"
+                r="371"
+                stroke="rgba(2, 43, 58, 0.08)"
+                strokeWidth="3"
+                fill="none"
+                className="dark:hidden"
+              />
+              <circle
+                cx="500"
+                cy="500"
+                r="371"
+                stroke="rgba(0, 0, 0, 0.55)"
+                strokeWidth="3"
+                fill="none"
+                className="hidden dark:block"
+              />
+              <circle
+                cx="500"
+                cy="500"
+                r="498"
+                stroke="rgba(2, 43, 58, 0.05)"
+                strokeWidth="3"
+                fill="none"
+                className="dark:hidden"
+              />
+              <circle
+                cx="500"
+                cy="500"
+                r="498"
+                stroke="rgba(0, 0, 0, 0.35)"
+                strokeWidth="3"
+                fill="none"
+                className="hidden dark:block"
+              />
+
+              {/* 3. Dashed Center Guide Line (12% opacity of edge line color, stroke-dasharray 5 7) */}
+              <circle
+                cx="500"
+                cy="500"
+                r="434.78"
+                stroke="var(--border-subtle)"
+                strokeOpacity="0.12"
+                strokeWidth="1"
+                strokeDasharray="5 7"
+                vectorEffect="non-scaling-stroke"
+                fill="none"
+              />
+
+              {/* 4. 1px Outer Edge Line (r=500): light var(--border-subtle) / dark rgba(255,255,255,0.08) */}
+              <circle
                 cx="500"
                 cy="500"
                 r="500"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0%" stopColor="rgba(2, 43, 58, 0.02)" />
-                <stop offset="72%" stopColor="rgba(2, 43, 58, 0.02)" />
-                <stop offset="100%" stopColor="rgba(2, 43, 58, 0.10)" />
-              </radialGradient>
+                stroke="var(--border-subtle)"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+                fill="none"
+              />
 
-              {/* 
-                DARK: outer edge rgba(255,255,255,0.07) fading to inner edge rgba(255,255,255,0.01).
-                No teal glow on the band.
-              */}
-              <radialGradient
-                id="bandRadGradDark"
+              {/* 5. 1px Inner Edge Line (r=369.57): light var(--border-subtle) / dark rgba(255,255,255,0.08) */}
+              <circle
                 cx="500"
                 cy="500"
-                r="500"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.01)" />
-                <stop offset="72%" stopColor="rgba(255, 255, 255, 0.01)" />
-                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
-              </radialGradient>
-            </defs>
-
-            {/* Thick Soft Band (centerline at 430, strokeWidth 140 = inner 360, outer 500) */}
-            <circle
-              cx="500"
-              cy="500"
-              r="430"
-              stroke="url(#bandRadGradLight)"
-              strokeWidth="140"
-              fill="none"
-              className="dark:hidden"
-            />
-            <circle
-              cx="500"
-              cy="500"
-              r="430"
-              stroke="url(#bandRadGradDark)"
-              strokeWidth="140"
-              fill="none"
-              className="hidden dark:block"
-            />
-
-            {/* Light Mode: 1px inner highlight rgba(255,255,255,0.6) */}
-            <circle
-              cx="500"
-              cy="500"
-              r="360"
-              stroke="rgba(255, 255, 255, 0.6)"
-              strokeWidth="1"
-              fill="none"
-              className="dark:hidden"
-            />
-
-            {/* Dark Mode: 1px border rgba(255,255,255,0.08) at inner and outer edges */}
-            <circle
-              cx="500"
-              cy="500"
-              r="360"
-              stroke="rgba(255, 255, 255, 0.08)"
-              strokeWidth="1"
-              fill="none"
-              className="hidden dark:block"
-            />
-            <circle
-              cx="500"
-              cy="500"
-              r="500"
-              stroke="rgba(255, 255, 255, 0.08)"
-              strokeWidth="1"
-              fill="none"
-              className="hidden dark:block"
-            />
-          </svg>
+                r="369.57"
+                stroke="var(--border-subtle)"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+                fill="none"
+              />
+            </svg>
+          </div>
         </div>
 
         {/* ── B) ROTATING LAYER (motion.div, NOT masked, z-index above band) ── */}
@@ -503,10 +567,12 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
               idx={idx}
               stepDeg={stepDeg}
               ringRotation={ringRotation}
+              tailOpacity={tailOpacity}
+              tailScaleSigned={tailScaleSigned}
             />
           ))}
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };
