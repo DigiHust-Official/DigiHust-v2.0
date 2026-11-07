@@ -32,7 +32,7 @@ import { HeroWaves } from '../ui/HeroWaves';
 import { ServiceCard } from '../ui/ServiceCard';
 import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
-import RadialOrbitalTimeline, { defaultServicesTimelineData } from '../ui/radial-orbital-timeline';
+import { OrbitRing } from '../ui/OrbitRing';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { Project, getProjectLiveUrl, PROJECTS } from './Work';
@@ -221,6 +221,7 @@ export const Home: React.FC = () => {
   const { siteContent } = useApp();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  const heroRef = useRef<HTMLElement>(null);
   const modelDiagramRef = useRef<HTMLDivElement>(null);
   const isModelInView = useInView(modelDiagramRef, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' });
   const shouldReduceMotion = useReducedMotion();
@@ -348,12 +349,19 @@ export const Home: React.FC = () => {
       />
 
       {/* ── SECTION 1: COMPACT FULL-VIEWPORT HERO (Responsive on all screen sizes) ── */}
-      <section data-hero="true" className="relative lg:min-h-[calc(100dvh-4rem)] lg:max-h-[860px] flex flex-col justify-between px-4 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] overflow-hidden pt-24 sm:pt-26 lg:pt-20 pb-8 lg:pb-8 bg-[var(--bg-page)]">
+      <section
+        ref={heroRef}
+        data-hero="true"
+        className="relative lg:min-h-[calc(100dvh-4rem)] lg:max-h-[860px] flex flex-col justify-between px-4 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] overflow-hidden pt-24 sm:pt-26 lg:pt-20 pb-8 lg:pb-8 bg-[var(--bg-page)]"
+      >
         {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
         <HeroWaves />
 
         {/* Ambient celestial glow for depth */}
         <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        {/* OrbitRing: z-0 decorative background orbit positioned at left:66% top:50% */}
+        <OrbitRing containerRef={heroRef} />
 
         <div className="max-w-7xl mx-auto w-full my-auto py-2 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
@@ -432,28 +440,8 @@ export const Home: React.FC = () => {
               </motion.div>
             </motion.div>
 
-            {/* Right Column: Radial Orbital Timeline Component */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="lg:col-span-6 xl:col-span-5 relative flex flex-col items-center justify-center"
-            >
-              <div className="w-full relative rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] backdrop-blur-sm p-2 shadow-xl min-h-[280px] sm:min-h-[340px]">
-                <RadialOrbitalTimeline
-                  timelineData={defaultServicesTimelineData}
-                  embedded={true}
-                  className="w-full"
-                />
-                
-                <div className="text-center pt-1 pb-0.5">
-                  <p className="text-[10px] font-bold text-[var(--text-muted)] flex items-center justify-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-teal)] animate-ping" />
-                    <span>{t('hero_orbit_instruction')}</span>
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            {/* Right Column: Spacer reserved for the orbital visual */}
+            <div className="lg:col-span-6 xl:col-span-5 min-h-[160px] sm:min-h-[220px] lg:min-h-[460px] pointer-events-none" />
 
           </div>
         </div>
