@@ -210,39 +210,13 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
           zIndex: 20,
         }}
       >
-        {/* 
-          Faint "seat" in the groove floor:
-          - Inside the stone's container (follows the stone along the groove)
-          - Blurred ellipse, size 118% of --badge
-          - Offset +5% right and +7% down relative to stone center
-          - Does not use counter-rotation for position (stays below the stone)
-          - Filter blur(8px)
-          - LIGHT rgba(2,43,58,0.28), DARK rgba(0,0,0,0.50)
-        */}
-        <div
-          className="orbit-stone-seat pointer-events-none"
-          style={{
-            position: 'absolute',
-            left: 'calc(var(--badge) * 0.05)',
-            top: 'calc(var(--badge) * 0.07)',
-            width: 'calc(var(--badge) * 1.18)',
-            height: 'calc(var(--badge) * 1.18)',
-            borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
-            filter: 'blur(8px)',
-            zIndex: -1,
-          }}
-        />
-
         <motion.div style={{ rotate: badgeRot }} className="will-change-transform">
           <div
             tabIndex={0}
             role="img"
             aria-label={service.defaultName}
             title={service.defaultName}
-            className={`orbit-badge group relative rounded-full flex items-center justify-center transition-transform duration-300 pointer-events-auto cursor-pointer focus:outline-none hover:scale-105 ${
-              isActive ? 'scale-105 is-active' : ''
-            }`}
+            className="orbit-badge group relative rounded-full flex items-center justify-center pointer-events-auto cursor-pointer focus:outline-none"
             style={{
               width: 'var(--badge)',
               height: 'var(--badge)',
@@ -497,19 +471,19 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
 
           /* ── Stone Matte Ceramic Colors (Single Source of Truth) ────── */
           :root, .orbit-ring-outer {
-            --dh-stone-1: #34424B;
-            --dh-stone-2: #2B373F;
-            --dh-stone-3: #1E292F;
-            --dh-stone-4: #171F25;
+            --dh-stone-1: #5A6B76;
+            --dh-stone-2: #3B4A54;
+            --dh-stone-3: #26333B;
+            --dh-stone-4: #151D23;
             --dh-inlay: #2EC4D6;
             --dh-caption-accent: #1F7A8C;
           }
 
           .dark .orbit-ring-outer, .dark .service-caption, .dark {
-            --dh-stone-1: #E4EAED;
-            --dh-stone-2: #D9E0E4;
-            --dh-stone-3: #C3CDD4;
-            --dh-stone-4: #AEBBC4;
+            --dh-stone-1: #F3F6F8;
+            --dh-stone-2: #DDE4E8;
+            --dh-stone-3: #BFCAD1;
+            --dh-stone-4: #98A8B3;
             --dh-inlay: #17707F;
             --dh-caption-accent: #2EC4D6;
           }
@@ -520,50 +494,37 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
             will-change: transform;
             border-radius: 50%;
             border: none !important;
+            outline: none !important;
             background: radial-gradient(
-              circle at 36% 30%,
+              circle at 34% 28%,
               var(--dh-stone-1) 0%,
-              var(--dh-stone-2) 38%,
-              var(--dh-stone-3) 72%,
+              var(--dh-stone-2) 30%,
+              var(--dh-stone-3) 62%,
               var(--dh-stone-4) 100%
             );
             box-shadow:
-              inset -8px -12px 20px rgba(0, 0, 0, 0.30),
-              inset 4px 5px 10px rgba(255, 255, 255, 0.06),
-              0 5px 8px rgba(2, 43, 58, 0.30),
-              0 14px 22px rgba(2, 43, 58, 0.18);
+              inset calc(var(--badge) * -10 / 150) calc(var(--badge) * -14 / 150) calc(var(--badge) * 22 / 150) rgba(0, 0, 0, 0.45),
+              inset calc(var(--badge) * 6 / 150) calc(var(--badge) * 8 / 150) calc(var(--badge) * 14 / 150) rgba(255, 255, 255, 0.10),
+              calc(var(--badge) * 3 / 150) calc(var(--badge) * 5 / 150) calc(var(--badge) * 5 / 150) rgba(2, 43, 58, 0.35),
+              calc(var(--badge) * 7 / 150) calc(var(--badge) * 11 / 150) calc(var(--badge) * 12 / 150) calc(var(--badge) * -5 / 150) rgba(2, 43, 58, 0.30);
           }
 
           /* ── Matte Ceramic Stones (Dark Theme - Soft Porcelain) ─────── */
           .dark .orbit-badge {
             border: none !important;
+            outline: none !important;
             background: radial-gradient(
-              circle at 36% 30%,
+              circle at 34% 28%,
               var(--dh-stone-1) 0%,
-              var(--dh-stone-2) 38%,
-              var(--dh-stone-3) 72%,
+              var(--dh-stone-2) 30%,
+              var(--dh-stone-3) 62%,
               var(--dh-stone-4) 100%
             ) !important;
             box-shadow:
-              inset -8px -12px 20px rgba(30, 45, 58, 0.28),
-              inset 4px 5px 10px rgba(255, 255, 255, 0.35),
-              0 5px 8px rgba(0, 0, 0, 0.5),
-              0 14px 22px rgba(0, 0, 0, 0.4) !important;
-          }
-
-          /* Active / Focused stone ring: 2px solid var(--dh-caption-accent) with 4px offset */
-          .orbit-badge:focus-visible,
-          .orbit-badge.is-active {
-            outline: 2px solid var(--dh-caption-accent);
-            outline-offset: 4px;
-          }
-
-          /* Stone "seat" faint shadow in groove floor */
-          .orbit-stone-seat {
-            background: rgba(2, 43, 58, 0.28);
-          }
-          .dark .orbit-stone-seat {
-            background: rgba(0, 0, 0, 0.50) !important;
+              inset calc(var(--badge) * -10 / 150) calc(var(--badge) * -14 / 150) calc(var(--badge) * 22 / 150) rgba(24, 38, 50, 0.38),
+              inset calc(var(--badge) * 6 / 150) calc(var(--badge) * 8 / 150) calc(var(--badge) * 14 / 150) rgba(255, 255, 255, 0.40),
+              calc(var(--badge) * 3 / 150) calc(var(--badge) * 5 / 150) calc(var(--badge) * 5 / 150) rgba(0, 0, 0, 0.55),
+              calc(var(--badge) * 7 / 150) calc(var(--badge) * 11 / 150) calc(var(--badge) * 12 / 150) calc(var(--badge) * -5 / 150) rgba(0, 0, 0, 0.50) !important;
           }
 
           /* Stacked Icons: (a) Groove (bottom) */
@@ -638,7 +599,7 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
                 <defs>
                   {/* 
                     LIGHT: Recessed groove radialGradient
-                    outer = 1.0 (r=500), centerline = 0.862 (r=431), inner edge = 0.724 (r=362)
+                    inner = 0.724, outer = 1.0 (r=500, cx=cy=0.5)
                   */}
                   <radialGradient
                     id="grooveGradLight"
@@ -647,20 +608,20 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
                     r="0.5"
                     gradientUnits="objectBoundingBox"
                   >
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="71.8%" stopColor="rgba(255, 255, 255, 0)" />
-                    <stop offset="72.4%" stopColor="rgba(255, 255, 255, 0.95)" />
-                    <stop offset="73.3%" stopColor="rgba(255, 255, 255, 0.40)" />
-                    <stop offset="74.5%" stopColor="rgba(2, 43, 58, 0.075)" />
-                    <stop offset="93.5%" stopColor="rgba(2, 43, 58, 0.15)" />
-                    <stop offset="98.5%" stopColor="rgba(2, 43, 58, 0.30)" />
-                    <stop offset="99.5%" stopColor="rgba(2, 43, 58, 0)" />
-                    <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+                    <stop offset="0.7235" stopColor="rgba(255, 255, 255, 0)" />
+                    <stop offset="0.7240" stopColor="rgba(255, 255, 255, 0.90)" />
+                    <stop offset="0.7330" stopColor="rgba(255, 255, 255, 0.55)" />
+                    <stop offset="0.7440" stopColor="rgba(2, 43, 58, 0.10)" />
+                    <stop offset="0.8200" stopColor="rgba(2, 43, 58, 0.15)" />
+                    <stop offset="0.9400" stopColor="rgba(2, 43, 58, 0.26)" />
+                    <stop offset="0.9800" stopColor="rgba(2, 43, 58, 0.34)" />
+                    <stop offset="0.9960" stopColor="rgba(2, 43, 58, 0.16)" />
+                    <stop offset="1.0000" stopColor="rgba(2, 43, 58, 0)" />
                   </radialGradient>
 
                   {/* 
                     DARK: Recessed groove radialGradient
-                    outer = 1.0 (r=500), centerline = 0.862 (r=431), inner edge = 0.724 (r=362)
+                    inner = 0.724, outer = 1.0 (r=500, cx=cy=0.5)
                   */}
                   <radialGradient
                     id="grooveGradDark"
@@ -669,15 +630,15 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
                     r="0.5"
                     gradientUnits="objectBoundingBox"
                   >
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="71.8%" stopColor="rgba(255, 255, 255, 0)" />
-                    <stop offset="72.4%" stopColor="rgba(255, 255, 255, 0.16)" />
-                    <stop offset="73.3%" stopColor="rgba(255, 255, 255, 0.08)" />
-                    <stop offset="74.5%" stopColor="rgba(0, 0, 0, 0.20)" />
-                    <stop offset="93.5%" stopColor="rgba(0, 0, 0, 0.38)" />
-                    <stop offset="98.5%" stopColor="rgba(0, 0, 0, 0.55)" />
-                    <stop offset="99.5%" stopColor="rgba(0, 0, 0, 0)" />
-                    <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+                    <stop offset="0.7235" stopColor="rgba(255, 255, 255, 0)" />
+                    <stop offset="0.7240" stopColor="rgba(255, 255, 255, 0.16)" />
+                    <stop offset="0.7330" stopColor="rgba(255, 255, 255, 0.07)" />
+                    <stop offset="0.7440" stopColor="rgba(0, 0, 0, 0.22)" />
+                    <stop offset="0.8200" stopColor="rgba(0, 0, 0, 0.32)" />
+                    <stop offset="0.9400" stopColor="rgba(0, 0, 0, 0.46)" />
+                    <stop offset="0.9800" stopColor="rgba(0, 0, 0, 0.58)" />
+                    <stop offset="0.9960" stopColor="rgba(0, 0, 0, 0.25)" />
+                    <stop offset="1.0000" stopColor="rgba(0, 0, 0, 0)" />
                   </radialGradient>
                 </defs>
 
@@ -697,13 +658,13 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
                   className="hidden dark:block"
                 />
 
-                {/* 2. 1px Crisp Edge on the Outer Rim (r=500) */}
+                {/* 2. Crisp 1.2px Outer Edge Line (r=499.4) */}
                 <circle
                   cx="500"
                   cy="500"
-                  r="500"
-                  stroke="rgba(2, 43, 58, 0.18)"
-                  strokeWidth="1"
+                  r="499.4"
+                  stroke="rgba(2, 43, 58, 0.22)"
+                  strokeWidth="1.2"
                   vectorEffect="non-scaling-stroke"
                   fill="none"
                   className="dark:hidden"
@@ -711,9 +672,9 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
                 <circle
                   cx="500"
                   cy="500"
-                  r="500"
-                  stroke="rgba(255, 255, 255, 0.07)"
-                  strokeWidth="1"
+                  r="499.4"
+                  stroke="rgba(255, 255, 255, 0.06)"
+                  strokeWidth="1.2"
                   vectorEffect="non-scaling-stroke"
                   fill="none"
                   className="hidden dark:block"
@@ -750,7 +711,7 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
         style={{
           position: 'absolute',
           right: '3.5%',
-          bottom: '5%',
+          bottom: '56px',
           width: 'max(240px, calc(var(--R) * 0.38))',
           zIndex: 5,
           pointerEvents: 'none',

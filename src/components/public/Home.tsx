@@ -382,7 +382,7 @@ export const Home: React.FC = () => {
         <section
           ref={heroRef}
           data-hero="true"
-          className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 flex flex-col justify-between px-4 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] overflow-hidden pt-24 sm:pt-26 lg:pt-20 pb-8 lg:pb-8 bg-[var(--bg-page)]"
+          className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 border-b border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-page)]"
         >
           {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
           <HeroWaves />
@@ -393,20 +393,105 @@ export const Home: React.FC = () => {
           {/* OrbitRing: bottom-right quarter arc pinned orbital hero visual */}
           <OrbitRing runwayRef={runwayRef} containerRef={heroRef} />
 
-        <div className="max-w-7xl mx-auto w-full my-auto py-2 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
+          {/* On lg: 100% height grid anchored to bottom-left with exact 56px bottom margin */}
+          {/* On mobile: standard vertical flow with top and bottom breathing room */}
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-12 lg:p-0 lg:h-full lg:grid lg:grid-rows-[1fr] lg:pt-16 lg:pb-[56px] pointer-events-none">
             
-            {/* Left Column: Headlines & Pitch */}
+            {/* ── DESKTOP LAYOUT (lg and up): Diagonal bottom-left composition ── */}
             <motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-6 xl:col-span-7 lg:-translate-y-[4vh]"
+              data-hero-desktop="true"
+              className="hidden lg:block lg:self-end pointer-events-auto"
+              style={{ width: 'min(52vw, 60rem)' }}
             >
-              {/* Headline (about 15% larger) */}
+              {/* 1. Headline: 2 block-level spans, span 2 has max-width: 8.4em and text-wrap: balance */}
               <motion.h1
                 variants={itemVariants}
-                className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] lg:text-[3.45rem] text-[var(--text-heading)] leading-[1.14] tracking-tight mb-4"
+                className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0"
+                style={{
+                  fontSize: 'clamp(2.75rem, 5.2vw, 6rem)',
+                  lineHeight: 1.04,
+                  letterSpacing: '-0.035em',
+                }}
+              >
+                <span className="block w-fit text-[var(--text-heading)]">
+                  {hero?.headlineLine1 || t('hero_headline_1')}
+                </span>
+                <span
+                  className="block w-fit text-[var(--brand-teal-text)]"
+                  style={{ maxWidth: '8.4em', textWrap: 'balance' }}
+                >
+                  {hero?.headlineHighlight || hero?.headlineLine2 || t('hero_headline_2')}
+                </span>
+              </motion.h1>
+
+              {/* 2. Full-width 1px hairline rule below headline */}
+              <motion.div
+                variants={itemVariants}
+                className="w-full h-px bg-[var(--dh-border)]"
+                style={{ marginTop: 'clamp(24px, 3.4vh, 40px)' }}
+              />
+
+              {/* 3. Footer Row: Paragraph (left) + Actions (right) */}
+              <div
+                className="grid grid-cols-[minmax(0,27rem)_auto] items-end"
+                style={{
+                  columnGap: 'clamp(32px, 5vw, 80px)',
+                  marginTop: 'clamp(20px, 3vh, 32px)',
+                }}
+              >
+                {/* Left cell: Paragraph */}
+                <motion.p
+                  variants={itemVariants}
+                  className="text-[var(--text-muted)] m-0"
+                  style={{
+                    fontSize: 'clamp(1rem, 1.05vw, 1.2rem)',
+                    lineHeight: 1.65,
+                    maxWidth: '27rem',
+                  }}
+                >
+                  {hero?.subheadline || t('hero_sub')}
+                </motion.p>
+
+                {/* Right cell: Actions (Primary button + Explore Squads text link) */}
+                <motion.div
+                  variants={itemVariants}
+                  className="flex flex-col items-start gap-[18px]"
+                >
+                  {/* a) Primary button: Start a Project */}
+                  <Link
+                    to="/contact"
+                    className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none whitespace-nowrap"
+                  >
+                    <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+
+                  {/* b) Secondary: Explore Squads text link (NOT a button) */}
+                  <Link
+                    to="/services"
+                    className="group inline-flex items-center gap-2 font-semibold text-sm sm:text-base text-[var(--text-heading)] underline decoration-1 underline-offset-[6px] decoration-[var(--border-hover)] hover:decoration-[var(--brand-teal)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-teal)] select-none whitespace-nowrap"
+                  >
+                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                    <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* ── MOBILE LAYOUT (< 1024px): Preserved existing mobile layout ── */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="block lg:hidden w-full pointer-events-auto"
+            >
+              <motion.h1
+                variants={itemVariants}
+                className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.14] tracking-tight mb-4"
               >
                 {hero?.headlineLine1 || t('hero_headline_1')}<br />
                 <span className="text-[var(--brand-teal-text)]">
@@ -414,45 +499,35 @@ export const Home: React.FC = () => {
                 </span>
               </motion.h1>
 
-              {/* Subtitle */}
               <motion.p
                 variants={itemVariants}
-                className="text-xs sm:text-sm lg:text-base text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
+                className="text-xs sm:text-sm text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
               >
                 {hero?.subheadline || t('hero_sub')}
               </motion.p>
 
-              {/* Action Buttons */}
               <motion.div
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
               >
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to="/contact"
-                    className="flex items-center justify-center space-x-2 px-7 py-3.5 rounded-xl btn-brand-futuristic text-white font-bold text-xs sm:text-sm shadow-md transition-all"
-                  >
-                    <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to="/services"
-                    className="flex items-center justify-center space-x-2 px-6 py-3 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--brand-teal)] text-[var(--text-heading)] font-bold text-xs sm:text-sm bg-[var(--bg-surface)] hover:bg-[var(--bg-subtle)] transition-all"
-                  >
-                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
-                  </Link>
-                </motion.div>
+                <Link
+                  to="/contact"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none"
+                >
+                  <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/services"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-transparent hover:bg-[var(--dh-surface-alt)] border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] transition-colors select-none"
+                >
+                  <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                </Link>
               </motion.div>
             </motion.div>
 
-            {/* Right Column: Spacer reserved for the orbital visual */}
-            <div className="lg:col-span-6 xl:col-span-5 min-h-[160px] sm:min-h-[220px] lg:min-h-[460px] pointer-events-none" />
-
           </div>
-        </div>
-      </section>
+        </section>
       </div>
 
       {/* ── METRICS STRIP ── */}
