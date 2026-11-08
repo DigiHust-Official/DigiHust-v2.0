@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   motion,
+  AnimatePresence,
   useMotionValue,
   useTransform,
   useAnimationFrame,
@@ -11,71 +12,117 @@ import {
   MotionValue,
 } from 'framer-motion';
 import {
-  Palette,
+  PenTool,
   Code2,
-  Bot,
+  Workflow,
   TrendingUp,
   Search,
   ShieldCheck,
-  LayoutDashboard,
-  Briefcase,
+  BarChart3,
+  Puzzle,
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export interface OrbitService {
   id: string;
-  name: string;
+  numStr: string;
+  nameKey: string;
+  outcomeKey: string;
+  audienceKey: string;
+  defaultName: string;
+  defaultOutcome: string;
+  defaultAudience: string;
   icon: React.ElementType;
-  ariaLabel: string;
 }
 
-const ORBIT_SERVICES: OrbitService[] = [
+export const ORBIT_SERVICES: OrbitService[] = [
   {
     id: 'graphic-design',
-    name: 'Graphic Design & Branding',
-    icon: Palette,
-    ariaLabel: 'Graphic Design and Branding Service',
+    numStr: '01',
+    nameKey: 'orbit_service_1_name',
+    outcomeKey: 'orbit_service_1_outcome',
+    audienceKey: 'orbit_service_1_audience',
+    defaultName: 'Graphic Design & Branding',
+    defaultOutcome: 'A brand customers remember and trust.',
+    defaultAudience: 'Startups launching and companies rebranding',
+    icon: PenTool,
   },
   {
     id: 'fullstack-dev',
-    name: 'Full Stack Development',
+    numStr: '02',
+    nameKey: 'orbit_service_2_name',
+    outcomeKey: 'orbit_service_2_outcome',
+    audienceKey: 'orbit_service_2_audience',
+    defaultName: 'Full Stack Development',
+    defaultOutcome: 'Web and mobile products built to scale with you.',
+    defaultAudience: 'Businesses taking an idea to a live product',
     icon: Code2,
-    ariaLabel: 'Full Stack Web Development Service',
   },
   {
     id: 'ai-automations',
-    name: 'AI Automations',
-    icon: Bot,
-    ariaLabel: 'AI and Workflow Automations Service',
+    numStr: '03',
+    nameKey: 'orbit_service_3_name',
+    outcomeKey: 'orbit_service_3_outcome',
+    audienceKey: 'orbit_service_3_audience',
+    defaultName: 'AI Automations',
+    defaultOutcome: 'Repetitive work handled automatically, so your team can focus on growth.',
+    defaultAudience: 'Operations teams buried in manual tasks',
+    icon: Workflow,
   },
   {
     id: 'growth-marketing',
-    name: 'Growth & Marketing',
+    numStr: '04',
+    nameKey: 'orbit_service_4_name',
+    outcomeKey: 'orbit_service_4_outcome',
+    audienceKey: 'orbit_service_4_audience',
+    defaultName: 'Growth & Marketing',
+    defaultOutcome: 'Campaigns that turn attention into paying customers.',
+    defaultAudience: 'Brands ready to grow their audience and revenue',
     icon: TrendingUp,
-    ariaLabel: 'Growth Marketing and SEO Optimization Service',
   },
   {
     id: 'seo',
-    name: 'SEO',
+    numStr: '05',
+    nameKey: 'orbit_service_5_name',
+    outcomeKey: 'orbit_service_5_outcome',
+    audienceKey: 'orbit_service_5_audience',
+    defaultName: 'SEO',
+    defaultOutcome: 'Be found by the people who are already searching for you.',
+    defaultAudience: 'Businesses that want steady organic traffic',
     icon: Search,
-    ariaLabel: 'Search Engine Optimization Service',
   },
   {
     id: 'cybersecurity',
-    name: 'Cyber Security',
+    numStr: '06',
+    nameKey: 'orbit_service_6_name',
+    outcomeKey: 'orbit_service_6_outcome',
+    audienceKey: 'orbit_service_6_audience',
+    defaultName: 'Cyber Security',
+    defaultOutcome: 'Find the weak spots before attackers do.',
+    defaultAudience: 'Companies protecting customer data and uptime',
     icon: ShieldCheck,
-    ariaLabel: 'Cyber Security and Hardening Service',
   },
   {
     id: 'bi-dashboards',
-    name: 'BI Dashboards',
-    icon: LayoutDashboard,
-    ariaLabel: 'Business Intelligence and Data Dashboards Service',
+    numStr: '07',
+    nameKey: 'orbit_service_7_name',
+    outcomeKey: 'orbit_service_7_outcome',
+    audienceKey: 'orbit_service_7_audience',
+    defaultName: 'BI Dashboards',
+    defaultOutcome: 'Your data, turned into decisions you can act on.',
+    defaultAudience: 'Leaders who need clear numbers, not spreadsheets',
+    icon: BarChart3,
   },
   {
     id: 'business-solutions',
-    name: 'Business Solutions',
-    icon: Briefcase,
-    ariaLabel: 'Custom Business and Enterprise Solutions',
+    numStr: '08',
+    nameKey: 'orbit_service_8_name',
+    outcomeKey: 'orbit_service_8_outcome',
+    audienceKey: 'orbit_service_8_audience',
+    defaultName: 'Business Solutions',
+    defaultOutcome: 'Custom systems that fit how your business actually works.',
+    defaultAudience: 'Teams outgrowing off-the-shelf tools',
+    icon: Puzzle,
   },
 ];
 
@@ -93,6 +140,7 @@ interface OrbitArmProps {
   ringRotation: MotionValue<number>;
   tailOpacity: MotionValue<number>;
   tailScaleSigned: MotionValue<number>;
+  isActive: boolean;
 }
 
 const OrbitArm: React.FC<OrbitArmProps> = ({
@@ -102,6 +150,7 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
   ringRotation,
   tailOpacity,
   tailScaleSigned,
+  isActive,
 }) => {
   const angleDeg = idx * stepDeg;
   const IconComp = service.icon;
@@ -127,7 +176,7 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
         - Tapered comet tail trailing behind stone motion along orbit curve.
         - Length: calc(var(--badge) * 2.4); Height: calc(var(--badge) * 0.8)
         - Starts under stone, fades to fully transparent.
-        - Recolor: LIGHT rgba(31,122,140,0.45), DARK rgba(46,196,214,0.40).
+        - Recolor: LIGHT rgba(23,31,37,0.32), DARK rgba(217,224,228,0.30).
         - Invisible when idle or below 150 px/s (|v| < 150, opacity: 0).
         - Smoothly grows and fades in with scroll velocity (|v| >= 150, full at 1500 px/s).
         - Direction automatically follows velocity sign (flips when scrolling upward).
@@ -150,7 +199,7 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
         }}
       />
 
-      {/* Polished 3D Stone Badge Anchor at Centerline (0, 0) */}
+      {/* Ceramic Stone Badge Anchor at Centerline (0, 0) */}
       <div
         className="orbit-badge-anchor"
         style={{
@@ -161,38 +210,68 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
           zIndex: 20,
         }}
       >
+        {/* 
+          Faint "seat" in the groove floor:
+          - Inside the stone's container (follows the stone along the groove)
+          - Blurred ellipse, size 118% of --badge
+          - Offset +5% right and +7% down relative to stone center
+          - Does not use counter-rotation for position (stays below the stone)
+          - Filter blur(8px)
+          - LIGHT rgba(2,43,58,0.28), DARK rgba(0,0,0,0.50)
+        */}
+        <div
+          className="orbit-stone-seat pointer-events-none"
+          style={{
+            position: 'absolute',
+            left: 'calc(var(--badge) * 0.05)',
+            top: 'calc(var(--badge) * 0.07)',
+            width: 'calc(var(--badge) * 1.18)',
+            height: 'calc(var(--badge) * 1.18)',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+            filter: 'blur(8px)',
+            zIndex: -1,
+          }}
+        />
+
         <motion.div style={{ rotate: badgeRot }} className="will-change-transform">
           <div
             tabIndex={0}
             role="img"
-            aria-label={service.ariaLabel}
-            title={service.name}
-            className="orbit-badge group relative rounded-full flex items-center justify-center transition-transform duration-300 pointer-events-auto cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2EC4D6] hover:scale-105"
+            aria-label={service.defaultName}
+            title={service.defaultName}
+            className={`orbit-badge group relative rounded-full flex items-center justify-center transition-transform duration-300 pointer-events-auto cursor-pointer focus:outline-none hover:scale-105 ${
+              isActive ? 'scale-105 is-active' : ''
+            }`}
             style={{
               width: 'var(--badge)',
               height: 'var(--badge)',
             }}
           >
-            {/* Contact Shadow INSIDE stone: stays fixed bottom-right with counter-rotation */}
-            <div className="orbit-contact-shadow pointer-events-none" />
-
-            {/* Engraved Icon (48% of badge size, strokeWidth: 2.25) */}
+            {/* Engraved Icon (48% of badge size): Two stacked copies */}
             <div
-              className="flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-110 relative z-10"
+              className="relative flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-110 z-10"
               style={{
                 width: 'calc(var(--badge) * 0.48)',
                 height: 'calc(var(--badge) * 0.48)',
               }}
             >
+              {/* (a) GROOVE (bottom copy): strokeWidth 3.6 */}
+              <IconComp
+                strokeWidth={3.6}
+                className="w-full h-full absolute inset-0 orbit-icon-groove"
+              />
+
+              {/* (b) INLAY (top copy): strokeWidth 2.25 */}
               <IconComp
                 strokeWidth={2.25}
-                className="w-full h-full orbit-badge-icon"
+                className="w-full h-full absolute inset-0 orbit-icon-inlay"
               />
             </div>
 
             {/* Hover Tooltip */}
             <div className="hidden lg:group-hover:flex absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-subtle)] shadow-xl text-xs font-bold text-[var(--text-heading)] whitespace-nowrap z-50 pointer-events-none transition-all duration-200">
-              {service.name}
+              {service.defaultName}
             </div>
           </div>
         </motion.div>
@@ -200,6 +279,12 @@ const OrbitArm: React.FC<OrbitArmProps> = ({
     </div>
   );
 };
+
+/* ── Angular Distance Helper ─────────────────────────────────────────────── */
+function getAngularDistance(angle1: number, angle2: number): number {
+  const diff = (((angle1 - angle2 + 180) % 360) + 360) % 360 - 180;
+  return Math.abs(diff);
+}
 
 export const OrbitRing: React.FC<OrbitRingProps> = ({
   runwayRef,
@@ -209,6 +294,17 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const isInViewRef = useRef(true);
   const shouldReduceMotion = Boolean(useReducedMotion());
+  const { t } = useLanguage();
+
+  // Active stone state with 4-degree hysteresis
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
+
+  // Velocity freeze state: freeze displayed caption during high scroll velocity
+  const [displayedIndex, setDisplayedIndex] = useState(0);
+  const displayedIndexRef = useRef(0);
+  const [isFastScroll, setIsFastScroll] = useState(false);
+  const isFastScrollRef = useRef(false);
 
   // ── Scroll Tracking across Runway ─────────────────────────────────────────
   const scrollTarget = runwayRef?.current ? runwayRef : containerRef;
@@ -277,6 +373,14 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
   useAnimationFrame((_time, delta) => {
     if (shouldReduceMotion) {
       ringRotation.set(initialOffset);
+      if (activeIndexRef.current !== 0) {
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+      }
+      if (displayedIndexRef.current !== 0) {
+        displayedIndexRef.current = 0;
+        setDisplayedIndex(0);
+      }
       return;
     }
     if (!isInViewRef.current) return;
@@ -286,343 +390,478 @@ export const OrbitRing: React.FC<OrbitRingProps> = ({
     const idleStep = degPerSec * dt;
     idleAngle.set(idleAngle.get() + idleStep);
 
-    ringRotation.set(idleAngle.get() + scrollAngle.get());
+    const currentTotalRotation = idleAngle.get() + scrollAngle.get();
+    ringRotation.set(currentTotalRotation);
+
+    // Velocity check for fast scrolling (dimming and freezing caption)
+    const currentVelocity = smoothVelocity.get();
+    const speed = Math.abs(currentVelocity);
+    const fastNow = speed >= 150;
+
+    if (fastNow !== isFastScrollRef.current) {
+      isFastScrollRef.current = fastNow;
+      setIsFastScroll(fastNow);
+    }
+
+    // ── Active Service Detection with 4-degree Hysteresis ──────────────────
+    // Target is top-left diagonal from bottom-right corner = -45 deg
+    const currentActive = activeIndexRef.current;
+    const currentDist = getAngularDistance(currentActive * 45 + currentTotalRotation, -45);
+
+    let bestCandidate = currentActive;
+    let bestDist = currentDist;
+
+    for (let i = 0; i < 8; i++) {
+      if (i === currentActive) continue;
+      const dist = getAngularDistance(i * 45 + currentTotalRotation, -45);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestCandidate = i;
+      }
+    }
+
+    // Switch active index only if best candidate is at least 4 degrees closer to -45 deg
+    if (bestCandidate !== currentActive && bestDist <= currentDist - 4) {
+      activeIndexRef.current = bestCandidate;
+      setActiveIndex(bestCandidate);
+    }
+
+    // Update displayed index for caption when not scrolling fast
+    if (!fastNow) {
+      if (displayedIndexRef.current !== activeIndexRef.current) {
+        displayedIndexRef.current = activeIndexRef.current;
+        setDisplayedIndex(activeIndexRef.current);
+      }
+    }
   });
 
   const stepDeg = 45; // 360 / 8 = 45 deg spacing
+  const displayedService = ORBIT_SERVICES[displayedIndex] || ORBIT_SERVICES[0];
 
   return (
-    <div
-      ref={rootRef}
-      className={`orbit-ring-outer ${className}`}
-      style={{
-        position: 'absolute',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }}
-      aria-hidden="true"
-    >
-      {/* Hidden Inline SVG Filter for Engraved Icon Carving */}
-      <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-        <defs>
-          <filter id="dh-engrave" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
-            <feOffset in="SourceAlpha" dx="1.6" dy="2" result="off" />
-            <feGaussianBlur in="off" stdDeviation="1.3" result="offBlur" />
-            <feComposite in="SourceAlpha" in2="offBlur" operator="out" result="inner" />
-            <feFlood floodColor="#000" floodOpacity="0.9" result="black" />
-            <feComposite in="black" in2="inner" operator="in" result="innerShadow" />
-            <feMerge>
-              <feMergeNode in="SourceGraphic" />
-              <feMergeNode in="innerShadow" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
+    <>
+      <div
+        ref={rootRef}
+        className={`orbit-ring-outer ${className}`}
+        style={{
+          position: 'absolute',
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      >
+        {/* Hidden Inline SVG Filter for Engraved Icon Carving */}
+        <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+          <defs>
+            <filter id="dh-engrave" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+              <feOffset in="SourceAlpha" dx="1.6" dy="2" result="off" />
+              <feGaussianBlur in="off" stdDeviation="1.3" result="offBlur" />
+              <feComposite in="SourceAlpha" in2="offBlur" operator="out" result="inner" />
+              <feFlood floodColor="#000" floodOpacity="0.9" result="black" />
+              <feComposite in="black" in2="inner" operator="in" result="innerShadow" />
+              <feMerge>
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode in="innerShadow" />
+              </feMerge>
+            </filter>
+          </defs>
+        </svg>
 
-      <style>{`
-        /* ── Base / Screens >= 1024px (One Unified Width-Only Formula) ── */
-        .orbit-ring-outer {
-          --R: 37vw;
-          --band: calc(var(--R) * 0.32);
-          --ring-size: calc(2 * var(--R) + var(--band));
-          --badge: calc(var(--R) * 0.21);
-          --orbit-duration: 60s;
-          left: calc(100% + 2.5% - var(--ring-size) / 2) !important;
-          top: calc(100% - var(--ring-size) / 2) !important;
-          width: var(--ring-size) !important;
-          height: var(--ring-size) !important;
-          opacity: 1 !important;
-        }
-        .orbit-trail {
-          display: block !important;
-        }
-
-        /* ── Mobile & Tablet (< 1024px) ───────────────────────────────── */
-        @media (max-width: 1023px) {
+        <style>{`
+          /* ── Base / Screens >= 1024px (One Unified Width-Only Formula) ── */
           .orbit-ring-outer {
-            opacity: 0.35 !important;
+            --R: 37vw;
+            --band: calc(var(--R) * 0.32);
+            --ring-size: calc(2 * var(--R) + var(--band));
+            --badge: calc(var(--R) * 0.21);
+            --orbit-duration: 60s;
+            left: calc(100% + 2.5% - var(--ring-size) / 2) !important;
+            top: calc(100% - var(--ring-size) / 2) !important;
+            width: var(--ring-size) !important;
+            height: var(--ring-size) !important;
+            opacity: 1 !important;
           }
           .orbit-trail {
-            display: none !important;
+            display: block !important;
           }
-        }
 
-        /* ── Spherical Polished Stones (Light Theme) ─────────────────── */
-        .orbit-badge {
-          position: relative;
-          will-change: transform;
-          border-radius: 50%;
-          border: none !important;
-          background: radial-gradient(circle at 32% 26%, #6DB2C4 0%, #2F7C90 24%, #0F4254 56%, #022B3A 82%, #011820 100%);
-          box-shadow:
-            inset -10px -14px 22px rgba(0, 10, 16, 0.55),
-            inset 5px 6px 12px rgba(255, 255, 255, 0.22),
-            inset -3px -4px 6px rgba(120, 220, 235, 0.28),
-            0 2px 4px rgba(2, 43, 58, 0.35);
-        }
+          /* ── Mobile & Tablet (< 1024px) ───────────────────────────────── */
+          @media (max-width: 1023px) {
+            .orbit-ring-outer {
+              opacity: 0.35 !important;
+            }
+            .orbit-trail {
+              display: none !important;
+            }
+          }
 
-        /* Gloss (::before) */
-        .orbit-badge::before {
-          content: "";
-          position: absolute;
-          left: 14%;
-          top: 5%;
-          width: 72%;
-          height: 46%;
-          border-radius: 50%;
-          transform: rotate(-12deg);
-          pointer-events: none;
-          z-index: 20;
-          background: linear-gradient(to bottom, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.05) 70%, rgba(255, 255, 255, 0));
-        }
+          /* ── Stone Matte Ceramic Colors (Single Source of Truth) ────── */
+          :root, .orbit-ring-outer {
+            --dh-stone-1: #34424B;
+            --dh-stone-2: #2B373F;
+            --dh-stone-3: #1E292F;
+            --dh-stone-4: #171F25;
+            --dh-inlay: #2EC4D6;
+            --dh-caption-accent: #1F7A8C;
+          }
 
-        /* Specular (::after) */
-        .orbit-badge::after {
-          content: "";
-          position: absolute;
-          left: 23%;
-          top: 14%;
-          width: 17%;
-          height: 9%;
-          border-radius: 50%;
-          transform: rotate(-32deg);
-          filter: blur(1.5px);
-          pointer-events: none;
-          z-index: 25;
-          background: rgba(255, 255, 255, 0.8);
-        }
+          .dark .orbit-ring-outer, .dark .service-caption, .dark {
+            --dh-stone-1: #E4EAED;
+            --dh-stone-2: #D9E0E4;
+            --dh-stone-3: #C3CDD4;
+            --dh-stone-4: #AEBBC4;
+            --dh-inlay: #17707F;
+            --dh-caption-accent: #2EC4D6;
+          }
 
-        /* Engraved Icon (Light) */
-        .orbit-badge-icon {
-          color: rgba(1, 20, 28, 0.62);
-          stroke: rgba(1, 20, 28, 0.62);
-          filter: url(#dh-engrave) drop-shadow(1px 1.5px 0 rgba(255, 255, 255, 0.30));
-        }
+          /* ── Matte Ceramic Stones (Light Theme - Ink Ceramic) ───────── */
+          .orbit-badge {
+            position: relative;
+            will-change: transform;
+            border-radius: 50%;
+            border: none !important;
+            background: radial-gradient(
+              circle at 36% 30%,
+              var(--dh-stone-1) 0%,
+              var(--dh-stone-2) 38%,
+              var(--dh-stone-3) 72%,
+              var(--dh-stone-4) 100%
+            );
+            box-shadow:
+              inset -8px -12px 20px rgba(0, 0, 0, 0.30),
+              inset 4px 5px 10px rgba(255, 255, 255, 0.06),
+              0 5px 8px rgba(2, 43, 58, 0.30),
+              0 14px 22px rgba(2, 43, 58, 0.18);
+          }
 
-        /* ── Spherical Polished Stones (Dark Theme) ──────────────────── */
-        .dark .orbit-badge {
-          border: none !important;
-          background: radial-gradient(circle at 32% 26%, #4C8FA3 0%, #1F5568 24%, #0E2E3C 54%, #07161F 82%, #030A0F 100%) !important;
-          box-shadow:
-            inset -10px -14px 22px rgba(0, 0, 0, 0.65),
-            inset 5px 6px 12px rgba(255, 255, 255, 0.14),
-            inset -3px -4px 8px rgba(46, 196, 214, 0.30),
-            0 0 28px rgba(46, 196, 214, 0.10) !important;
-        }
+          /* ── Matte Ceramic Stones (Dark Theme - Soft Porcelain) ─────── */
+          .dark .orbit-badge {
+            border: none !important;
+            background: radial-gradient(
+              circle at 36% 30%,
+              var(--dh-stone-1) 0%,
+              var(--dh-stone-2) 38%,
+              var(--dh-stone-3) 72%,
+              var(--dh-stone-4) 100%
+            ) !important;
+            box-shadow:
+              inset -8px -12px 20px rgba(30, 45, 58, 0.28),
+              inset 4px 5px 10px rgba(255, 255, 255, 0.35),
+              0 5px 8px rgba(0, 0, 0, 0.5),
+              0 14px 22px rgba(0, 0, 0, 0.4) !important;
+          }
 
-        .dark .orbit-badge::before {
-          background: linear-gradient(to bottom, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.04) 70%, rgba(255, 255, 255, 0)) !important;
-        }
+          /* Active / Focused stone ring: 2px solid var(--dh-caption-accent) with 4px offset */
+          .orbit-badge:focus-visible,
+          .orbit-badge.is-active {
+            outline: 2px solid var(--dh-caption-accent);
+            outline-offset: 4px;
+          }
 
-        .dark .orbit-badge::after {
-          background: rgba(255, 255, 255, 0.65) !important;
-        }
+          /* Stone "seat" faint shadow in groove floor */
+          .orbit-stone-seat {
+            background: rgba(2, 43, 58, 0.28);
+          }
+          .dark .orbit-stone-seat {
+            background: rgba(0, 0, 0, 0.50) !important;
+          }
 
-        /* Engraved Icon (Dark) */
-        .dark .orbit-badge-icon {
-          color: #03121A !important;
-          stroke: #03121A !important;
-          filter: url(#dh-engrave) drop-shadow(1px 1.5px 0 rgba(46, 196, 214, 0.50)) !important;
-        }
+          /* Stacked Icons: (a) Groove (bottom) */
+          .orbit-icon-groove {
+            color: rgba(0, 0, 0, 0.45);
+            stroke: rgba(0, 0, 0, 0.45);
+          }
+          .dark .orbit-icon-groove {
+            color: rgba(30, 45, 58, 0.40) !important;
+            stroke: rgba(30, 45, 58, 0.40) !important;
+          }
 
-        /* Contact Shadow: child element INSIDE the stone */
-        .orbit-contact-shadow {
-          position: absolute;
-          left: 10%;
-          top: 80%;
-          width: 82%;
-          height: 28%;
-          border-radius: 50%;
-          filter: blur(10px);
-          z-index: -1;
-          transform: translate(12%, 14%);
-          background: rgba(2, 43, 58, 0.45);
-        }
-        .dark .orbit-contact-shadow {
-          background: rgba(0, 0, 0, 0.55) !important;
-        }
+          /* Stacked Icons: (b) Inlay (top) */
+          .orbit-icon-inlay {
+            color: var(--dh-inlay);
+            stroke: var(--dh-inlay);
+            filter: url(#dh-engrave) drop-shadow(1px 1.5px 0 rgba(255, 255, 255, 0.14));
+          }
+          .dark .orbit-icon-inlay {
+            color: var(--dh-inlay) !important;
+            stroke: var(--dh-inlay) !important;
+            filter: url(#dh-engrave) drop-shadow(1px 1.5px 0 rgba(255, 255, 255, 0.55)) !important;
+          }
 
-        /* ── Tail Themes ─────────────────────────────────────────────── */
-        .orbit-trail {
-          background: linear-gradient(to left, rgba(31, 122, 140, 0.45), rgba(31, 122, 140, 0));
-        }
-        .dark .orbit-trail {
-          background: linear-gradient(to left, rgba(46, 196, 214, 0.40), rgba(46, 196, 214, 0)) !important;
-        }
-      `}</style>
+          /* ── Velocity Motion Tails ───────────────────────────────────── */
+          .orbit-trail {
+            background: linear-gradient(to left, rgba(23, 31, 37, 0.32), rgba(23, 31, 37, 0));
+          }
+          .dark .orbit-trail {
+            background: linear-gradient(to left, rgba(217, 224, 228, 0.30), rgba(217, 224, 228, 0)) !important;
+          }
 
-      <div className="relative w-full h-full select-none">
-        {/* ── A) BAND LAYER (ONLY this element gets mask-image fades) ──────── */}
-        {/* Left-edge fade (0% to 15%) AND top-edge fade (0% to 12%) via nested mask containers */}
-        <div
-          className="orbit-band-wrapper absolute inset-0 pointer-events-none"
-          style={{
-            maskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
-          }}
-        >
+          /* ── Editorial Service Caption Styling ───────────────────────── */
+          .service-caption {
+            --R: 37vw;
+          }
+          @media (max-width: 1365px) {
+            .service-caption-built-for {
+              display: none !important;
+            }
+          }
+          @media (max-width: 1023px) {
+            .service-caption {
+              display: none !important;
+            }
+          }
+        `}</style>
+
+        <div className="relative w-full h-full select-none">
+          {/* ── A) BAND LAYER: CLEAN RECESSED GROOVE (ONLY this element gets mask-image fades) ── */}
+          {/* Left-edge fade (0% to 15%) AND top-edge fade (0% to 12%) via nested mask containers */}
           <div
-            className="orbit-band-inner absolute inset-0 pointer-events-none"
+            className="orbit-band-wrapper absolute inset-0 pointer-events-none"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
+              maskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%)',
             }}
           >
-            <svg
-              className="w-full h-full"
-              viewBox="0 0 1000 1000"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+            <div
+              className="orbit-band-inner absolute inset-0 pointer-events-none"
+              style={{
+                maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%)',
+              }}
             >
-              <defs>
-                {/* 
-                  LIGHT: radial gradient across band thickness (r=362.07 to r=500),
-                  outer edge rgba(2,43,58,0.10) to inner edge rgba(2,43,58,0.03).
-                */}
-                <radialGradient
-                  id="bandRadGradLight"
+              <svg
+                className="w-full h-full"
+                viewBox="0 0 1000 1000"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  {/* 
+                    LIGHT: Recessed groove radialGradient
+                    outer = 1.0 (r=500), centerline = 0.862 (r=431), inner edge = 0.724 (r=362)
+                  */}
+                  <radialGradient
+                    id="grooveGradLight"
+                    cx="0.5"
+                    cy="0.5"
+                    r="0.5"
+                    gradientUnits="objectBoundingBox"
+                  >
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="71.8%" stopColor="rgba(255, 255, 255, 0)" />
+                    <stop offset="72.4%" stopColor="rgba(255, 255, 255, 0.95)" />
+                    <stop offset="73.3%" stopColor="rgba(255, 255, 255, 0.40)" />
+                    <stop offset="74.5%" stopColor="rgba(2, 43, 58, 0.075)" />
+                    <stop offset="93.5%" stopColor="rgba(2, 43, 58, 0.15)" />
+                    <stop offset="98.5%" stopColor="rgba(2, 43, 58, 0.30)" />
+                    <stop offset="99.5%" stopColor="rgba(2, 43, 58, 0)" />
+                    <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+                  </radialGradient>
+
+                  {/* 
+                    DARK: Recessed groove radialGradient
+                    outer = 1.0 (r=500), centerline = 0.862 (r=431), inner edge = 0.724 (r=362)
+                  */}
+                  <radialGradient
+                    id="grooveGradDark"
+                    cx="0.5"
+                    cy="0.5"
+                    r="0.5"
+                    gradientUnits="objectBoundingBox"
+                  >
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="71.8%" stopColor="rgba(255, 255, 255, 0)" />
+                    <stop offset="72.4%" stopColor="rgba(255, 255, 255, 0.16)" />
+                    <stop offset="73.3%" stopColor="rgba(255, 255, 255, 0.08)" />
+                    <stop offset="74.5%" stopColor="rgba(0, 0, 0, 0.20)" />
+                    <stop offset="93.5%" stopColor="rgba(0, 0, 0, 0.38)" />
+                    <stop offset="98.5%" stopColor="rgba(0, 0, 0, 0.55)" />
+                    <stop offset="99.5%" stopColor="rgba(0, 0, 0, 0)" />
+                    <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+                  </radialGradient>
+                </defs>
+
+                {/* 1. Single SVG Circle Filled with Recessed Groove Gradient (r=500 at cx=500, cy=500) */}
+                <circle
                   cx="500"
                   cy="500"
                   r="500"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop offset="0%" stopColor="rgba(2, 43, 58, 0.03)" />
-                  <stop offset="72%" stopColor="rgba(2, 43, 58, 0.03)" />
-                  <stop offset="100%" stopColor="rgba(2, 43, 58, 0.10)" />
-                </radialGradient>
-
-                {/* 
-                  DARK: radial gradient across band thickness (r=362.07 to r=500),
-                  outer edge rgba(255,255,255,0.07) to inner edge rgba(255,255,255,0.02).
-                  Clearly defined and visible in dark mode.
-                */}
-                <radialGradient
-                  id="bandRadGradDark"
+                  fill="url(#grooveGradLight)"
+                  className="dark:hidden"
+                />
+                <circle
                   cx="500"
                   cy="500"
                   r="500"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop offset="0%" stopColor="rgba(255, 255, 255, 0.02)" />
-                  <stop offset="72%" stopColor="rgba(255, 255, 255, 0.02)" />
-                  <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
-                </radialGradient>
-              </defs>
+                  fill="url(#grooveGradDark)"
+                  className="hidden dark:block"
+                />
 
-              {/* 1. Recessed Track Fill (Centerline r=431.03, strokeWidth=137.93: inner 362.07, outer 500) */}
-              <circle
-                cx="500"
-                cy="500"
-                r="431.03"
-                stroke="url(#bandRadGradLight)"
-                strokeWidth="137.93"
-                fill="none"
-                className="dark:hidden"
-              />
-              <circle
-                cx="500"
-                cy="500"
-                r="431.03"
-                stroke="url(#bandRadGradDark)"
-                strokeWidth="137.93"
-                fill="none"
-                className="hidden dark:block"
-              />
+                {/* 2. 1px Crisp Edge on the Outer Rim (r=500) */}
+                <circle
+                  cx="500"
+                  cy="500"
+                  r="500"
+                  stroke="rgba(2, 43, 58, 0.18)"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                  fill="none"
+                  className="dark:hidden"
+                />
+                <circle
+                  cx="500"
+                  cy="500"
+                  r="500"
+                  stroke="rgba(255, 255, 255, 0.07)"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                  fill="none"
+                  className="hidden dark:block"
+                />
+              </svg>
+            </div>
+          </div>
 
-              {/* 2. Soft Inner Groove Shadows (giving depth to the recessed track) */}
-              <circle
-                cx="500"
-                cy="500"
-                r="364"
-                stroke="rgba(2, 43, 58, 0.08)"
-                strokeWidth="3"
-                fill="none"
-                className="dark:hidden"
+          {/* ── B) ROTATING LAYER (motion.div, NOT masked, z-index above band) ── */}
+          <motion.div
+            style={{ rotate: ringRotation }}
+            className="orbit-rotating-layer absolute inset-0 pointer-events-none z-10 will-change-transform"
+          >
+            {ORBIT_SERVICES.map((service, idx) => (
+              <OrbitArm
+                key={service.id}
+                service={service}
+                idx={idx}
+                stepDeg={stepDeg}
+                ringRotation={ringRotation}
+                tailOpacity={tailOpacity}
+                tailScaleSigned={tailScaleSigned}
+                isActive={idx === activeIndex}
               />
-              <circle
-                cx="500"
-                cy="500"
-                r="364"
-                stroke="rgba(0, 0, 0, 0.55)"
-                strokeWidth="3"
-                fill="none"
-                className="hidden dark:block"
-              />
-              <circle
-                cx="500"
-                cy="500"
-                r="498"
-                stroke="rgba(2, 43, 58, 0.05)"
-                strokeWidth="3"
-                fill="none"
-                className="dark:hidden"
-              />
-              <circle
-                cx="500"
-                cy="500"
-                r="498"
-                stroke="rgba(0, 0, 0, 0.35)"
-                strokeWidth="3"
-                fill="none"
-                className="hidden dark:block"
-              />
+            ))}
+          </motion.div>
+        </div>
+      </div>
 
-              {/* 3. Dashed Center Guide Line (12% opacity of edge line color, stroke-dasharray 5 7) */}
-              <circle
-                cx="500"
-                cy="500"
-                r="431.03"
-                stroke="var(--border-subtle)"
-                strokeOpacity="0.12"
-                strokeWidth="1"
-                strokeDasharray="5 7"
-                vectorEffect="non-scaling-stroke"
-                fill="none"
-              />
+      {/* ── C) SERVICE CAPTION IN THE HOLLOW OF THE ARC (lg and up only) ───── */}
+      <div
+        className="service-caption hidden lg:block"
+        aria-live="off"
+        style={{
+          position: 'absolute',
+          right: '3.5%',
+          bottom: '5%',
+          width: 'max(240px, calc(var(--R) * 0.38))',
+          zIndex: 5,
+          pointerEvents: 'none',
+          opacity: isFastScroll ? 0.35 : 1,
+          transition: 'opacity 200ms ease',
+        }}
+      >
+        {/* Editorial container: 2px vertical rule in unified accent color with 18px padding */}
+        <div
+          className="service-caption-inner relative"
+          style={{
+            borderLeft: '2px solid var(--dh-caption-accent)',
+            paddingLeft: '18px',
+          }}
+        >
+          {/* Animated content crossfade: 180ms exit, 450ms enter + translateY */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={displayedService.id}
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={
+                shouldReduceMotion
+                  ? { opacity: 1, y: 0 }
+                  : {
+                      opacity: 0,
+                      transition: { duration: 0.18, ease: 'easeIn' },
+                    }
+              }
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : {
+                      opacity: { duration: 0.45, ease: 'easeOut' },
+                      y: { duration: 0.45, ease: 'easeOut' },
+                    }
+              }
+            >
+              {/* Row 1: "0N / 08" */}
+              <div className="font-mono text-[12px] tracking-[0.12em] text-[var(--text-muted)] select-none tabular-nums mb-1">
+                {displayedService.numStr} / 08
+              </div>
 
-              {/* 4. 1px Outer Edge Line (r=500): light var(--border-subtle) / dark rgba(255,255,255,0.08) */}
-              <circle
-                cx="500"
-                cy="500"
-                r="500"
-                stroke="var(--border-subtle)"
-                strokeWidth="1"
-                vectorEffect="non-scaling-stroke"
-                fill="none"
-              />
+              {/* Row 2: Service Name */}
+              <h3
+                className="font-display font-semibold text-[var(--text-heading)] leading-tight mb-1.5"
+                style={{
+                  fontSize: 'max(20px, calc(var(--R) * 0.032))',
+                }}
+              >
+                {t(displayedService.nameKey) || displayedService.defaultName}
+              </h3>
 
-              {/* 5. 1px Inner Edge Line (r=362.07): light var(--border-subtle) / dark rgba(255,255,255,0.08) */}
-              <circle
-                cx="500"
-                cy="500"
-                r="362.07"
-                stroke="var(--border-subtle)"
-                strokeWidth="1"
-                vectorEffect="non-scaling-stroke"
-                fill="none"
-              />
-            </svg>
+              {/* Row 3: Outcome (max 2 lines) */}
+              <p
+                className="text-[var(--text-muted)] line-clamp-2 mb-2.5"
+                style={{
+                  fontSize: 'max(13px, calc(var(--R) * 0.019))',
+                  lineHeight: 1.5,
+                }}
+              >
+                {t(displayedService.outcomeKey) || displayedService.defaultOutcome}
+              </p>
+
+              {/* Row 4: "BUILT FOR" + Audience (Hidden below 1366px) */}
+              <div className="service-caption-built-for text-xs text-[var(--text-muted)] mb-3">
+                <span className="text-[11px] uppercase tracking-[0.12em] font-semibold opacity-75 mr-1.5">
+                  {t('service_caption_built_for') || 'BUILT FOR'}:
+                </span>
+                <span className="text-[13px] text-[var(--text-body)]">
+                  {t(displayedService.audienceKey) || displayedService.defaultAudience}
+                </span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Row 5: 8 dots (6px) with 18px active pill; colors switch instantly */}
+          <div className="flex items-center gap-1.5 pt-1" aria-hidden="true">
+            {ORBIT_SERVICES.map((s, i) => {
+              const isDotActive = i === displayedIndex;
+              return (
+                <div
+                  key={s.id}
+                  className="transition-all duration-200 rounded-full"
+                  style={{
+                    width: isDotActive ? '18px' : '6px',
+                    height: '6px',
+                    backgroundColor: isDotActive ? 'var(--dh-caption-accent)' : 'var(--text-muted)',
+                    opacity: isDotActive ? 1 : 0.35,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
-        {/* ── B) ROTATING LAYER (motion.div, NOT masked, z-index above band) ── */}
-        <motion.div
-          style={{ rotate: ringRotation }}
-          className="orbit-rotating-layer absolute inset-0 pointer-events-none z-10 will-change-transform"
-        >
-          {ORBIT_SERVICES.map((service, idx) => (
-            <OrbitArm
-              key={service.id}
-              service={service}
-              idx={idx}
-              stepDeg={stepDeg}
-              ringRotation={ringRotation}
-              tailOpacity={tailOpacity}
-              tailScaleSigned={tailScaleSigned}
-            />
+        {/* Screen Reader accessible list of all 8 services */}
+        <ul className="sr-only">
+          {ORBIT_SERVICES.map((s) => (
+            <li key={s.id}>
+              <h4>{t(s.nameKey) || s.defaultName}</h4>
+              <p>{t(s.outcomeKey) || s.defaultOutcome}</p>
+              <p>
+                {(t('service_caption_built_for') || 'Built for') +
+                  ': ' +
+                  (t(s.audienceKey) || s.defaultAudience)}
+              </p>
+            </li>
           ))}
-        </motion.div>
+        </ul>
       </div>
-    </div>
+    </>
   );
 };
