@@ -411,9 +411,9 @@ export const Home: React.FC = () => {
               {/* 1. Headline: 2 spans */}
               <motion.h1
                 variants={itemVariants}
-                className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0"
+                className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0 w-fit"
                 style={{
-                  fontSize: 'clamp(2.75rem, 4.6vw, 5.5rem)',
+                  fontSize: 'clamp(2.75rem, 4.2vw, 4.9rem)',
                   lineHeight: 1.05,
                   letterSpacing: '-0.03em',
                 }}
@@ -444,7 +444,7 @@ export const Home: React.FC = () => {
               {/* 3. Buttons: margin-top 40px, gap 14px, both 56px high, px 28px, rounded 14px */}
               <motion.div
                 variants={itemVariants}
-                className="flex items-center gap-[14px] mt-[40px]"
+                className="flex items-center gap-[14px] mt-[40px] w-fit"
               >
                 {/* Primary Button */}
                 <Link
