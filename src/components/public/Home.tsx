@@ -32,6 +32,7 @@ import { ServiceCard } from '../ui/ServiceCard';
 import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
 import { OrbitRing } from '../ui/OrbitRing';
+import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { Project, getProjectLiveUrl, PROJECTS } from './Work';
@@ -352,12 +353,12 @@ export const Home: React.FC = () => {
       <div
         ref={runwayRef}
         className="hero-runway relative"
-        style={{ height: 'calc(100vh + var(--hero-runway, 200vh))' }}
+        style={{ height: 'calc(100vh + var(--hero-runway, 120vh))' }}
       >
         <style>{`
           @media (min-width: 1024px) {
             .hero-runway {
-              --hero-runway: 200vh;
+              --hero-runway: 120vh;
               height: calc(100vh + var(--hero-runway)) !important;
             }
           }
@@ -382,7 +383,7 @@ export const Home: React.FC = () => {
         <section
           ref={heroRef}
           data-hero="true"
-          className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 border-b border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-page)]"
+          className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 flex flex-col lg:block border-b border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-page)]"
         >
           {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
           <HeroWaves />
@@ -390,31 +391,31 @@ export const Home: React.FC = () => {
           {/* Ambient celestial glow for depth */}
           <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-          {/* OrbitRing: bottom-right quarter arc pinned orbital hero visual */}
-          <OrbitRing runwayRef={runwayRef} containerRef={heroRef} />
-
           {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
-          {/* On lg: 100% height grid anchored to bottom-left with exact 56px bottom margin */}
-          {/* On mobile: standard vertical flow with top and bottom breathing room */}
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-12 lg:p-0 lg:h-full lg:grid lg:grid-rows-[1fr] lg:pt-16 lg:pb-[56px] pointer-events-none">
+          <div className="order-1 max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none">
             
-            {/* ── DESKTOP LAYOUT (lg and up): Diagonal bottom-left composition ── */}
+            {/* ── DESKTOP LAYOUT (lg and up) ── */}
             <motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               data-hero-desktop="true"
-              className="hidden lg:block lg:self-end pointer-events-auto"
-              style={{ width: 'min(52vw, 60rem)' }}
+              className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
+              style={{
+                width: 'min(44vw, 48rem)',
+                minHeight: 'calc(100vh - 64px)',
+                marginTop: '64px',
+                transform: 'translateY(-2vh)',
+              }}
             >
-              {/* 1. Headline: 2 block-level spans, span 2 has max-width: 8.4em and text-wrap: balance */}
+              {/* 1. Headline: 2 spans */}
               <motion.h1
                 variants={itemVariants}
                 className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0"
                 style={{
-                  fontSize: 'clamp(2.75rem, 5.2vw, 6rem)',
-                  lineHeight: 1.04,
-                  letterSpacing: '-0.035em',
+                  fontSize: 'clamp(2.75rem, 4.6vw, 5.5rem)',
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.03em',
                 }}
               >
                 <span className="block w-fit text-[var(--text-heading)]">
@@ -428,61 +429,43 @@ export const Home: React.FC = () => {
                 </span>
               </motion.h1>
 
-              {/* 2. Full-width 1px hairline rule below headline */}
-              <motion.div
+              {/* 2. Paragraph */}
+              <motion.p
                 variants={itemVariants}
-                className="w-full h-px bg-[var(--dh-border)]"
-                style={{ marginTop: 'clamp(24px, 3.4vh, 40px)' }}
-              />
-
-              {/* 3. Footer Row: Paragraph (left) + Actions (right) */}
-              <div
-                className="grid grid-cols-[minmax(0,27rem)_auto] items-end"
+                className="text-[var(--text-muted)] m-0 mt-[28px] max-w-[34rem]"
                 style={{
-                  columnGap: 'clamp(32px, 5vw, 80px)',
-                  marginTop: 'clamp(20px, 3vh, 32px)',
+                  fontSize: 'clamp(1rem, 1.1vw, 1.25rem)',
+                  lineHeight: 1.65,
                 }}
               >
-                {/* Left cell: Paragraph */}
-                <motion.p
-                  variants={itemVariants}
-                  className="text-[var(--text-muted)] m-0"
-                  style={{
-                    fontSize: 'clamp(1rem, 1.05vw, 1.2rem)',
-                    lineHeight: 1.65,
-                    maxWidth: '27rem',
-                  }}
-                >
-                  {hero?.subheadline || t('hero_sub')}
-                </motion.p>
+                {hero?.subheadline || t('hero_sub')}
+              </motion.p>
 
-                {/* Right cell: Actions (Primary button + Explore Squads text link) */}
-                <motion.div
-                  variants={itemVariants}
-                  className="flex flex-col items-start gap-[18px]"
+              {/* 3. Buttons: margin-top 40px, gap 14px, both 56px high, px 28px, rounded 14px */}
+              <motion.div
+                variants={itemVariants}
+                className="flex items-center gap-[14px] mt-[40px]"
+              >
+                {/* Primary Button */}
+                <Link
+                  to="/contact"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none whitespace-nowrap shadow-none"
                 >
-                  {/* a) Primary button: Start a Project */}
-                  <Link
-                    to="/contact"
-                    className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none whitespace-nowrap"
-                  >
-                    <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
 
-                  {/* b) Secondary: Explore Squads text link (NOT a button) */}
-                  <Link
-                    to="/services"
-                    className="group inline-flex items-center gap-2 font-semibold text-sm sm:text-base text-[var(--text-heading)] underline decoration-1 underline-offset-[6px] decoration-[var(--border-hover)] hover:decoration-[var(--brand-teal)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-teal)] select-none whitespace-nowrap"
-                  >
-                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
-                    <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-                  </Link>
-                </motion.div>
-              </div>
+                {/* Secondary Button */}
+                <Link
+                  to="/services"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-base bg-transparent border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] hover:bg-[var(--dh-surface-alt)] transition-colors select-none whitespace-nowrap shadow-none"
+                >
+                  <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                </Link>
+              </motion.div>
             </motion.div>
 
-            {/* ── MOBILE LAYOUT (< 1024px): Preserved existing mobile layout ── */}
+            {/* ── MOBILE LAYOUT (< 1024px) ── */}
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -493,8 +476,8 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.14] tracking-tight mb-4"
               >
-                {hero?.headlineLine1 || t('hero_headline_1')}<br />
-                <span className="text-[var(--brand-teal-text)]">
+                <span className="block">{hero?.headlineLine1 || t('hero_headline_1')}</span>
+                <span className="block text-[var(--brand-teal-text)]">
                   {hero?.headlineHighlight || hero?.headlineLine2 || t('hero_headline_2')}
                 </span>
               </motion.h1>
@@ -512,20 +495,25 @@ export const Home: React.FC = () => {
               >
                 <Link
                   to="/contact"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none shadow-none"
                 >
                   <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/services"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-transparent hover:bg-[var(--dh-surface-alt)] border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] transition-colors select-none"
+                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-transparent border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] hover:bg-[var(--dh-surface-alt)] transition-colors select-none shadow-none"
                 >
                   <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
                 </Link>
               </motion.div>
             </motion.div>
 
+          </div>
+
+          {/* HeroMediaColumns: order-2 on mobile (below text), absolute on desktop */}
+          <div className="order-2 w-full lg:w-auto relative lg:static z-10 px-6 lg:px-0 pb-12 lg:pb-0 pointer-events-none">
+            <HeroMediaColumns heroRef={heroRef} runwayRef={runwayRef} />
           </div>
         </section>
       </div>
