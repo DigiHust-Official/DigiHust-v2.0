@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { ThemeRadio } from '../ui/ThemeRadio';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
+import { TRANSLATIONS } from '../../lib/i18n';
 import logoImg from '../../assets/logo.png';
-
 import { PortalNavbar } from '../portal/PortalNavbar';
+
+// Register fallback key for Contact Us if not present
+if (!TRANSLATIONS.en['nav.contactUs']) {
+  TRANSLATIONS.en['nav.contactUs'] = 'Contact Us';
+}
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -27,6 +32,7 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Retain all section links in order; Contact is removed because Contact Us is the primary CTA
   const navLinks = [
     { label: t('nav_services'), href: '/services' },
     { label: t('nav_work'), href: '/portfolio' },
@@ -35,7 +41,6 @@ export const Navbar: React.FC = () => {
     { label: t('nav_team'), href: '/team' },
     { label: t('nav_blog'), href: '/blog' },
     { label: 'Careers', href: '/careers' },
-    { label: t('nav_contact'), href: '/contact' },
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -87,7 +92,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`relative group px-2.5 xl:px-4 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-colors duration-200 whitespace-nowrap outline-none focus-visible:text-[var(--brand-teal)] ${
+                className={`relative group px-2 xl:px-3.5 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-colors duration-200 whitespace-nowrap outline-none focus-visible:text-[var(--brand-teal)] ${
                   active ? 'text-[var(--brand-teal)] dark:text-cyan-300 font-bold' : 'text-[var(--text-body)] hover:text-[var(--brand-teal)] dark:hover:text-cyan-300'
                 }`}
               >
@@ -110,24 +115,24 @@ export const Navbar: React.FC = () => {
           })}
         </div>
 
-        {/* CTA, Language & Theme Controls (Desktop) */}
-        <div className="hidden lg:flex items-center space-x-3">
-          <LanguageSelector />
-          <ThemeToggle />
+        {/* Desktop Right-Hand Controls: ThemeRadio, LanguageSelector, Contact Us */}
+        <div className="hidden lg:flex items-center space-x-2">
+          <ThemeRadio />
+          <LanguageSelector dropdownAlign="right" />
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Link
               to="/contact"
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold shadow-md transition-all border border-[#1F7A8C]/40 dark:border-cyan-400/40"
+              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold shadow-md transition-all border border-[#1F7A8C]/40 dark:border-cyan-400/40 select-none whitespace-nowrap"
             >
-              <span>{t('btn_get_quote')}</span>
+              <span>{t('nav.contactUs')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
         </div>
 
-        {/* Mobile Action Bar: Theme Toggle pulled out + Menu Trigger */}
+        {/* Mobile Action Bar: ThemeRadio + Menu Trigger */}
         <div className="flex items-center space-x-2 lg:hidden">
-          <ThemeToggle />
+          <ThemeRadio />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-xl text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
@@ -164,18 +169,21 @@ export const Navbar: React.FC = () => {
                 {link.label}
               </Link>
             ))}
+            {/* Preferences row: ThemeRadio + LanguageSelector */}
             <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-[var(--border-subtle)]">
               <span className="text-xs font-bold text-[var(--text-muted)]">{t('preferences')}</span>
               <div className="flex items-center space-x-2">
-                <LanguageSelector />
+                <ThemeRadio />
+                <LanguageSelector dropdownAlign="left" />
               </div>
             </div>
+            {/* Contact Us button at the bottom */}
             <Link
               to="/contact"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center space-x-2 px-4 py-3.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold mt-3 shadow-md border border-[#1F7A8C]/40 dark:border-cyan-400/40"
+              className="flex items-center justify-center space-x-2 px-4 py-3.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold mt-3 shadow-md border border-[#1F7A8C]/40 dark:border-cyan-400/40 select-none"
             >
-              <span>{t('btn_get_quote')}</span>
+              <span>{t('nav.contactUs')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>

@@ -31,6 +31,7 @@ import { HeroWaves } from '../ui/HeroWaves';
 import { ServiceCard } from '../ui/ServiceCard';
 import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
+import { GlowCtaButton } from '../ui/GlowCtaButton';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { useLanguage } from '../../context/LanguageContext';
@@ -446,14 +447,11 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="flex items-center gap-[14px] mt-[40px] w-fit"
               >
-                {/* Primary Button */}
-                <Link
+                {/* Primary Button: GlowCtaButton */}
+                <GlowCtaButton
                   to="/contact"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none whitespace-nowrap shadow-none"
-                >
-                  <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                  label={hero?.ctaPrimaryText || t('btn_scoped_quote')}
+                />
 
                 {/* Secondary Button */}
                 <Link
@@ -493,13 +491,11 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
               >
-                <Link
+                <GlowCtaButton
                   to="/contact"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-[var(--dh-primary)] hover:bg-[var(--dh-primary-hover)] text-[var(--dh-primary-contrast)] transition-colors select-none shadow-none"
-                >
-                  <span>{hero?.ctaPrimaryText || t('btn_scoped_quote')}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                  label={hero?.ctaPrimaryText || t('btn_scoped_quote')}
+                  className="w-full sm:w-auto"
+                />
                 <Link
                   to="/services"
                   className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-transparent border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] hover:bg-[var(--dh-surface-alt)] transition-colors select-none shadow-none"

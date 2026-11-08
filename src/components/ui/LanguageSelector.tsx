@@ -48,7 +48,10 @@ export const FlagIcon: React.FC<{ code: string; className?: string }> = ({ code,
   }
 };
 
-export const LanguageSelector: React.FC = () => {
+export const LanguageSelector: React.FC<{ className?: string; dropdownAlign?: 'left' | 'right' }> = ({
+  className = '',
+  dropdownAlign = 'right',
+}) => {
   const { language, setLanguage, activeOption } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -59,49 +62,69 @@ export const LanguageSelector: React.FC = () => {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative inline-block ${className}`} ref={dropdownRef}>
+      {/* Trigger: icon-only, 36x36, border-radius 999px, 18px Languages icon, strokeWidth 1.75 */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--brand-teal)] text-xs font-bold text-[var(--text-heading)] transition-all duration-150 shadow-sm cursor-pointer select-none group"
-        aria-label={`Current language: ${activeOption.label}. Click to switch.`}
+        aria-label="Language"
+        title={activeOption?.label || 'Language'}
         aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className="w-[36px] h-[36px] rounded-full flex items-center justify-center border-none bg-transparent hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--brand-teal)] select-none"
       >
-        <FlagIcon code={activeOption.code} />
-        <span className="uppercase text-[11px] font-extrabold tracking-wide">{activeOption.code}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-150 ${isOpen ? 'rotate-180 text-[var(--brand-teal)]' : ''}`} />
+        <Languages className="w-[18px] h-[18px]" strokeWidth={1.75} aria-hidden="true" />
       </button>
 
+      {/* Dropdown: bg-surface, border-subtle, radius 12px, 14px items, check icon */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="px-2.5 py-1.5 text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider border-b border-[var(--border-subtle)] mb-1 flex items-center gap-1.5">
-            <Languages className="w-3.5 h-3.5 text-[var(--brand-teal)]" />
-            <span>Select Language</span>
-          </div>
-          {LANGUAGES.map((lang: LanguageOption) => (
-            <button
-              key={lang.code}
-              onClick={() => {
-                setLanguage(lang.code);
-                setIsOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                lang.code === language
-                  ? 'bg-[var(--brand-teal)] text-white font-bold shadow-sm'
-                  : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)]'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <FlagIcon code={lang.code} className="w-4 h-3" />
+        <div
+          role="listbox"
+          aria-label="Select Language"
+          className={`absolute ${
+            dropdownAlign === 'right' ? 'right-0' : 'left-0'
+          } mt-2 w-48 rounded-[12px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150`}
+        >
+          {LANGUAGES.map((lang: LanguageOption) => {
+            const isSelected = lang.code === language;
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  setLanguage(lang.code);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] font-medium transition-colors cursor-pointer border-none text-left select-none outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] ${
+                  isSelected
+                    ? 'bg-[var(--brand-teal-subtle)] text-[var(--brand-teal-text)] font-semibold'
+                    : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)]'
+                }`}
+              >
                 <span>{lang.label}</span>
-              </div>
-              {lang.code === language && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-            </button>
-          ))}
+                {isSelected && (
+                  <Check className="w-4 h-4 text-[var(--brand-teal)] shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
