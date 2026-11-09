@@ -468,19 +468,19 @@ export const Home: React.FC = () => {
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_1') || 'Milestone guarantee'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_2') || 'Verified specialists'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_3') || 'Proposal in 24h'}
                   </span>
                 </div>
@@ -527,19 +527,19 @@ export const Home: React.FC = () => {
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_1') || 'Milestone guarantee'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_2') || 'Verified specialists'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                  <span className="text-[13px] font-semibold text-[var(--text-muted)]">
                     {t('hero_v6_trust_3') || 'Proposal in 24h'}
                   </span>
                 </div>

@@ -15,11 +15,11 @@
   grid-template-rows: 1fr;
   margin: 0;
   padding: 0;
-  font-family: inherit;
-  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: clamp(2.5rem, min(5.4vw, 11vh), 6rem);
   line-height: 1.02;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
   color: var(--text-heading);
 }
 
@@ -90,8 +90,9 @@
   padding: 0;
   margin-top: clamp(14px, 2.4vh, 24px);
   max-width: 30rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: clamp(1.05rem, min(1.5vw, 3.2vh), 1.5rem);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
   color: var(--text-body);
   text-wrap: pretty;
