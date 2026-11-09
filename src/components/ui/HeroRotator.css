@@ -17,7 +17,7 @@
   padding: 0;
   font-family: 'Outfit', sans-serif;
   font-weight: 900;
-  font-size: clamp(2.5rem, min(5.4vw, 11vh), 6rem);
+  font-size: clamp(2.5rem, min(5.75vw, 11.8vh), 6.45rem);
   line-height: 1.02;
   letter-spacing: -0.03em;
   color: var(--text-heading);
@@ -89,9 +89,9 @@
   margin: 0;
   padding: 0;
   margin-top: clamp(14px, 2.4vh, 24px);
-  max-width: 30rem;
+  max-width: 36rem;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(1.05rem, min(1.5vw, 3.2vh), 1.5rem);
+  font-size: clamp(1.1rem, min(1.58vw, 3.36vh), 1.58rem);
   font-weight: 600;
   line-height: 1.4;
   color: var(--text-body);

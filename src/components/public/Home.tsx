@@ -425,7 +425,7 @@ export const Home: React.FC = () => {
               data-hero-desktop="true"
               className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
               style={{
-                width: 'min(54vw, 62rem)',
+                width: 'min(56vw, 64rem)',
                 minHeight: 'calc(100vh - var(--dh-nav-bottom, 72px))',
                 paddingTop: 'calc(var(--dh-nav-bottom, 72px) + clamp(28px, 5vh, 56px))',
                 paddingBottom: 'clamp(24px, 4.5vh, 48px)',
