@@ -64,42 +64,47 @@ const FrameCard: React.FC<FrameCardProps> = ({
   const displayLabel = localizedLabel || frame.label;
   const railLabel = frame.shortLabel || displayLabel;
 
-  // Rank: 1 to 8 based on position in HERO_FRAMES
-  const rank = HERO_FRAMES.findIndex((f) => f.id === frame.id) + 1;
-
-  // Render upright stacked letters (Joker playing-card style)
-  const renderStackedLetters = () => {
+  // Render upright stacked letters + bold icon (Joker playing-card rail style)
+  const renderRailGroup = () => {
     const chars = Array.from((railLabel || '').toUpperCase());
     const len = chars.length;
     const sizeModifier =
       len >= 12
-        ? 'dh-card-stacked-label--sm'
+        ? 'dh-card-rail-group--sm'
         : len >= 8
-        ? 'dh-card-stacked-label--md'
-        : 'dh-card-stacked-label--lg';
+        ? 'dh-card-rail-group--md'
+        : 'dh-card-rail-group--lg';
 
     return (
-      <div className={`dh-card-stacked-label ${sizeModifier}`} aria-hidden="true">
-        {chars.map((char, i) => {
-          if (char === ' ') {
+      <div className={`dh-card-rail-group ${sizeModifier}`} aria-hidden="true">
+        <IconComponent
+          className="dh-card-rail-icon"
+          strokeWidth={2.5}
+          aria-hidden="true"
+        />
+        <span className="dh-card-rail-gap" aria-hidden="true" />
+        <div className="dh-card-stacked-label" aria-hidden="true">
+          {chars.map((char, i) => {
+            if (char === ' ') {
+              return (
+                <span
+                  key={i}
+                  className="dh-card-stacked-space"
+                  aria-hidden="true"
+                />
+              );
+            }
             return (
               <span
                 key={i}
-                className="dh-card-stacked-space"
+                className="dh-card-stacked-char"
                 aria-hidden="true"
-              />
+              >
+                {char}
+              </span>
             );
-          }
-          return (
-            <span
-              key={i}
-              className="dh-card-stacked-char"
-              aria-hidden="true"
-            >
-              {char}
-            </span>
-          );
-        })}
+          })}
+        </div>
       </div>
     );
   };
@@ -111,20 +116,12 @@ const FrameCard: React.FC<FrameCardProps> = ({
       aria-hidden={isClone}
       aria-label={isClone ? undefined : displayLabel}
     >
-      {/* a) Top band: Corner index at top-left */}
-      <div className="dh-card-top-band" aria-hidden="true">
-        <div className="dh-card-corner-index">
-          <span className="dh-card-corner-rank">{rank}</span>
-          <IconComponent className="dh-card-corner-icon" strokeWidth={1.75} />
-        </div>
-      </div>
-
-      {/* b) Left Rail: Upright stacked letters along left edge near top */}
+      {/* a) Left Rail: Icon at top + small gap + upright stacked letters */}
       <div className="dh-card-rail-left" aria-hidden="true">
-        {renderStackedLetters()}
+        {renderRailGroup()}
       </div>
 
-      {/* c) Window (area win): aspect-ratio 4/5, recessed */}
+      {/* b) Window (area win): aspect-ratio 4/5, recessed */}
       <div className="dh-card-window">
         {/* Real media: <img> or <video> */}
         {hasSource ? (
@@ -165,17 +162,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
         )}
       </div>
 
-      {/* d) Right Rail: Upright stacked letters along right edge near bottom (180deg) */}
+      {/* c) Right Rail: Exact copy placed near bottom and rotated 180deg as a whole */}
       <div className="dh-card-rail-right" aria-hidden="true">
-        {renderStackedLetters()}
-      </div>
-
-      {/* e) Bottom band: Mirrored corner index at bottom-right */}
-      <div className="dh-card-bot-band" aria-hidden="true">
-        <div className="dh-card-corner-index dh-card-corner-index--br">
-          <span className="dh-card-corner-rank">{rank}</span>
-          <IconComponent className="dh-card-corner-icon" strokeWidth={1.75} />
-        </div>
+        {renderRailGroup()}
       </div>
     </div>
   );
@@ -395,19 +384,15 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           width: 100%;
           position: relative;
           margin-bottom: var(--hero-column-gap);
-          padding: 3.5%;
+          padding: clamp(6px, 2.8cqw, 12px);
           border-radius: 12px;
           background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
           box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
           display: grid;
           grid-template-columns: var(--rail) 1fr var(--rail);
-          grid-template-rows: auto auto auto;
-          grid-template-areas:
-            "top top top"
-            "rl win rr"
-            "bot bot bot";
-          --rail: clamp(14px, 6.8cqw, 26px);
-          --band: clamp(22px, 9.5cqw, 40px);
+          align-items: stretch;
+          gap: clamp(3px, 1.5cqw, 6px);
+          --rail: clamp(14px, 6.8cqw, 24px);
           user-select: none;
           box-sizing: border-box;
         }
@@ -424,72 +409,49 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           z-index: 2;
         }
 
-        /* Bands */
-        .dh-card-top-band {
-          grid-area: top;
-          height: var(--band);
-          padding-inline: 2cqw;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          z-index: 3;
-        }
-
-        .dh-card-bot-band {
-          grid-area: bot;
-          height: var(--band);
-          padding-inline: 2cqw;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          z-index: 3;
-        }
-
-        .dh-card-corner-index {
-          display: inline-flex;
-          align-items: center;
-          gap: 1.6cqw;
-          line-height: 1;
-        }
-
-        .dh-card-corner-index--br {
-          transform: rotate(180deg);
-        }
-
-        .dh-card-corner-rank {
-          font-family: ui-serif, Georgia, "Times New Roman", serif;
-          font-weight: 700;
-          font-size: clamp(13px, 6.4cqw, 26px);
-          line-height: 1;
-          color: var(--dh-ink);
-        }
-
-        .dh-card-corner-icon {
-          width: clamp(11px, 5.4cqw, 22px);
-          height: clamp(11px, 5.4cqw, 22px);
-          color: var(--dh-ink);
-        }
-
         /* Rails */
         .dh-card-rail-left {
-          grid-area: rl;
           display: flex;
-          align-items: flex-start;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
           padding-top: clamp(2px, 1.2cqw, 6px);
           z-index: 3;
           overflow: hidden;
         }
 
         .dh-card-rail-right {
-          grid-area: rr;
           display: flex;
-          align-items: flex-start;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
           padding-top: clamp(2px, 1.2cqw, 6px);
           z-index: 3;
           overflow: hidden;
           transform: rotate(180deg);
+        }
+
+        .dh-card-rail-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          width: 100%;
+        }
+
+        .dh-card-rail-icon {
+          width: 1.28em;
+          height: 1.28em;
+          color: var(--dh-ink);
+          opacity: 0.90;
+          flex-shrink: 0;
+        }
+
+        .dh-card-rail-gap {
+          display: block;
+          height: clamp(3px, 1.4cqw, 5px);
+          width: 1px;
+          flex-shrink: 0;
         }
 
         .dh-card-stacked-label {
@@ -506,16 +468,16 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           user-select: none;
         }
 
-        .dh-card-stacked-label--sm {
-          font-size: clamp(7.5px, 2.5cqw, 10.5px);
+        .dh-card-rail-group--sm {
+          font-size: clamp(7px, 2.3cqw, 9.5px);
         }
 
-        .dh-card-stacked-label--md {
-          font-size: clamp(8px, 2.8cqw, 11.5px);
+        .dh-card-rail-group--md {
+          font-size: clamp(7.5px, 2.6cqw, 10.5px);
         }
 
-        .dh-card-stacked-label--lg {
-          font-size: clamp(8.5px, 3.2cqw, 12.5px);
+        .dh-card-rail-group--lg {
+          font-size: clamp(8px, 3cqw, 11.5px);
         }
 
         .dh-card-stacked-char {
@@ -527,7 +489,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         }
 
         .dh-card-stacked-space {
-          height: 0.6em;
+          height: 0.55em;
           width: 1px;
           display: block;
           flex-shrink: 0;
