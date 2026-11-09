@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, Headset } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
@@ -212,21 +212,15 @@ export const Navbar: React.FC = () => {
           {/* 1px x 22px Divider */}
           <span className="dh-nav-divider" aria-hidden="true" />
 
-          {/* Contact Button with Availability Dot, Arrow, Tooltip */}
+          {/* Contact Button with Headset, Tooltip */}
           <div className="dh-nav-contact-wrap">
             <Link
               to="/contact"
               className="dh-nav-contact-btn"
               aria-describedby={NAV_AVAILABLE ? 'nav-contact-tip' : undefined}
             >
-              {NAV_AVAILABLE && (
-                <span className="dh-nav-avail-wrap" aria-hidden="true">
-                  <span className="dh-nav-avail-dot" />
-                  <span className="dh-nav-avail-ring" />
-                </span>
-              )}
               <span>{t('nav.contactUs')}</span>
-              <ArrowUpRight className="dh-nav-contact-arrow" size={16} />
+              <Headset className="dh-nav-contact-arrow" size={16} strokeWidth={2} aria-hidden="true" />
             </Link>
 
             {NAV_AVAILABLE && (
