@@ -33,6 +33,7 @@ import { ServiceCard } from '../ui/ServiceCard';
 import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
 import { GlowCtaButton } from '../ui/GlowCtaButton';
+import { GlassCtaButton } from '../ui/GlassCtaButton';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { useLanguage } from '../../context/LanguageContext';
@@ -370,9 +371,51 @@ export const Home: React.FC = () => {
               height: auto !important;
             }
           }
-          @media (max-height: 639px) {
+          @media (max-height: 719px) {
             .dh-hero-trust-row {
               display: none !important;
+            }
+          }
+          @media (max-height: 639px) {
+            .dh-hero-body {
+              display: none !important;
+            }
+          }
+          .dh-hero-payoff {
+            display: inline-block;
+            padding: 0.04em 0.28em 0.12em;
+            border-radius: 0.16em;
+            clip-path: inset(0 100% 0 0 round 0.16em);
+            animation: dh-payoff-reveal 700ms cubic-bezier(0.2, 0.7, 0.2, 1) 450ms forwards;
+          }
+          @keyframes dh-payoff-reveal {
+            0% {
+              clip-path: inset(0 100% 0 0 round 0.16em);
+            }
+            100% {
+              clip-path: inset(0 0 0 0 round 0.16em);
+            }
+          }
+          html[data-theme="light"] .dh-hero-payoff,
+          html.light .dh-hero-payoff {
+            background: linear-gradient(100deg, #0B4F61, #1F7A8C);
+            color: #FFFFFF;
+          }
+          :root .dh-hero-payoff,
+          html[data-theme="dark"] .dh-hero-payoff,
+          html.dark .dh-hero-payoff {
+            background: linear-gradient(100deg, #2EC4D6, #5BD7E5);
+            color: #031820;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .dh-hero-payoff {
+              clip-path: inset(0 0 0 0 round 0.16em) !important;
+              animation: none !important;
+            }
+          }
+          @media (min-width: 1024px) {
+            .dh-hero-payoff {
+              margin-left: -0.28em;
             }
           }
           @media (prefers-reduced-motion: reduce) {
@@ -397,9 +440,9 @@ export const Home: React.FC = () => {
 
           {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
           <div
-            className="order-1 max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none"
+            className="order-1 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none"
             style={{
-              '--dh-hero-btn-h': '56px',
+              '--dh-hero-btn-h': '54px',
               '--dh-hero-btn-radius': '999px',
             } as React.CSSProperties}
           >
@@ -412,85 +455,104 @@ export const Home: React.FC = () => {
               data-hero-desktop="true"
               className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
               style={{
-                width: 'min(44vw, 42rem)',
-                minHeight: 'calc(100vh - var(--dh-nav-bottom, 80px))',
-                paddingTop: 'calc(var(--dh-nav-bottom, 80px) + clamp(40px, 7vh, 72px))',
-                paddingBottom: 'clamp(28px, 5vh, 56px)',
+                width: 'min(46vw, 42rem)',
+                minHeight: 'calc(100vh - var(--dh-nav-bottom, 72px))',
+                paddingTop: 'calc(var(--dh-nav-bottom, 72px) + clamp(28px, 5vh, 56px))',
+                paddingBottom: 'clamp(24px, 4.5vh, 48px)',
+                paddingLeft: 'calc(var(--dh-gutter, clamp(16px, 3.5vw, 40px)) + 13px)',
                 alignSelf: 'flex-start',
               }}
             >
-              {/* 1. Headline: 2 spans */}
+              {/* 1. Headline: 2 block spans */}
               <motion.h1
                 variants={itemVariants}
                 className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0 w-fit"
                 style={{
-                  fontSize: 'clamp(2rem, min(3.4vw, 7vh), 4.25rem)',
-                  lineHeight: 1.08,
+                  fontSize: 'clamp(2.25rem, min(3.8vw, 7.8vh), 5rem)',
+                  lineHeight: 1.06,
                   letterSpacing: '-0.03em',
                 }}
               >
                 <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap">
-                  {t('hero_v4_headline_1')}
+                  {t('hero_v5_headline_1')}
                 </span>
                 <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap mt-1">
-                  <span className="dh-hero-marker">
-                    {t('hero_v4_headline_2')}
+                  <span className="dh-hero-payoff">
+                    {t('hero_v5_headline_2')}
                   </span>
                 </span>
               </motion.h1>
 
-              {/* 2. Paragraph */}
+              {/* 2. Subheading */}
               <motion.p
                 variants={itemVariants}
-                className="text-[var(--text-muted)] m-0 mt-[clamp(14px,2.4vh,26px)] max-w-[33rem]"
+                className="dh-hero-sub m-0 font-semibold text-[var(--text-heading)] max-w-[34rem]"
+                style={{
+                  fontSize: 'clamp(1.05rem, min(1.6vw, 3.4vh), 1.7rem)',
+                  lineHeight: 1.35,
+                  marginTop: 'clamp(14px, 2.4vh, 24px)',
+                }}
+              >
+                {t('hero_v5_sub')}
+              </motion.p>
+
+              {/* 3. Body paragraph */}
+              <motion.p
+                variants={itemVariants}
+                className="dh-hero-body text-[var(--text-muted)] m-0 max-w-[33rem]"
                 style={{
                   fontSize: 'clamp(0.95rem, 1.05vw, 1.15rem)',
                   lineHeight: 1.6,
+                  marginTop: '12px',
                   textWrap: 'pretty',
                 }}
               >
-                {t('hero_v4_subheadline')}
+                {t('hero_v5_body')}
               </motion.p>
 
-              {/* 3. Buttons: margin-top clamp(20px, 3.8vh, 36px), gap 14px */}
+              {/* 4. Buttons: Glass proposal button + See Our Work */}
               <motion.div
                 variants={itemVariants}
-                className="flex items-center gap-[14px] mt-[clamp(20px,3.8vh,36px)] w-fit"
+                className="flex items-center gap-[14px] w-fit"
+                style={{
+                  marginTop: 'clamp(22px, 4vh, 36px)',
+                }}
               >
-                {/* Primary Button: GlowCtaButton */}
-                <GlowCtaButton
+                <GlassCtaButton
                   to="/contact"
-                  label={t('hero_v4_btn_proposal')}
+                  label={t('hero_v5_btn_proposal')}
                 />
 
-                {/* Secondary Button: See Our Work */}
                 <Link
                   to="/portfolio"
                   className="dh-hero-explore-btn group"
                 >
                   <span className="dh-hero-explore-content">
-                    <span>{t('hero_v4_btn_work')}</span>
+                    <span>{t('hero_v5_btn_work')}</span>
                     <ArrowUpRight className="dh-hero-explore-icon" />
                   </span>
                 </Link>
               </motion.div>
 
-              {/* 4. Trust Row */}
+              {/* 5. Trust Row */}
               <motion.div
                 variants={itemVariants}
-                className="dh-hero-trust-row flex flex-wrap items-center gap-x-[20px] gap-y-[8px] mt-[clamp(16px,3vh,28px)] select-none"
+                className="dh-hero-trust-row flex flex-wrap items-center gap-x-[20px] gap-y-[8px] select-none"
+                style={{
+                  marginTop: 'clamp(16px, 2.8vh, 26px)',
+                }}
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_1')}</span>
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_1')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_2')}</span>
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_2')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_3')}</span>
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_3')}</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -500,34 +562,41 @@ export const Home: React.FC = () => {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="block lg:hidden w-full pointer-events-auto"
+              className="block lg:hidden w-full pointer-events-auto px-6"
             >
               <motion.h1
                 variants={itemVariants}
                 className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.12] tracking-tight mb-4"
               >
-                <span className="block">{t('hero_v4_headline_1')}</span>
+                <span className="block">{t('hero_v5_headline_1')}</span>
                 <span className="block mt-1">
-                  <span className="dh-hero-marker">
-                    {t('hero_v4_headline_2')}
+                  <span className="dh-hero-payoff">
+                    {t('hero_v5_headline_2')}
                   </span>
                 </span>
               </motion.h1>
 
               <motion.p
                 variants={itemVariants}
-                className="text-xs sm:text-sm text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
+                className="dh-hero-sub text-sm sm:text-base font-semibold text-[var(--text-heading)] max-w-[32rem] leading-snug mb-3"
               >
-                {t('hero_v4_subheadline')}
+                {t('hero_v5_sub')}
+              </motion.p>
+
+              <motion.p
+                variants={itemVariants}
+                className="dh-hero-body text-xs sm:text-sm text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
+              >
+                {t('hero_v5_body')}
               </motion.p>
 
               <motion.div
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
               >
-                <GlowCtaButton
+                <GlassCtaButton
                   to="/contact"
-                  label={t('hero_v4_btn_proposal')}
+                  label={t('hero_v5_btn_proposal')}
                   className="w-full sm:w-auto"
                 />
                 <Link
@@ -535,7 +604,7 @@ export const Home: React.FC = () => {
                   className="dh-hero-explore-btn group w-full sm:w-auto"
                 >
                   <span className="dh-hero-explore-content">
-                    <span>{t('hero_v4_btn_work')}</span>
+                    <span>{t('hero_v5_btn_work')}</span>
                     <ArrowUpRight className="dh-hero-explore-icon" />
                   </span>
                 </Link>
@@ -547,15 +616,15 @@ export const Home: React.FC = () => {
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_1')}</span>
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_1')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_2')}</span>
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_2')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_3')}</span>
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_3')}</span>
                 </div>
               </motion.div>
             </motion.div>

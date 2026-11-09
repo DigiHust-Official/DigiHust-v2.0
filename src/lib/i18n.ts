@@ -50,6 +50,18 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     hero_v4_trust_2: 'Milestone delivery guarantee',
     hero_v4_trust_3: 'Verified specialists',
 
+    // Hero Redesign Keys (v5 Glass / Silver)
+    hero_v5_headline_1: 'Tired of chasing freelancers?',
+    hero_v5_headline_2: 'Get one team that delivers.',
+    hero_v5_sub: 'One contract. One accountable lead. A full team of verified specialists.',
+    hero_v5_body:
+      'No more missed deadlines or blame-shifting between five freelancers. Designers, developers, marketers and security specialists work as one team, and every milestone is planned, tracked and guaranteed.',
+    hero_v5_btn_proposal: 'Get a Proposal in 24h',
+    hero_v5_btn_work: 'See Our Work',
+    hero_v5_trust_1: 'Milestone delivery guarantee',
+    hero_v5_trust_2: 'Verified specialists',
+    hero_v5_trust_3: 'Proposal within 24 hours',
+
     // Orbit Services Caption
     service_caption_built_for: 'Built for',
     orbit_service_1_name: 'Graphic Design & Branding',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
@@ -9,6 +9,7 @@ import { useApp } from '../../context/AppContext';
 import { TRANSLATIONS } from '../../lib/i18n';
 import logoImg from '../../assets/logo.png';
 import { PortalNavbar } from '../portal/PortalNavbar';
+import './Navbar.css';
 
 // Register fallback key for Contact Us if not present
 if (!TRANSLATIONS.en['nav.contactUs']) {
@@ -20,24 +21,15 @@ export const Navbar: React.FC = () => {
   const { t } = useLanguage();
   const { isAuthenticated } = useApp();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
   const isPortalLogin = location.pathname === '/portal/login';
   const isPortal = location.pathname.startsWith('/portal') || ['/dashboard', '/roster', '/admin'].some(p => location.pathname.startsWith(p));
   const isVerify = location.pathname.startsWith('/verify') || location.pathname.startsWith('/cert');
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 15);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   // Measure the navbar's bottom edge at scrollY 0 on mount and on resize (debounced)
   useEffect(() => {
     const updateNavBottom = () => {
-      // Ignore changes while the user is scrolled and the navbar is in a shrunken state
-      if (window.scrollY > 0) return;
       if (headerRef.current) {
         const bottom = headerRef.current.getBoundingClientRect().bottom;
         if (bottom > 0) {
@@ -72,14 +64,14 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  // Retain all section links in order; Contact is removed because Contact Us is the primary CTA
+  // Retain all 7 section links in exact order
   const navLinks = [
-    { label: t('nav_services'), href: '/services' },
-    { label: t('nav_work'), href: '/portfolio' },
-    { label: t('nav_how_it_works'), href: '/how-it-works' },
-    { label: t('nav_about'), href: '/about' },
-    { label: t('nav_team'), href: '/team' },
-    { label: t('nav_blog'), href: '/blog' },
+    { label: t('nav_services') || 'Services', href: '/services' },
+    { label: t('nav_work') || 'Work', href: '/portfolio' },
+    { label: t('nav_how_it_works') || 'How It Works', href: '/how-it-works' },
+    { label: t('nav_about') || 'About', href: '/about' },
+    { label: t('nav_team') || 'Team', href: '/team' },
+    { label: t('nav_blog') || 'Blog', href: '/blog' },
     { label: 'Careers', href: '/careers' },
   ];
 
@@ -101,131 +93,97 @@ export const Navbar: React.FC = () => {
   }
 
   return (
-    <header
-      ref={headerRef}
-      className={`fixed top-0 left-0 right-0 z-[9980] transition-all duration-300 ${
-        scrolled
-          ? 'bg-[var(--bg-page)]/90 backdrop-blur-md shadow-md border-b border-[var(--border-subtle)] py-0'
-          : 'bg-transparent py-2'
-      }`}
-    >
-      <nav className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between" aria-label="Main Navigation">
-
+    <header ref={headerRef} className="dh-nav-header">
+      <nav className="dh-nav-bar" aria-label="Main Navigation">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2.5 group">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 3 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center shadow-md bg-white border border-[var(--border-subtle)] p-0.5"
-          >
+        <Link to="/" className="flex items-center space-x-2.5 group select-none">
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-0.5">
             <img src={logoImg} alt="DigiHust Logo" className="w-full h-full object-contain" />
-          </motion.div>
-          <span className="font-display font-extrabold text-xl tracking-tight text-[var(--text-heading)] group-hover:text-[var(--brand-teal)] transition-colors">
+          </div>
+          <span className="dh-nav-logo-text font-display font-bold text-lg tracking-tight transition-colors">
             DigiHust
           </span>
         </Link>
 
-        {/* Desktop Nav with Animated Pill and Hover Expanding Line */}
-        <div className="hidden lg:flex items-center space-x-0.5 xl:space-x-1 relative">
+        {/* Desktop Center Links */}
+        <div className="hidden lg:flex dh-nav-links">
           {navLinks.map((link) => {
             const active = isActive(link.href);
             return (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`relative group px-2 xl:px-3.5 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-colors duration-200 whitespace-nowrap outline-none focus-visible:text-[var(--brand-teal)] ${
-                  active ? 'text-[var(--brand-teal)] dark:text-cyan-300 font-bold' : 'text-[var(--text-body)] hover:text-[var(--brand-teal)] dark:hover:text-cyan-300'
-                }`}
+                className={`dh-nav-link ${active ? 'dh-nav-link--active' : ''}`}
               >
-                {active && (
-                  <motion.div
-                    layoutId="activeNavTab"
-                    className="absolute inset-0 bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/40 rounded-xl"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                {!active && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute left-1/2 -translate-x-1/2 bottom-0 w-3/4 h-[2px] bg-[#1F7A8C] dark:bg-cyan-400 origin-center scale-x-0 group-hover:scale-x-100 group-focus-visible:scale-x-100 transition-transform duration-200 ease-out motion-reduce:transition-none pointer-events-none rounded-full"
-                  />
-                )}
-                <span className="relative z-10">{link.label}</span>
+                {link.label}
               </Link>
             );
           })}
         </div>
 
-        {/* Desktop Right-Hand Controls: ThemeSwitch, LanguageSelector, Contact Us */}
-        <div className="hidden lg:flex items-center space-x-2">
+        {/* Desktop Right Cluster: ThemeSwitch, LanguageSelector, Contact */}
+        <div className="hidden lg:flex dh-nav-right">
           <ThemeSwitch />
           <LanguageSelector dropdownAlign="right" />
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              to="/contact"
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold shadow-md transition-all border border-[#1F7A8C]/40 dark:border-cyan-400/40 select-none whitespace-nowrap"
-            >
-              <span>{t('nav.contactUs')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </motion.div>
+          <Link to="/contact" className="dh-nav-contact-btn">
+            {t('nav.contactUs')}
+          </Link>
         </div>
 
         {/* Mobile Action Bar: ThemeSwitch + Menu Trigger */}
-        <div className="flex items-center space-x-2 lg:hidden">
+        <div className="flex items-center space-x-1.5 lg:hidden justify-self-end">
           <ThemeSwitch />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 rounded-xl text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
+            className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-[var(--text-heading)] hover:bg-[rgba(255,255,255,0.1)] transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--dh-focus-ring)]"
             aria-label={mobileOpen ? 'Close Menu' : 'Open Menu'}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu with Framer Motion */}
+      {/* Mobile Menu Panel */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             id="mobile-nav-menu"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="lg:hidden bg-[var(--bg-surface)] backdrop-blur-lg border-b border-[var(--border-subtle)] px-6 py-5 space-y-2 overflow-hidden shadow-2xl"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="dh-nav-mobile-panel lg:hidden space-y-2"
           >
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                   isActive(link.href)
-                    ? 'text-[var(--brand-teal-text)] font-bold bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/40'
-                    : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)]'
+                    ? 'text-[var(--brand-teal-text)] font-bold bg-[var(--brand-teal-subtle)]'
+                    : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[rgba(255,255,255,0.06)]'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            {/* Preferences row: ThemeSwitch, LanguageSelector */}
+
             <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-[var(--border-subtle)]">
-              <span className="text-xs font-bold text-[var(--text-muted)]">{t('preferences')}</span>
+              <span className="text-xs font-semibold text-[var(--text-muted)]">{t('preferences')}</span>
               <div className="flex items-center space-x-2">
                 <ThemeSwitch />
                 <LanguageSelector dropdownAlign="left" />
               </div>
             </div>
-            {/* Contact Us button at the bottom */}
+
             <Link
               to="/contact"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center space-x-2 px-4 py-3.5 rounded-xl bg-[#1F7A8C] hover:bg-[#14535F] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] active:bg-[#0F4049] text-white text-sm font-bold mt-3 shadow-md border border-[#1F7A8C]/40 dark:border-cyan-400/40 select-none"
+              className="dh-nav-contact-btn w-full mt-2 justify-center"
             >
-              <span>{t('nav.contactUs')}</span>
-              <ArrowRight className="w-4 h-4" />
+              {t('nav.contactUs')}
             </Link>
           </motion.div>
         )}
@@ -233,7 +191,3 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
-
-
-
-

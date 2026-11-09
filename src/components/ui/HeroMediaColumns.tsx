@@ -62,6 +62,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
 
   const localizedLabel = frame.labelKey ? t(frame.labelKey) : frame.label;
   const displayLabel = localizedLabel || frame.label;
+  const railLabel = frame.shortLabel || displayLabel;
 
   // Rank: 1 to 8 based on position in HERO_FRAMES
   const rank = HERO_FRAMES.findIndex((f) => f.id === frame.id) + 1;
@@ -73,7 +74,22 @@ const FrameCard: React.FC<FrameCardProps> = ({
       aria-hidden={isClone}
       aria-label={isClone ? undefined : displayLabel}
     >
-      {/* ── Window (4:5, relative, overflow hidden, radius 6px) ── */}
+      {/* a) Top band: Corner index at top-left */}
+      <div className="dh-card-top-band" aria-hidden="true">
+        <div className="dh-card-corner-index">
+          <span className="dh-card-corner-rank">{rank}</span>
+          <IconComponent className="dh-card-corner-icon" strokeWidth={1.75} />
+        </div>
+      </div>
+
+      {/* b) Left Rail: Vertical bottom-to-top (rotated 180deg) */}
+      <div className="dh-card-rail-left" aria-hidden="true">
+        <span className="dh-card-rail-text dh-card-rail-text--left">
+          {railLabel}
+        </span>
+      </div>
+
+      {/* c) Window (area win): aspect-ratio 4/5, recessed */}
       <div className="dh-card-window">
         {/* Real media: <img> or <video> */}
         {hasSource ? (
@@ -103,41 +119,30 @@ const FrameCard: React.FC<FrameCardProps> = ({
           )
         ) : (
           /* Architectural Placeholder */
-          <div
-            className="w-full h-full flex flex-col items-center justify-center relative p-4"
-            style={{
-              background: 'var(--dh-placeholder-gradient)',
-            }}
-          >
-            <div className="w-[30%] h-[30%] max-w-[100px] max-h-[100px] flex items-center justify-center text-[var(--dh-card-ink)] opacity-40">
-              <IconComponent
-                strokeWidth={1.25}
-                className="w-full h-full object-contain"
-              />
+          <div className="dh-card-placeholder">
+            <div className="dh-card-placeholder-icon">
+              <IconComponent strokeWidth={1.25} className="w-full h-full object-contain" />
             </div>
-            <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] font-mono text-[var(--dh-card-ink)] opacity-55">
+            <div className="dh-card-placeholder-spec">
               {isVideo ? '4:5 · 1080x1350 · MP4 4-6s' : '4:5 · 1200x1500'}
             </div>
           </div>
         )}
-
-        {/* ── Corner Tabs (Top-Left & Mirrored Bottom-Right) ── */}
-        <div className="dh-card-tab dh-card-tab-tl" aria-hidden="true">
-          <span className="dh-card-tab-rank">{rank}</span>
-          <IconComponent className="dh-card-tab-icon" strokeWidth={1.75} />
-        </div>
-
-        <div className="dh-card-tab dh-card-tab-br" aria-hidden="true">
-          <span className="dh-card-tab-rank">{rank}</span>
-          <IconComponent className="dh-card-tab-icon" strokeWidth={1.75} />
-        </div>
       </div>
 
-      {/* ── Name Row Under Window ── */}
-      <div className="dh-card-name-row" aria-hidden="true">
-        <span className="dh-card-rule" />
-        <span className="dh-card-name">{displayLabel}</span>
-        <span className="dh-card-rule" />
+      {/* d) Right Rail: Vertical top-to-bottom */}
+      <div className="dh-card-rail-right" aria-hidden="true">
+        <span className="dh-card-rail-text dh-card-rail-text--right">
+          {railLabel}
+        </span>
+      </div>
+
+      {/* e) Bottom band: Mirrored corner index at bottom-right */}
+      <div className="dh-card-bot-band" aria-hidden="true">
+        <div className="dh-card-corner-index dh-card-corner-index--br">
+          <span className="dh-card-corner-rank">{rank}</span>
+          <IconComponent className="dh-card-corner-icon" strokeWidth={1.75} />
+        </div>
       </div>
     </div>
   );
@@ -351,121 +356,178 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           --dh-placeholder-gradient: linear-gradient(160deg, rgba(46, 196, 214, 0.10), rgba(46, 196, 214, 0.03));
         }
 
-        /* ── Playing Card Styling ── */
+        /* ── Silver Playing Card Styling ── */
         .dh-card {
           container-type: inline-size;
           width: 100%;
           position: relative;
-          background: var(--dh-card-face);
-          border: 1px solid rgba(10, 31, 43, 0.14);
-          border-radius: 12px;
-          padding: 5.5% 5.5% 4%;
           margin-bottom: var(--hero-column-gap);
-          box-shadow: var(--dh-card-shadow);
+          padding: 3.5%;
+          border-radius: 12px;
+          background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
+          box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
+          display: grid;
+          grid-template-columns: var(--rail) 1fr var(--rail);
+          grid-template-rows: auto auto auto;
+          grid-template-areas:
+            "top top top"
+            "rl win rr"
+            "bot bot bot";
+          --rail: clamp(14px, 6.8cqw, 26px);
+          --band: clamp(22px, 9.5cqw, 40px);
           user-select: none;
           box-sizing: border-box;
         }
 
-        /* Inner border */
+        /* Engraved inner line */
         .dh-card::before {
           content: '';
           position: absolute;
-          inset: 2.5%;
-          border: 1px solid var(--dh-card-line);
+          inset: 2%;
+          border: 1px solid rgba(10, 31, 43, 0.20);
           border-radius: 9px;
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
           pointer-events: none;
           z-index: 2;
         }
 
+        /* Bands */
+        .dh-card-top-band {
+          grid-area: top;
+          height: var(--band);
+          padding-inline: 2cqw;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          z-index: 3;
+        }
+
+        .dh-card-bot-band {
+          grid-area: bot;
+          height: var(--band);
+          padding-inline: 2cqw;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          z-index: 3;
+        }
+
+        .dh-card-corner-index {
+          display: inline-flex;
+          align-items: center;
+          gap: 1.6cqw;
+          line-height: 1;
+        }
+
+        .dh-card-corner-index--br {
+          transform: rotate(180deg);
+        }
+
+        .dh-card-corner-rank {
+          font-family: ui-serif, Georgia, "Times New Roman", serif;
+          font-weight: 700;
+          font-size: clamp(13px, 6.4cqw, 26px);
+          line-height: 1;
+          color: var(--dh-ink);
+        }
+
+        .dh-card-corner-icon {
+          width: clamp(11px, 5.4cqw, 22px);
+          height: clamp(11px, 5.4cqw, 22px);
+          color: var(--dh-ink);
+        }
+
+        /* Rails */
+        .dh-card-rail-left {
+          grid-area: rl;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 3;
+          overflow: hidden;
+        }
+
+        .dh-card-rail-right {
+          grid-area: rr;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 3;
+          overflow: hidden;
+        }
+
+        .dh-card-rail-text {
+          writing-mode: vertical-rl;
+          text-transform: uppercase;
+          font-weight: 600;
+          font-size: clamp(9px, 2.9cqw, 12.5px);
+          letter-spacing: 0.14em;
+          color: var(--dh-ink);
+          opacity: 0.82;
+          white-space: nowrap;
+          max-height: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .dh-card-rail-text--left {
+          transform: rotate(180deg);
+        }
+
         /* Window: 4:5 aspect ratio */
         .dh-card-window {
+          grid-area: win;
           position: relative;
           width: 100%;
           aspect-ratio: 4 / 5;
           border-radius: 6px;
           overflow: hidden;
           z-index: 1;
+          box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.28), 0 1px 0 rgba(255, 255, 255, 0.60);
         }
 
-        .dh-card-window::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border: 1px solid rgba(10, 31, 43, 0.14);
-          border-radius: 6px;
-          pointer-events: none;
-          z-index: 5;
-        }
-
-        /* Corner tabs (Top-Left & Mirrored Bottom-Right) */
-        .dh-card-tab {
-          position: absolute;
-          background: var(--dh-card-face);
-          padding: 1.8cqw 2.2cqw 2.2cqw;
-          border-bottom-right-radius: 8px;
+        /* Flat tint architectural placeholder */
+        .dh-card-placeholder {
+          width: 100%;
+          height: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.8cqw;
-          z-index: 10;
-          pointer-events: none;
+          justify-content: center;
+          position: relative;
+          padding: 1rem;
           box-sizing: border-box;
+          background: linear-gradient(160deg, rgba(31, 122, 140, 0.14), rgba(31, 122, 140, 0.05));
         }
 
-        .dh-card-tab-tl {
-          left: 0;
-          top: 0;
+        html[data-theme="dark"] .dh-card-placeholder,
+        html.dark .dh-card-placeholder,
+        :root .dh-card-placeholder {
+          background: linear-gradient(160deg, rgba(10, 31, 43, 0.22), rgba(10, 31, 43, 0.10));
         }
 
-        .dh-card-tab-br {
-          right: 0;
-          bottom: 0;
-          transform: rotate(180deg);
-        }
-
-        .dh-card-tab-rank {
-          font-family: ui-serif, Georgia, "Times New Roman", serif;
-          font-weight: 700;
-          font-size: clamp(14px, 6.6cqw, 28px);
-          line-height: 1;
-          color: var(--dh-card-ink);
-        }
-
-        .dh-card-tab-icon {
-          width: clamp(11px, 5cqw, 20px);
-          height: clamp(11px, 5cqw, 20px);
-          color: var(--dh-card-ink);
-        }
-
-        /* Name row under window */
-        .dh-card-name-row {
-          margin-top: 3.2cqw;
+        .dh-card-placeholder-icon {
+          width: 30%;
+          height: 30%;
+          max-width: 90px;
+          max-height: 90px;
           display: flex;
           align-items: center;
-          gap: 2.4cqw;
-          text-align: center;
-          width: 100%;
-          z-index: 1;
-          position: relative;
+          justify-content: center;
+          color: var(--dh-ink);
+          opacity: 0.45;
         }
 
-        .dh-card-rule {
-          flex: 1;
-          min-width: 12px;
-          height: 1px;
-          background: var(--dh-card-line);
-        }
-
-        .dh-card-name {
-          text-transform: uppercase;
-          font-size: clamp(9.5px, 3cqw, 13px);
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          line-height: 1.25;
-          text-wrap: balance;
-          color: var(--dh-card-ink);
-          white-space: normal;
+        .dh-card-placeholder-spec {
+          position: absolute;
+          bottom: 8px;
+          left: 0;
+          right: 0;
           text-align: center;
+          font-size: 10px;
+          font-family: monospace;
+          color: var(--dh-ink);
+          opacity: 0.60;
         }
 
         /* Desktop Layout (lg and up) */
@@ -474,7 +536,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
             position: absolute;
             top: calc(var(--dh-nav-bottom, 68px) + 12px);
             bottom: 0;
-            right: clamp(1.5rem, 2vw, 2rem);
+            right: var(--dh-gutter, clamp(16px, 3.5vw, 40px));
             width: min(34vw, 36rem);
             display: grid;
             grid-template-columns: 1fr 1fr;

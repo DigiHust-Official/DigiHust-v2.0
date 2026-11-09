@@ -23,7 +23,7 @@ export const ThemeSwitch: React.FC<ThemeSwitchProps> = ({ className = '' }) => {
       onClick={toggleTheme}
       aria-label={ariaLabel}
       title={ariaLabel}
-      className={`w-[36px] h-[36px] rounded-full flex items-center justify-center border-none bg-transparent hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--brand-teal)] select-none ${className}`}
+      className={`w-[36px] h-[36px] rounded-full flex items-center justify-center border-none bg-transparent text-[rgba(10,31,43,0.62)] dark:text-[rgba(243,246,250,0.66)] hover:text-[#0A1F2B] dark:hover:text-[#FFFFFF] hover:bg-[rgba(255,255,255,0.55)] dark:hover:bg-[rgba(255,255,255,0.08)] transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--dh-focus-ring)] select-none ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isLight ? (
