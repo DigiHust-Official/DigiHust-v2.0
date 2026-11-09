@@ -401,7 +401,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           grid-template-columns: var(--rail) 1fr var(--rail);
           grid-template-areas: "rl win rr";
           align-items: center;
-          --rail: 26px;
+          --rail: clamp(14px, 5.2cqw, 20px);
           user-select: none;
           box-sizing: border-box;
         }
@@ -455,8 +455,8 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         }
 
         .dh-card-corner-icon {
-          width: clamp(14px, 6.4cqw, 25px);
-          height: clamp(14px, 6.4cqw, 25px);
+          width: clamp(13px, 5.8cqw, 20px);
+          height: clamp(13px, 5.8cqw, 20px);
           color: var(--dh-ink);
           flex-shrink: 0;
         }
@@ -509,12 +509,12 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           flex-shrink: 0;
         }
 
-        /* Window: 4:5 aspect ratio */
+        /* Window: recessed portrait media, 77.6% card height preserving Step 0 vertical ratio */
         .dh-card-window {
           grid-area: win;
           position: relative;
           width: 100%;
-          aspect-ratio: 4 / 5;
+          height: 77.6%;
           border-radius: 6px;
           overflow: hidden;
           z-index: 1;
