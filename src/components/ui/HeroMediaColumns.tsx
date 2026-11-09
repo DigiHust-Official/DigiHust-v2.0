@@ -67,6 +67,43 @@ const FrameCard: React.FC<FrameCardProps> = ({
   // Rank: 1 to 8 based on position in HERO_FRAMES
   const rank = HERO_FRAMES.findIndex((f) => f.id === frame.id) + 1;
 
+  // Render upright stacked letters (Joker playing-card style)
+  const renderStackedLetters = () => {
+    const chars = Array.from((railLabel || '').toUpperCase());
+    const len = chars.length;
+    const sizeModifier =
+      len >= 12
+        ? 'dh-card-stacked-label--sm'
+        : len >= 8
+        ? 'dh-card-stacked-label--md'
+        : 'dh-card-stacked-label--lg';
+
+    return (
+      <div className={`dh-card-stacked-label ${sizeModifier}`} aria-hidden="true">
+        {chars.map((char, i) => {
+          if (char === ' ') {
+            return (
+              <span
+                key={i}
+                className="dh-card-stacked-space"
+                aria-hidden="true"
+              />
+            );
+          }
+          return (
+            <span
+              key={i}
+              className="dh-card-stacked-char"
+              aria-hidden="true"
+            >
+              {char}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div
       className="hero-media-frame dh-card"
@@ -82,11 +119,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
         </div>
       </div>
 
-      {/* b) Left Rail: Vertical bottom-to-top (rotated 180deg) */}
+      {/* b) Left Rail: Upright stacked letters along left edge near top */}
       <div className="dh-card-rail-left" aria-hidden="true">
-        <span className="dh-card-rail-text dh-card-rail-text--left">
-          {railLabel}
-        </span>
+        {renderStackedLetters()}
       </div>
 
       {/* c) Window (area win): aspect-ratio 4/5, recessed */}
@@ -130,11 +165,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
         )}
       </div>
 
-      {/* d) Right Rail: Vertical top-to-bottom */}
+      {/* d) Right Rail: Upright stacked letters along right edge near bottom (180deg) */}
       <div className="dh-card-rail-right" aria-hidden="true">
-        <span className="dh-card-rail-text dh-card-rail-text--right">
-          {railLabel}
-        </span>
+        {renderStackedLetters()}
       </div>
 
       {/* e) Bottom band: Mirrored corner index at bottom-right */}
@@ -441,8 +474,9 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card-rail-left {
           grid-area: rl;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
+          padding-top: clamp(2px, 1.2cqw, 6px);
           z-index: 3;
           overflow: hidden;
         }
@@ -450,28 +484,53 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card-rail-right {
           grid-area: rr;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
+          padding-top: clamp(2px, 1.2cqw, 6px);
           z-index: 3;
           overflow: hidden;
-        }
-
-        .dh-card-rail-text {
-          writing-mode: vertical-rl;
-          text-transform: uppercase;
-          font-weight: 600;
-          font-size: clamp(9px, 2.9cqw, 12.5px);
-          letter-spacing: 0.14em;
-          color: var(--dh-ink);
-          opacity: 0.82;
-          white-space: nowrap;
-          max-height: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .dh-card-rail-text--left {
           transform: rotate(180deg);
+        }
+
+        .dh-card-stacked-label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          line-height: 1.08;
+          font-family: 'Plus Jakarta Sans', var(--font-sans, sans-serif);
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          color: var(--dh-ink);
+          opacity: 0.85;
+          user-select: none;
+        }
+
+        .dh-card-stacked-label--sm {
+          font-size: clamp(7.5px, 2.5cqw, 10.5px);
+        }
+
+        .dh-card-stacked-label--md {
+          font-size: clamp(8px, 2.8cqw, 11.5px);
+        }
+
+        .dh-card-stacked-label--lg {
+          font-size: clamp(8.5px, 3.2cqw, 12.5px);
+        }
+
+        .dh-card-stacked-char {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 1.08em;
+          flex-shrink: 0;
+        }
+
+        .dh-card-stacked-space {
+          height: 0.6em;
+          width: 1px;
+          display: block;
+          flex-shrink: 0;
         }
 
         /* Window: 4:5 aspect ratio */
