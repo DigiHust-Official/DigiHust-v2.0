@@ -147,6 +147,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
             </div>
           </div>
         )}
+
+        {/* Readability vignette strip behind decorative rails */}
+        <div className="dh-card-rail-vignette" aria-hidden="true" />
       </div>
 
       {/* 2. Top band: Corner icon at top-left */}
@@ -397,7 +400,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
           user-select: none;
           box-sizing: border-box;
-          --rail: clamp(14px, 11cqw, 26px);
+          --rail: clamp(14px, 11.84cqw, 26px);
           --band: clamp(22px, 9.5cqw, 40px);
         }
 
@@ -430,6 +433,23 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           object-fit: cover;
           object-position: center;
           display: block;
+        }
+
+        /* Subtle readability vignette behind decorative rails */
+        .dh-card-rail-vignette {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 2;
+          background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.18) 0%,
+            rgba(0, 0, 0, 0.10) 24px,
+            transparent 38px,
+            transparent calc(100% - 38px),
+            rgba(0, 0, 0, 0.10) calc(100% - 24px),
+            rgba(0, 0, 0, 0.18) 100%
+          );
         }
 
         /* Bands */
@@ -474,7 +494,9 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card-corner-icon {
           width: clamp(13px, 6.2cqw, 24px);
           height: clamp(13px, 6.2cqw, 24px);
-          color: var(--dh-ink);
+          color: rgba(255, 255, 255, 0.65);
+          mix-blend-mode: overlay;
+          filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
         }
 
         /* Rails */
@@ -518,8 +540,9 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           font-family: 'Plus Jakarta Sans', var(--font-sans, sans-serif);
           font-weight: 600;
           letter-spacing: 0.04em;
-          color: var(--dh-ink);
-          opacity: 0.85;
+          color: rgba(255, 255, 255, 0.65);
+          mix-blend-mode: overlay;
+          text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.35);
           user-select: none;
         }
 
