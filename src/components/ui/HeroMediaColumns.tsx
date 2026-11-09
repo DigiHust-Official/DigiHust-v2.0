@@ -108,19 +108,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
       aria-hidden={isClone}
       aria-label={isClone ? undefined : displayLabel}
     >
-      {/* a) Top band: Corner icon at top-left */}
-      <div className="dh-card-top-band" aria-hidden="true">
-        <div className="dh-card-corner-index">
-          <IconComponent className="dh-card-corner-icon" strokeWidth={2.5} />
-        </div>
-      </div>
-
-      {/* b) Left Rail: Upright stacked letters along left edge near top */}
-      <div className="dh-card-rail-left" aria-hidden="true">
-        {renderStackedLetters()}
-      </div>
-
-      {/* c) Window (area win): aspect-ratio 4/5, recessed */}
+      {/* 1. Full-bleed Window extending from inner edge to inner edge */}
       <div className="dh-card-window">
         {/* Real media: <img> or <video> */}
         {hasSource ? (
@@ -137,7 +125,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
               loop
               playsInline
               preload="metadata"
-              className="w-full h-full object-cover pointer-events-none"
+              className="w-full h-full object-cover object-center pointer-events-none"
               aria-label={isClone ? '' : frame.alt}
             />
           ) : (
@@ -145,7 +133,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
               src={frame.src}
               alt={isClone ? '' : frame.alt}
               decoding="async"
-              className="w-full h-full object-cover pointer-events-none"
+              className="w-full h-full object-cover object-center pointer-events-none"
             />
           )
         ) : (
@@ -161,12 +149,24 @@ const FrameCard: React.FC<FrameCardProps> = ({
         )}
       </div>
 
-      {/* d) Right Rail: Upright stacked letters along right edge near bottom (180deg) */}
+      {/* 2. Top band: Corner icon at top-left */}
+      <div className="dh-card-top-band" aria-hidden="true">
+        <div className="dh-card-corner-index">
+          <IconComponent className="dh-card-corner-icon" strokeWidth={2.5} />
+        </div>
+      </div>
+
+      {/* 3. Left Rail: Upright stacked letters along left edge near top */}
+      <div className="dh-card-rail-left" aria-hidden="true">
+        {renderStackedLetters()}
+      </div>
+
+      {/* 4. Right Rail: Upright stacked letters along right edge near bottom (180deg) */}
       <div className="dh-card-rail-right" aria-hidden="true">
         {renderStackedLetters()}
       </div>
 
-      {/* e) Bottom band: Mirrored corner icon at bottom-right */}
+      {/* 5. Bottom band: Mirrored corner icon at bottom-right */}
       <div className="dh-card-bot-band" aria-hidden="true">
         <div className="dh-card-corner-index dh-card-corner-index--br">
           <IconComponent className="dh-card-corner-icon" strokeWidth={2.5} />
@@ -388,23 +388,17 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card {
           container-type: inline-size;
           width: 100%;
+          aspect-ratio: 236.16 / 270.06;
           position: relative;
           margin-bottom: var(--hero-column-gap);
           padding: 3.5%;
           border-radius: 12px;
           background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
           box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
-          display: grid;
-          grid-template-columns: var(--rail) 1fr var(--rail);
-          grid-template-rows: auto auto auto;
-          grid-template-areas:
-            "top top top"
-            "rl win rr"
-            "bot bot bot";
-          --rail: clamp(14px, 6.8cqw, 26px);
-          --band: clamp(22px, 9.5cqw, 40px);
           user-select: none;
           box-sizing: border-box;
+          --rail: clamp(14px, 11cqw, 26px);
+          --band: clamp(22px, 9.5cqw, 40px);
         }
 
         /* Engraved inner line */
@@ -419,23 +413,50 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           z-index: 2;
         }
 
+        /* Full-bleed inner window extending from inner edge to inner edge */
+        .dh-card-window {
+          position: absolute;
+          inset: 3.5%;
+          border-radius: 8px;
+          overflow: hidden;
+          z-index: 1;
+          box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.28), 0 1px 0 rgba(255, 255, 255, 0.60);
+        }
+
+        .dh-card-window img,
+        .dh-card-window video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+
         /* Bands */
         .dh-card-top-band {
-          grid-area: top;
+          position: absolute;
+          top: 3.5%;
+          left: 3.5%;
+          width: var(--rail);
           height: var(--band);
           display: flex;
           align-items: center;
-          justify-content: flex-start;
-          z-index: 3;
+          justify-content: center;
+          z-index: 5;
+          pointer-events: none;
         }
 
         .dh-card-bot-band {
-          grid-area: bot;
+          position: absolute;
+          bottom: 3.5%;
+          right: 3.5%;
+          width: var(--rail);
           height: var(--band);
           display: flex;
           align-items: center;
-          justify-content: flex-end;
-          z-index: 3;
+          justify-content: center;
+          z-index: 5;
+          pointer-events: none;
         }
 
         .dh-card-corner-index {
@@ -458,22 +479,32 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
 
         /* Rails */
         .dh-card-rail-left {
-          grid-area: rl;
+          position: absolute;
+          top: calc(3.5% + var(--band));
+          left: 3.5%;
+          width: var(--rail);
+          height: calc(100% - 7% - 2 * var(--band));
           display: flex;
           align-items: flex-start;
           justify-content: center;
           padding-top: clamp(2px, 1.2cqw, 6px);
-          z-index: 3;
+          z-index: 5;
+          pointer-events: none;
           overflow: hidden;
         }
 
         .dh-card-rail-right {
-          grid-area: rr;
+          position: absolute;
+          bottom: calc(3.5% + var(--band));
+          right: 3.5%;
+          width: var(--rail);
+          height: calc(100% - 7% - 2 * var(--band));
           display: flex;
           align-items: flex-start;
           justify-content: center;
           padding-top: clamp(2px, 1.2cqw, 6px);
-          z-index: 3;
+          z-index: 5;
+          pointer-events: none;
           overflow: hidden;
           transform: rotate(180deg);
         }
@@ -517,18 +548,6 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           width: 1px;
           display: block;
           flex-shrink: 0;
-        }
-
-        /* Window: 4:5 aspect ratio */
-        .dh-card-window {
-          grid-area: win;
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4 / 5;
-          border-radius: 6px;
-          overflow: hidden;
-          z-index: 1;
-          box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.28), 0 1px 0 rgba(255, 255, 255, 0.60);
         }
 
         /* Flat tint architectural placeholder */
