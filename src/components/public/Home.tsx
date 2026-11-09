@@ -37,6 +37,7 @@ import { GlassCtaButton } from '../ui/GlassCtaButton';
 import { HeroRotator } from '../ui/HeroRotator';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
+import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { Project, getProjectLiveUrl, PROJECTS } from './Work';
@@ -231,6 +232,9 @@ export const Home: React.FC = () => {
   const modelDiagramRef = useRef<HTMLDivElement>(null);
   const isModelInView = useInView(modelDiagramRef, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' });
   const shouldReduceMotion = useReducedMotion();
+
+  // Scoped hard scroll on Home hero runway (desktop >= 1024px only)
+  useHeroHardScroll({ runwayRef });
 
   const diagramContainerVariants: Variants = {
     hidden: { opacity: shouldReduceMotion ? 1 : 0 },
