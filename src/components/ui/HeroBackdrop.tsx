@@ -5,6 +5,28 @@ export const WAVE_PARALLAX = true;
 
 const CURVE = 'M -200 900 C 220 900, 520 650, 860 520 S 1320 200, 1760 70';
 
+// Cubic Bézier sampler for distance-to-ribbon calculation
+function cubicBezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const mt = 1 - t;
+  return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
+}
+
+const SAMPLE_POINTS: Array<[number, number]> = [];
+for (let i = 0; i <= 16; i++) {
+  const t = i / 16;
+  SAMPLE_POINTS.push([
+    cubicBezier(-200, 220, 520, 860, t),
+    cubicBezier(900, 900, 650, 520, t),
+  ]);
+}
+for (let i = 1; i <= 16; i++) {
+  const t = i / 16;
+  SAMPLE_POINTS.push([
+    cubicBezier(860, 1200, 1320, 1760, t),
+    cubicBezier(520, 390, 200, 70, t),
+  ]);
+}
+
 interface HeroBackdropProps {
   heroRef?: React.RefObject<HTMLElement | null>;
   className?: string;
@@ -16,6 +38,7 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parallaxLayerRef = useRef<HTMLDivElement>(null);
+  const auraLayerRef = useRef<HTMLDivElement>(null);
   const svg2Ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -28,6 +51,14 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
     const heroEl = heroRef?.current || containerRef.current;
     let isIntersecting = true;
     let isVisible = !document.hidden;
+    let isRibbonHovered = false;
+
+    const resetAuraHover = () => {
+      if (isRibbonHovered) {
+        isRibbonHovered = false;
+        auraLayerRef.current?.classList.remove('dh-wave-aura-layer--hovered');
+      }
+    };
 
     const updateSvg2State = () => {
       const svg = svg2Ref.current;
@@ -54,6 +85,7 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
     const io = new IntersectionObserver(
       ([entry]) => {
         isIntersecting = entry.isIntersecting;
+        if (!isIntersecting) resetAuraHover();
         updateSvg2State();
       },
       { threshold: 0.05 }
@@ -62,11 +94,12 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
 
     const onVisibilityChange = () => {
       isVisible = !document.hidden;
+      if (!isVisible) resetAuraHover();
       updateSvg2State();
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
 
-    // ── 2. Parallax (up to 14px, lerp 0.08, rAF, refs only) ──
+    // ── 2. Parallax (up to 14px, lerp 0.08, rAF, refs only) & Aura Hover ──
     let rafId: number | null = null;
     let targetX = 0;
     let targetY = 0;
@@ -114,25 +147,88 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (!WAVE_PARALLAX || prefersReducedMotion || !hasFinePointer) return;
-      const normX = e.clientX / window.innerWidth - 0.5;
-      const normY = e.clientY / window.innerHeight - 0.5;
-      targetX = normX * 28; // -14px to +14px
-      targetY = normY * 28; // -14px to +14px
-      startParallaxLoop();
+      if (prefersReducedMotion || !hasFinePointer) return;
+
+      // 1. Mouse Parallax
+      if (WAVE_PARALLAX) {
+        const normX = e.clientX / window.innerWidth - 0.5;
+        const normY = e.clientY / window.innerHeight - 0.5;
+        targetX = normX * 28; // -14px to +14px
+        targetY = normY * 28; // -14px to +14px
+        startParallaxLoop();
+      }
+
+      // 2. Aura Hover Spread & Fade Detection
+      if (!isIntersecting || !isVisible) {
+        resetAuraHover();
+        return;
+      }
+
+      const heroNode = heroRef?.current || containerRef.current;
+      const containerNode = containerRef.current;
+      if (!heroNode || !containerNode) {
+        resetAuraHover();
+        return;
+      }
+
+      const heroRect = heroNode.getBoundingClientRect();
+      const inHero =
+        e.clientX >= heroRect.left &&
+        e.clientX <= heroRect.right &&
+        e.clientY >= heroRect.top &&
+        e.clientY <= heroRect.bottom;
+
+      if (!inHero) {
+        resetAuraHover();
+        return;
+      }
+
+      const cRect = containerNode.getBoundingClientRect();
+      const scale = Math.max(cRect.width / 1600, cRect.height / 900);
+      const offsetX = cRect.left + cRect.width / 2 - 800 * scale;
+      const offsetY = cRect.top + cRect.height / 2 - 450 * scale;
+
+      let minDistSq = Infinity;
+      const px = e.clientX;
+      const py = e.clientY;
+
+      for (let i = 0; i < SAMPLE_POINTS.length; i++) {
+        const [sx, sy] = SAMPLE_POINTS[i];
+        const screenX = offsetX + sx * scale;
+        const screenY = offsetY + sy * scale;
+        const dx = px - screenX;
+        const dy = py - screenY;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < minDistSq) {
+          minDistSq = distSq;
+        }
+      }
+
+      // roughly 120px threshold (120^2 = 14400)
+      const nearRibbon = minDistSq <= 14400;
+
+      if (nearRibbon !== isRibbonHovered) {
+        isRibbonHovered = nearRibbon;
+        if (nearRibbon) {
+          auraLayerRef.current?.classList.add('dh-wave-aura-layer--hovered');
+        } else {
+          auraLayerRef.current?.classList.remove('dh-wave-aura-layer--hovered');
+        }
+      }
     };
 
-    if (WAVE_PARALLAX && !prefersReducedMotion && hasFinePointer) {
+    if (!prefersReducedMotion && hasFinePointer) {
       window.addEventListener('pointermove', onPointerMove, { passive: true });
     }
 
     return () => {
       if (heroEl) io.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      if (WAVE_PARALLAX && !prefersReducedMotion && hasFinePointer) {
+      if (!prefersReducedMotion && hasFinePointer) {
         window.removeEventListener('pointermove', onPointerMove);
         if (rafId) cancelAnimationFrame(rafId);
       }
+      resetAuraHover();
     };
   }, [heroRef]);
 
@@ -143,7 +239,9 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
       aria-hidden="true"
     >
       <div ref={parallaxLayerRef} className="dh-wave-parallax-layer">
-        {/* SVG 1: STATIC LAYER (breathing animation, will-change: transform) */}
+        {/* NEW inner wrapper with independent transform/opacity/filter for aura hover */}
+        <div ref={auraLayerRef} className="dh-wave-aura-layer">
+          {/* SVG 1: STATIC LAYER (breathing animation, will-change: transform) */}
         <svg
           className="dh-wave-svg dh-wave-svg--static"
           viewBox="0 0 1600 900"
@@ -304,6 +402,7 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
             />
           </circle>
         </svg>
+        </div>
       </div>
     </div>
   );
