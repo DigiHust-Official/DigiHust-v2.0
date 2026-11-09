@@ -150,6 +150,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
 
         {/* Readability vignette strip behind decorative rails */}
         <div className="dh-card-rail-vignette" aria-hidden="true" />
+
+        {/* Specular glass shine & hover sheen */}
+        <div className="dh-card-glass-shine" aria-hidden="true" />
       </div>
 
       {/* 2. Top band: Corner icon at top-left */}
@@ -450,6 +453,69 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
             rgba(0, 0, 0, 0.10) calc(100% - 24px),
             rgba(0, 0, 0, 0.18) 100%
           );
+        }
+
+        /* 3. Glass specular look and hover sheen */
+        .dh-card-glass-shine {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          border-radius: inherit;
+          overflow: hidden;
+          z-index: 3;
+          background-image:
+            radial-gradient(45% 45% at 18% 12%, rgba(255, 255, 255, 0.16) 0%, transparent 100%),
+            linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 26%, transparent 40%, transparent 68%, rgba(255, 255, 255, 0.08) 82%, transparent 95%);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.40);
+        }
+
+        .dh-card-glass-shine::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -100%;
+          width: 300%;
+          height: 200%;
+          background: linear-gradient(
+            105deg,
+            transparent 35%,
+            rgba(255, 255, 255, 0.04) 42%,
+            rgba(255, 255, 255, 0.28) 48%,
+            rgba(255, 255, 255, 0.42) 50%,
+            rgba(255, 255, 255, 0.28) 52%,
+            rgba(255, 255, 255, 0.04) 58%,
+            transparent 65%
+          );
+          transform: translateX(-100%) rotate(25deg);
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .dh-card:hover .dh-card-glass-shine::after {
+          animation: dh-sheen-sweep 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes dh-sheen-sweep {
+          0% {
+            transform: translateX(-100%) rotate(25deg);
+            opacity: 0;
+          }
+          15% {
+            opacity: 1;
+          }
+          85% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100%) rotate(25deg);
+            opacity: 0;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dh-card:hover .dh-card-glass-shine::after {
+            animation: none !important;
+          }
         }
 
         /* Bands */
