@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
-import { ThemeRadio } from '../ui/ThemeRadio';
+import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { TRANSLATIONS } from '../../lib/i18n';
@@ -21,6 +21,7 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated } = useApp();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   const isPortalLogin = location.pathname === '/portal/login';
   const isPortal = location.pathname.startsWith('/portal') || ['/dashboard', '/roster', '/admin'].some(p => location.pathname.startsWith(p));
@@ -30,6 +31,45 @@ export const Navbar: React.FC = () => {
     const onScroll = () => setScrolled(window.scrollY > 15);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Measure the navbar's bottom edge at scrollY 0 on mount and on resize (debounced)
+  useEffect(() => {
+    const updateNavBottom = () => {
+      // Ignore changes while the user is scrolled and the navbar is in a shrunken state
+      if (window.scrollY > 0) return;
+      if (headerRef.current) {
+        const bottom = headerRef.current.getBoundingClientRect().bottom;
+        if (bottom > 0) {
+          document.documentElement.style.setProperty('--dh-nav-bottom', `${bottom}px`);
+        }
+      }
+    };
+
+    updateNavBottom();
+
+    let resizeTimer: NodeJS.Timeout;
+    const onResize = () => {
+      updateNavBottom();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateNavBottom, 50);
+    };
+
+    window.addEventListener('resize', onResize);
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && headerRef.current) {
+      ro = new ResizeObserver(() => {
+        updateNavBottom();
+      });
+      ro.observe(headerRef.current);
+    }
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
+      if (ro) ro.disconnect();
+    };
   }, []);
 
   // Retain all section links in order; Contact is removed because Contact Us is the primary CTA
@@ -62,6 +102,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header
+      ref={headerRef}
       className={`fixed top-0 left-0 right-0 z-[9980] transition-all duration-300 ${
         scrolled
           ? 'bg-[var(--bg-page)]/90 backdrop-blur-md shadow-md border-b border-[var(--border-subtle)] py-0'
@@ -115,9 +156,9 @@ export const Navbar: React.FC = () => {
           })}
         </div>
 
-        {/* Desktop Right-Hand Controls: ThemeRadio, LanguageSelector, Contact Us */}
+        {/* Desktop Right-Hand Controls: ThemeSwitch, LanguageSelector, Contact Us */}
         <div className="hidden lg:flex items-center space-x-2">
-          <ThemeRadio />
+          <ThemeSwitch />
           <LanguageSelector dropdownAlign="right" />
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Link
@@ -130,9 +171,9 @@ export const Navbar: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Mobile Action Bar: ThemeRadio + Menu Trigger */}
+        {/* Mobile Action Bar: ThemeSwitch + Menu Trigger */}
         <div className="flex items-center space-x-2 lg:hidden">
-          <ThemeRadio />
+          <ThemeSwitch />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-xl text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
@@ -169,11 +210,11 @@ export const Navbar: React.FC = () => {
                 {link.label}
               </Link>
             ))}
-            {/* Preferences row: ThemeRadio + LanguageSelector */}
+            {/* Preferences row: ThemeSwitch, LanguageSelector */}
             <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-[var(--border-subtle)]">
               <span className="text-xs font-bold text-[var(--text-muted)]">{t('preferences')}</span>
               <div className="flex items-center space-x-2">
-                <ThemeRadio />
+                <ThemeSwitch />
                 <LanguageSelector dropdownAlign="left" />
               </div>
             </div>

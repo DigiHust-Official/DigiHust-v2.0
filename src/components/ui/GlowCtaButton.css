@@ -1,20 +1,76 @@
-/* ── GlowCtaButton (Hero CTA) ── */
+/* ── GlowCtaButton (Hero CTA Theme-Aware Tokens) ── */
 :root {
   --dh-glow-height: 56px;
   --dh-glow-radius: 14px;
   --dh-glow-padding-inline: 28px;
-  --dh-glow-font-size: 1rem;
+  --dh-glow-font-size: 17.5px;
   --dh-glow-arrow-size: 16px;
-  --dh-glow-spread-light: 0 10px 25px -5px rgba(2, 43, 58, 0.22);
-  --dh-glow-spread-dark: 0 0 35px rgba(34, 211, 238, 0.40);
-  --dh-glow-spread-hover-dark: 0 0 50px rgba(34, 211, 238, 0.65);
+  --dh-nav-bottom: 80px;
+}
+
+/* Light Theme Variables */
+html[data-theme="light"],
+html.light {
+  --dh-glow-1: #0B4F61;
+  --dh-glow-2: #1F7A8C;
+  --dh-glow-3: #2A8FA3;
+  --dh-glow-text: #FFFFFF;
+  --dh-glow-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --dh-glow-border: rgba(255, 255, 255, 0.35);
+  --dh-glow-shadow: 0 10px 28px -6px rgba(31, 122, 140, 0.55);
+
+  --dh-glow-base-bg: #0B4F61;
+  --dh-glow-blob-1: #1F7A8C;
+  --dh-glow-blob-2: #0B4F61;
+  --dh-glow-blob-3: #1F7A8C;
+  --dh-glow-blob-4: #0B4F61;
+  --dh-glow-blob-5: #2A8FA3;
+  --dh-glow-blob-6: #1F7A8C;
+}
+
+/* Dark Theme Variables */
+:root,
+html[data-theme="dark"],
+html.dark {
+  --dh-glow-1: #2EC4D6;
+  --dh-glow-2: #27B0C3;
+  --dh-glow-3: #1F9FB3;
+  --dh-glow-text: #031820;
+  --dh-glow-text-shadow: none;
+  --dh-glow-border: rgba(255, 255, 255, 0.35);
+  --dh-glow-shadow: 0 0 0 1px rgba(46, 196, 214, 0.40), 0 10px 32px -4px rgba(46, 196, 214, 0.45);
+
+  --dh-glow-base-bg: #031820;
+  --dh-glow-blob-1: #2EC4D6;
+  --dh-glow-blob-2: #1F9FB3;
+  --dh-glow-blob-3: #27B0C3;
+  --dh-glow-blob-4: #2EC4D6;
+  --dh-glow-blob-5: #27B0C3;
+  --dh-glow-blob-6: #1F9FB3;
 }
 
 .dh-glow-btn {
-  height: var(--dh-glow-height);
+  height: var(--dh-hero-btn-h, var(--dh-glow-height));
   padding-inline: var(--dh-glow-padding-inline);
-  border-radius: var(--dh-glow-radius);
+  border-radius: var(--dh-hero-btn-radius, var(--dh-glow-radius));
   font-size: var(--dh-glow-font-size);
+  background-color: var(--dh-glow-base-bg);
+  border: 1px solid var(--dh-glow-border);
+  box-shadow: var(--dh-glow-shadow);
+  color: var(--dh-glow-text);
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+html[data-theme="light"] .dh-glow-btn:hover,
+html.light .dh-glow-btn:hover {
+  box-shadow: 0 14px 34px -4px rgba(31, 122, 140, 0.70);
+}
+
+html[data-theme="dark"] .dh-glow-btn:hover,
+html.dark .dh-glow-btn:hover,
+:root .dh-glow-btn:hover {
+  box-shadow: 0 0 0 1px rgba(46, 196, 214, 0.60), 0 14px 40px -2px rgba(46, 196, 214, 0.70);
 }
 
 /* Fluid morphing lava keyframes (prefixed to avoid collision with closing button) */
@@ -126,3 +182,144 @@
   }
 }
 
+/* ── Outlined Explore Squads Hero Button ── */
+.dh-hero-explore-btn {
+  height: var(--dh-hero-btn-h, 56px);
+  border-radius: var(--dh-hero-btn-radius, 14px);
+  padding-inline: var(--dh-glow-padding-inline, 28px);
+  font-size: var(--dh-glow-font-size, 17.5px);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+/* Light theme */
+html[data-theme="light"] .dh-hero-explore-btn,
+html.light .dh-hero-explore-btn {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--text-heading);
+  color: var(--text-heading);
+  box-shadow: 0 6px 16px -8px rgba(2, 43, 58, 0.25);
+}
+
+/* Dark theme */
+:root .dh-hero-explore-btn,
+html[data-theme="dark"] .dh-hero-explore-btn,
+html.dark .dh-hero-explore-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #F3F6FA;
+  box-shadow: none;
+}
+
+/* Hover ::before sweep fill (origin left, 260ms cubic-bezier(.2,.7,.2,1)) */
+.dh-hero-explore-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  z-index: 1;
+}
+
+html[data-theme="light"] .dh-hero-explore-btn::before,
+html.light .dh-hero-explore-btn::before {
+  background: var(--text-heading);
+}
+
+:root .dh-hero-explore-btn::before,
+html[data-theme="dark"] .dh-hero-explore-btn::before,
+html.dark .dh-hero-explore-btn::before {
+  background: #F3F6FA;
+}
+
+.dh-hero-explore-btn:hover::before {
+  transform: scaleX(1);
+}
+
+/* Active */
+.dh-hero-explore-btn:active {
+  transform: translateY(1px);
+}
+
+/* Focus-visible: outline 2px solid var(--focus-ring) with offset 3px */
+.dh-hero-explore-btn:focus-visible {
+  outline: 2px solid var(--dh-focus-ring, var(--brand-teal));
+  outline-offset: 3px;
+}
+
+/* Content wrapper in relative z-10 span */
+.dh-hero-explore-content {
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: color 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html[data-theme="light"] .dh-hero-explore-btn:hover .dh-hero-explore-content,
+html.light .dh-hero-explore-btn:hover .dh-hero-explore-content {
+  color: #FFFFFF;
+}
+
+:root .dh-hero-explore-btn:hover .dh-hero-explore-content,
+html[data-theme="dark"] .dh-hero-explore-btn:hover .dh-hero-explore-content,
+html.dark .dh-hero-explore-btn:hover .dh-hero-explore-content {
+  color: #050D14;
+}
+
+/* Trailing icon: 18px, moves translate(3px, -3px) on hover */
+.dh-hero-explore-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dh-hero-explore-btn:hover .dh-hero-explore-icon {
+  transform: translate(3px, -3px);
+}
+
+/* Reduced motion: no sweep or movement, instant color change */
+@media (prefers-reduced-motion: reduce) {
+  .dh-hero-explore-btn {
+    transition: none !important;
+  }
+  .dh-hero-explore-btn::before {
+    display: none !important;
+  }
+  .dh-hero-explore-btn:hover {
+    transform: none !important;
+  }
+  html[data-theme="light"] .dh-hero-explore-btn:hover {
+    background: var(--text-heading) !important;
+    color: #FFFFFF !important;
+  }
+  html[data-theme="dark"] .dh-hero-explore-btn:hover,
+  html.dark .dh-hero-explore-btn:hover,
+  :root .dh-hero-explore-btn:hover {
+    background: #F3F6FA !important;
+    color: #050D14 !important;
+  }
+  .dh-hero-explore-content {
+    transition: none !important;
+  }
+  .dh-hero-explore-icon {
+    transform: none !important;
+    transition: none !important;
+  }
+  .dh-hero-explore-btn:active {
+    transform: none !important;
+  }
+}

@@ -65,7 +65,9 @@ const FrameCard: React.FC<FrameCardProps> = ({
 
   return (
     <div
-      className="hero-media-frame relative w-full aspect-[4/5] rounded-[20px] overflow-hidden select-none border border-[var(--dh-border)] bg-[var(--dh-surface-alt)]"
+      className={`hero-media-frame relative w-full aspect-[4/5] rounded-[6px] overflow-hidden select-none border border-[var(--border-subtle)] ${
+        hasSource ? 'has-media bg-transparent' : 'bg-[var(--bg-surface)]'
+      }`}
       style={{
         boxShadow: 'var(--hero-frame-shadow)',
         marginBottom: 'var(--hero-column-gap)',
@@ -101,13 +103,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
         )
       ) : (
         /* ── Architectural Placeholder ── */
-        <div
-          className="w-full h-full flex flex-col items-center justify-center relative p-4"
-          style={{
-            background:
-              'linear-gradient(135deg, var(--dh-surface) 0%, var(--dh-surface-alt) 100%)',
-          }}
-        >
+        <div className="w-full h-full flex flex-col items-center justify-center relative p-4 bg-[var(--bg-surface)]">
           {/* Centered Lucide Icon: 34% width, strokeWidth 1.25, muted at 40% opacity */}
           <div className="w-[34%] h-[34%] max-w-[120px] max-h-[120px] flex items-center justify-center text-[var(--text-muted)] opacity-40">
             <IconComponent
@@ -123,23 +119,30 @@ const FrameCard: React.FC<FrameCardProps> = ({
         </div>
       )}
 
-      {/* ── Bottom Scrim ── */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none z-10"
-        style={{
-          background:
-            'linear-gradient(to top, rgba(2, 12, 18, 0.60) 0%, rgba(2, 12, 18, 0) 42%)',
-        }}
-      />
+      {/* ── Bottom Scrim (only on real media: linear-gradient(to top, rgba(2,12,18,0.72), rgba(2,12,18,0) 38%)) ── */}
+      {hasSource && (
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            background:
+              'linear-gradient(to top, rgba(2, 12, 18, 0.72) 0%, rgba(2, 12, 18, 0) 38%)',
+          }}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* ── Bottom-Left Label ── */}
-      <div className="absolute left-4 bottom-4 right-4 z-20 flex items-center pointer-events-none">
-        <span className="text-[11px] font-mono text-white/70 tabular-nums mr-2 shrink-0">
+      {/* ── Bottom-Left Label (14px inset: 11px tabular-nums + 12px weight 600) ── */}
+      <div className="absolute left-[14px] bottom-[14px] right-[14px] z-20 flex items-center pointer-events-none overflow-hidden">
+        <span
+          className={`text-[11px] font-mono tabular-nums mr-1.5 shrink-0 ${
+            hasSource ? 'text-white/70' : 'text-[var(--text-muted)]'
+          }`}
+        >
           {frame.serviceNumber}
         </span>
         <span
-          className={`font-semibold text-white tracking-[0.02em] truncate ${
-            isMobile ? 'text-[11px]' : 'text-[12.5px] lg:text-[13px]'
+          className={`font-semibold text-[12px] truncate ${
+            hasSource ? 'text-white' : 'text-[var(--text-heading)]'
           }`}
         >
           {displayLabel}
@@ -348,28 +351,30 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
       <style>{`
         .hero-media-columns-container {
           --hero-column-gap: clamp(12px, 1.2vw, 20px);
-          --hero-frame-shadow: 0 10px 30px rgba(2, 43, 58, 0.10);
+          --hero-frame-shadow: 0 4px 14px rgba(2, 43, 58, 0.06);
         }
         .dark .hero-media-columns-container,
-        [data-theme="dark"] .hero-media-columns-container {
-          --hero-frame-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        [data-theme="dark"] .hero-media-columns-container,
+        html.dark .hero-media-columns-container,
+        html[data-theme="dark"] .hero-media-columns-container {
+          --hero-frame-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
         }
 
         /* Desktop Layout (lg and up) */
         @media (min-width: 1024px) {
           .hero-media-columns-desktop {
             position: absolute;
-            top: 0;
+            top: calc(var(--dh-nav-bottom, 68px) + 12px);
             bottom: 0;
             right: clamp(1.5rem, 2vw, 2rem);
-            width: min(40vw, 46rem);
+            width: min(38vw, 42rem);
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: var(--hero-column-gap);
             z-index: 1;
             overflow: hidden;
-            mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 90%, transparent 100%);
             pointer-events: none;
           }
         }

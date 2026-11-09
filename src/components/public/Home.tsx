@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView, useReducedMotion, type Variants } from 'framer-motion';
 import {
   ArrowRight,
+  ArrowUpRight,
   Code,
   Palette,
   Cpu,
@@ -393,7 +394,13 @@ export const Home: React.FC = () => {
           <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
           {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
-          <div className="order-1 max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none">
+          <div
+            className="order-1 max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none"
+            style={{
+              '--dh-hero-btn-h': '56px',
+              '--dh-hero-btn-radius': '14px',
+            } as React.CSSProperties}
+          >
             
             {/* ── DESKTOP LAYOUT (lg and up) ── */}
             <motion.div
@@ -403,7 +410,7 @@ export const Home: React.FC = () => {
               data-hero-desktop="true"
               className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
               style={{
-                width: 'min(44vw, 48rem)',
+                width: 'min(42vw, 44rem)',
                 minHeight: 'calc(100vh - 64px)',
                 marginTop: '64px',
                 transform: 'translateY(-2vh)',
@@ -453,12 +460,15 @@ export const Home: React.FC = () => {
                   label={hero?.ctaPrimaryText || t('btn_scoped_quote')}
                 />
 
-                {/* Secondary Button */}
+                {/* Secondary Button: Explore Squads (Outlined button with hover sweep) */}
                 <Link
                   to="/services"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-base bg-transparent border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] hover:bg-[var(--dh-surface-alt)] transition-colors select-none whitespace-nowrap shadow-none"
+                  className="dh-hero-explore-btn group"
                 >
-                  <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                  <span className="dh-hero-explore-content">
+                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                    <ArrowUpRight className="dh-hero-explore-icon" />
+                  </span>
                 </Link>
               </motion.div>
             </motion.div>
@@ -498,9 +508,12 @@ export const Home: React.FC = () => {
                 />
                 <Link
                   to="/services"
-                  className="h-[56px] px-[28px] rounded-[14px] inline-flex items-center justify-center gap-2.5 font-semibold text-sm sm:text-base bg-transparent border border-[var(--dh-border)] dark:border-[rgba(255,255,255,0.18)] text-[var(--text-heading)] hover:bg-[var(--dh-surface-alt)] transition-colors select-none shadow-none"
+                  className="dh-hero-explore-btn group w-full sm:w-auto"
                 >
-                  <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                  <span className="dh-hero-explore-content">
+                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                    <ArrowUpRight className="dh-hero-explore-icon" />
+                  </span>
                 </Link>
               </motion.div>
             </motion.div>
