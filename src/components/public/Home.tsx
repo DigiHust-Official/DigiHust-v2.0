@@ -34,6 +34,7 @@ import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
 import { GlowCtaButton } from '../ui/GlowCtaButton';
 import { GlassCtaButton } from '../ui/GlassCtaButton';
+import { HeroRotator } from '../ui/HeroRotator';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { useLanguage } from '../../context/LanguageContext';
@@ -223,6 +224,7 @@ export const Home: React.FC = () => {
   const { t } = useLanguage();
   const { siteContent } = useApp();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [buttonsHovered, setButtonsHovered] = useState(false);
 
   const heroRef = useRef<HTMLElement>(null);
   const runwayRef = useRef<HTMLDivElement>(null);
@@ -376,46 +378,10 @@ export const Home: React.FC = () => {
               display: none !important;
             }
           }
-          @media (max-height: 639px) {
-            .dh-hero-body {
-              display: none !important;
-            }
-          }
-          .dh-hero-payoff {
-            display: inline-block;
-            padding: 0.04em 0.28em 0.12em;
-            border-radius: 0.16em;
-            clip-path: inset(0 100% 0 0 round 0.16em);
-            animation: dh-payoff-reveal 700ms cubic-bezier(0.2, 0.7, 0.2, 1) 450ms forwards;
-          }
-          @keyframes dh-payoff-reveal {
-            0% {
-              clip-path: inset(0 100% 0 0 round 0.16em);
-            }
-            100% {
-              clip-path: inset(0 0 0 0 round 0.16em);
-            }
-          }
-          html[data-theme="light"] .dh-hero-payoff,
-          html.light .dh-hero-payoff {
-            background: linear-gradient(100deg, #0B4F61, #1F7A8C);
-            color: #FFFFFF;
-          }
-          :root .dh-hero-payoff,
-          html[data-theme="dark"] .dh-hero-payoff,
-          html.dark .dh-hero-payoff {
-            background: linear-gradient(100deg, #2EC4D6, #5BD7E5);
-            color: #031820;
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .dh-hero-payoff {
-              clip-path: inset(0 0 0 0 round 0.16em) !important;
-              animation: none !important;
-            }
-          }
-          @media (min-width: 1024px) {
-            .dh-hero-payoff {
-              margin-left: -0.28em;
+          @media (max-width: 559px) {
+            .dh-hero-trust-row {
+              white-space: normal !important;
+              flex-wrap: wrap !important;
             }
           }
           @media (prefers-reduced-motion: reduce) {
@@ -435,7 +401,7 @@ export const Home: React.FC = () => {
           data-hero="true"
           className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 flex flex-col lg:block border-b border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-page)]"
         >
-          {/* Animated Hero Backdrop (grid, drifting teal & periwinkle glows, pointer light) */}
+          {/* Animated Hero Backdrop (Panorama Ribbon Wave) */}
           <HeroBackdrop heroRef={heroRef} />
 
           {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
@@ -455,68 +421,26 @@ export const Home: React.FC = () => {
               data-hero-desktop="true"
               className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
               style={{
-                width: 'min(46vw, 42rem)',
+                width: 'min(54vw, 62rem)',
                 minHeight: 'calc(100vh - var(--dh-nav-bottom, 72px))',
                 paddingTop: 'calc(var(--dh-nav-bottom, 72px) + clamp(28px, 5vh, 56px))',
                 paddingBottom: 'clamp(24px, 4.5vh, 48px)',
-                paddingLeft: 'calc(var(--dh-gutter, clamp(16px, 3.5vw, 40px)) + 13px)',
+                paddingLeft: 'calc(var(--dh-gutter, clamp(16px, 3.5vw, 40px)) + 15px)',
                 alignSelf: 'flex-start',
               }}
             >
-              {/* 1. Headline: 2 block spans */}
-              <motion.h1
-                variants={itemVariants}
-                className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0 w-fit"
-                style={{
-                  fontSize: 'clamp(2.25rem, min(3.8vw, 7.8vh), 5rem)',
-                  lineHeight: 1.06,
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap">
-                  {t('hero_v5_headline_1')}
-                </span>
-                <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap mt-1">
-                  <span className="dh-hero-payoff">
-                    {t('hero_v5_headline_2')}
-                  </span>
-                </span>
-              </motion.h1>
+              {/* 1. Scramble Headline Rotator (meta row, h1, sub-heading) */}
+              <HeroRotator isButtonsHovered={buttonsHovered} />
 
-              {/* 2. Subheading */}
-              <motion.p
-                variants={itemVariants}
-                className="dh-hero-sub m-0 font-semibold text-[var(--text-heading)] max-w-[34rem]"
-                style={{
-                  fontSize: 'clamp(1.05rem, min(1.6vw, 3.4vh), 1.7rem)',
-                  lineHeight: 1.35,
-                  marginTop: 'clamp(14px, 2.4vh, 24px)',
-                }}
-              >
-                {t('hero_v5_sub')}
-              </motion.p>
-
-              {/* 3. Body paragraph */}
-              <motion.p
-                variants={itemVariants}
-                className="dh-hero-body text-[var(--text-muted)] m-0 max-w-[33rem]"
-                style={{
-                  fontSize: 'clamp(0.95rem, 1.05vw, 1.15rem)',
-                  lineHeight: 1.6,
-                  marginTop: '12px',
-                  textWrap: 'pretty',
-                }}
-              >
-                {t('hero_v5_body')}
-              </motion.p>
-
-              {/* 4. Buttons: Glass proposal button + See Our Work */}
+              {/* 2. Buttons: Glass proposal button + See Our Work */}
               <motion.div
                 variants={itemVariants}
                 className="flex items-center gap-[14px] w-fit"
                 style={{
-                  marginTop: 'clamp(22px, 4vh, 36px)',
+                  marginTop: 'clamp(24px, 4.4vh, 40px)',
                 }}
+                onMouseEnter={() => setButtonsHovered(true)}
+                onMouseLeave={() => setButtonsHovered(false)}
               >
                 <GlassCtaButton
                   to="/contact"
@@ -534,25 +458,31 @@ export const Home: React.FC = () => {
                 </Link>
               </motion.div>
 
-              {/* 5. Trust Row */}
+              {/* 3. Trust Row (ONE line, 3 items) */}
               <motion.div
                 variants={itemVariants}
-                className="dh-hero-trust-row flex flex-wrap items-center gap-x-[20px] gap-y-[8px] select-none"
+                className="dh-hero-trust-row flex items-center gap-x-[20px] select-none whitespace-nowrap"
                 style={{
-                  marginTop: 'clamp(16px, 2.8vh, 26px)',
+                  marginTop: 'clamp(16px, 3vh, 28px)',
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_1')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_1') || 'Milestone guarantee'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_2')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_2') || 'Verified specialists'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_3')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_3') || 'Proposal in 24h'}
+                  </span>
                 </div>
               </motion.div>
             </motion.div>
@@ -564,35 +494,16 @@ export const Home: React.FC = () => {
               animate="visible"
               className="block lg:hidden w-full pointer-events-auto px-6"
             >
-              <motion.h1
-                variants={itemVariants}
-                className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.12] tracking-tight mb-4"
-              >
-                <span className="block">{t('hero_v5_headline_1')}</span>
-                <span className="block mt-1">
-                  <span className="dh-hero-payoff">
-                    {t('hero_v5_headline_2')}
-                  </span>
-                </span>
-              </motion.h1>
-
-              <motion.p
-                variants={itemVariants}
-                className="dh-hero-sub text-sm sm:text-base font-semibold text-[var(--text-heading)] max-w-[32rem] leading-snug mb-3"
-              >
-                {t('hero_v5_sub')}
-              </motion.p>
-
-              <motion.p
-                variants={itemVariants}
-                className="dh-hero-body text-xs sm:text-sm text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
-              >
-                {t('hero_v5_body')}
-              </motion.p>
+              <HeroRotator isButtonsHovered={buttonsHovered} />
 
               <motion.div
                 variants={itemVariants}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+                style={{
+                  marginTop: 'clamp(20px, 3.8vh, 32px)',
+                }}
+                onMouseEnter={() => setButtonsHovered(true)}
+                onMouseLeave={() => setButtonsHovered(false)}
               >
                 <GlassCtaButton
                   to="/contact"
@@ -615,16 +526,22 @@ export const Home: React.FC = () => {
                 className="dh-hero-trust-row flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 select-none"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_1')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_1') || 'Milestone guarantee'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_2')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_2') || 'Verified specialists'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
-                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v5_trust_3')}</span>
+                  <CheckCircle2 size={16} className="text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">
+                    {t('hero_v6_trust_3') || 'Proposal in 24h'}
+                  </span>
                 </div>
               </motion.div>
             </motion.div>

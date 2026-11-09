@@ -173,6 +173,16 @@ html.dark {
   --dh-silver-edge: inset 1px 1px 0 rgba(255, 255, 255, 0.55), inset -1px -1px 0 rgba(30, 40, 50, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.18);
   --dh-glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
   --dh-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 20px 40px -18px rgba(0, 0, 0, 0.65);
+
+  /* Wave & Rotator tokens */
+  --dh-wave-1: 255, 122, 89;
+  --dh-wave-2: 255, 190, 120;
+  --dh-wave-3: 142, 155, 232;
+  --dh-wave-hi: 255, 200, 140;
+  --dh-mark: rgba(46, 196, 214, 0.30);
+  --dh-scr: #2EC4D6;
+  --dh-seg-track: rgba(255, 255, 255, 0.18);
+  --dh-seg-fill: #2EC4D6;
 }
 
 html[data-theme="light"],
@@ -192,7 +202,6 @@ html.light {
   --dh-focus-ring: #1F7A8C;
   --dh-brand-navy: #022B3A;
   --dh-gradient-brand: linear-gradient(135deg, #1F7A8C, #2EC4D6);
-  --dh-mark: rgba(46, 196, 214, 0.40);
   --dh-card-face: #FBF9F4;
   --dh-card-ink: #0A1F2B;
   --dh-card-line: rgba(10, 31, 43, 0.18);
@@ -209,6 +218,16 @@ html.light {
   --dh-silver-edge: inset 1px 1px 0 rgba(255, 255, 255, 0.95), inset -1px -1px 0 rgba(95, 108, 120, 0.40), 0 0 0 1px rgba(110, 122, 134, 0.35);
   --dh-glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(223, 228, 233, 0.58));
   --dh-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(105, 120, 133, 0.28), 0 0 0 1px rgba(118, 132, 145, 0.30), 0 20px 40px -18px rgba(20, 45, 60, 0.35), 0 2px 6px rgba(20, 45, 60, 0.08);
+
+  /* Wave & Rotator tokens */
+  --dh-wave-1: 255, 122, 89;
+  --dh-wave-2: 255, 179, 107;
+  --dh-wave-3: 142, 155, 232;
+  --dh-wave-hi: 255, 160, 100;
+  --dh-mark: rgba(46, 196, 214, 0.38);
+  --dh-scr: #1F7A8C;
+  --dh-seg-track: rgba(10, 31, 43, 0.14);
+  --dh-seg-fill: #1F7A8C;
 }
 
 /* Marker draw-in animation */

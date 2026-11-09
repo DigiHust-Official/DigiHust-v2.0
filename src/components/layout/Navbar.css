@@ -11,6 +11,7 @@
 
 .dh-nav-bar {
   pointer-events: auto;
+  position: relative;
   height: 60px;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -68,20 +69,54 @@ html.dark .dh-nav-logo-text {
 
 /* Center group of links */
 .dh-nav-links {
+  position: relative;
   justify-self: center;
   display: flex;
   align-items: center;
   gap: 2px;
 }
 
+/* Gliding Indicator Pill */
+.dh-nav-glide {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 36px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 0;
+  transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              width 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              opacity 200ms ease;
+}
+
+html[data-theme="light"] .dh-nav-glide,
+html.light .dh-nav-glide {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 1px 2px rgba(20, 45, 60, 0.12);
+}
+
+:root .dh-nav-glide,
+html[data-theme="dark"] .dh-nav-glide,
+html.dark .dh-nav-glide {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .dh-nav-link {
+  position: relative;
+  z-index: 1;
   font-size: 14px;
   font-weight: 500;
   padding: 8px 12px;
   border-radius: 999px;
   white-space: nowrap;
   text-decoration: none;
-  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.18s ease;
   user-select: none;
   outline: none;
 }
@@ -91,6 +126,23 @@ html.dark .dh-nav-logo-text {
   outline-offset: 2px;
 }
 
+.dh-nav-link-label {
+  display: inline-block;
+}
+
+/* Active Route Dot (4px teal dot centered under link label) */
+.dh-nav-active-dot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--brand-teal-text);
+  pointer-events: none;
+}
+
 /* Light Theme Links */
 html[data-theme="light"] .dh-nav-link,
 html.light .dh-nav-link {
@@ -98,17 +150,16 @@ html.light .dh-nav-link {
 }
 
 html[data-theme="light"] .dh-nav-link:hover,
-html.light .dh-nav-link:hover {
+html.light .dh-nav-link:hover,
+html[data-theme="light"] .dh-nav-link:focus-visible,
+html.light .dh-nav-link:focus-visible {
   color: #0A1F2B;
-  background: rgba(255, 255, 255, 0.55);
 }
 
 html[data-theme="light"] .dh-nav-link.dh-nav-link--active,
 html.light .dh-nav-link.dh-nav-link--active {
   color: #0A1F2B;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 1px 2px rgba(20, 45, 60, 0.10);
 }
 
 /* Dark Theme Links */
@@ -120,9 +171,11 @@ html.dark .dh-nav-link {
 
 :root .dh-nav-link:hover,
 html[data-theme="dark"] .dh-nav-link:hover,
-html.dark .dh-nav-link:hover {
+html.dark .dh-nav-link:hover,
+:root .dh-nav-link:focus-visible,
+html[data-theme="dark"] .dh-nav-link:focus-visible,
+html.dark .dh-nav-link:focus-visible {
   color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.08);
 }
 
 :root .dh-nav-link.dh-nav-link--active,
@@ -130,7 +183,6 @@ html[data-theme="dark"] .dh-nav-link.dh-nav-link--active,
 html.dark .dh-nav-link.dh-nav-link--active {
   color: #FFFFFF;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Right Cluster */
@@ -140,13 +192,39 @@ html.dark .dh-nav-link.dh-nav-link--active {
   gap: 4px;
 }
 
+/* 1px x 22px Divider between Language Trigger and Contact */
+.dh-nav-divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  flex-shrink: 0;
+  display: block;
+}
+
+html[data-theme="light"] .dh-nav-divider,
+html.light .dh-nav-divider {
+  background-color: rgba(10, 31, 43, 0.14);
+}
+
+:root .dh-nav-divider,
+html[data-theme="dark"] .dh-nav-divider,
+html.dark .dh-nav-divider {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Contact Button Wrapper & Tooltip */
+.dh-nav-contact-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .dh-nav-contact-btn {
   height: 44px;
   padding-inline: 22px;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  margin-left: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -164,6 +242,100 @@ html.dark .dh-nav-link.dh-nav-link--active {
   outline: 2px solid var(--dh-focus-ring);
   outline-offset: 3px;
   border-radius: 999px;
+}
+
+/* Availability Dot (8px, #22C55E with 2.2s pulse ring) */
+.dh-nav-avail-wrap {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dh-nav-avail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22C55E;
+  display: block;
+}
+
+.dh-nav-avail-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1.5px solid #22C55E;
+  animation: dh-avail-pulse 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes dh-avail-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Trailing arrow icon */
+.dh-nav-contact-arrow {
+  margin-left: 6px;
+  flex-shrink: 0;
+  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dh-nav-contact-btn:hover .dh-nav-contact-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* Glass Tooltip below Contact Button */
+.dh-nav-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 9999;
+}
+
+.dh-nav-contact-wrap:hover .dh-nav-tooltip,
+.dh-nav-contact-wrap:focus-within .dh-nav-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-theme="light"] .dh-nav-tooltip,
+html.light .dh-nav-tooltip {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  color: #0A1F2B;
+  box-shadow: 0 10px 25px -5px rgba(20, 45, 60, 0.25);
+}
+
+:root .dh-nav-tooltip,
+html[data-theme="dark"] .dh-nav-tooltip,
+html.dark .dh-nav-tooltip {
+  background: rgba(18, 30, 40, 0.88);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #F3F6FA;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.60);
 }
 
 /* Light Theme Contact Button */
@@ -202,6 +374,37 @@ html.dark .dh-nav-contact-btn:hover {
   transform: translateY(1px);
 }
 
+/* Scroll Progress Bar along bottom rim */
+.dh-nav-scroll-track {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+}
+
+html[data-theme="light"] .dh-nav-scroll-track,
+html.light .dh-nav-scroll-track {
+  background: rgba(10, 31, 43, 0.08);
+}
+
+:root .dh-nav-scroll-track,
+html[data-theme="dark"] .dh-nav-scroll-track,
+html.dark .dh-nav-scroll-track {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.dh-nav-scroll-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #1F7A8C, #2EC4D6 55%, #FF7A59);
+  border-radius: 2px;
+}
+
 /* Mobile Glass Menu */
 .dh-nav-mobile-panel {
   pointer-events: auto;
@@ -230,13 +433,33 @@ html.dark .dh-nav-mobile-panel {
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.70);
 }
 
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .dh-nav-contact-btn,
-  .dh-nav-contact-btn:hover,
-  .dh-nav-contact-btn:active {
-    transform: none !important;
-    transition: none !important;
+/* Tight width rules (1024-1099px: hide arrow first, then divider; never links or availability dot) */
+@media (max-width: 1100px) {
+  .dh-nav-contact-arrow {
+    display: none !important;
   }
 }
 
+@media (max-width: 1040px) {
+  .dh-nav-divider {
+    display: none !important;
+  }
+}
+
+/* Reduced Motion Overrides */
+@media (prefers-reduced-motion: reduce) {
+  .dh-nav-glide {
+    transition: none !important;
+  }
+  .dh-nav-contact-btn,
+  .dh-nav-contact-btn:hover,
+  .dh-nav-contact-btn:active,
+  .dh-nav-contact-arrow {
+    transform: none !important;
+    transition: none !important;
+  }
+  .dh-nav-avail-ring {
+    display: none !important;
+    animation: none !important;
+  }
+}

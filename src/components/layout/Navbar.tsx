@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { useLanguage } from '../../context/LanguageContext';
@@ -10,6 +10,8 @@ import { TRANSLATIONS } from '../../lib/i18n';
 import logoImg from '../../assets/logo.png';
 import { PortalNavbar } from '../portal/PortalNavbar';
 import './Navbar.css';
+
+export const NAV_AVAILABLE = true;
 
 // Register fallback key for Contact Us if not present
 if (!TRANSLATIONS.en['nav.contactUs']) {
@@ -22,10 +24,52 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated } = useApp();
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const linksContainerRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
+  const [glideStyle, setGlideStyle] = useState<{
+    transform: string;
+    width: string;
+    opacity: number;
+  }>({
+    transform: 'translate3d(0, -50%, 0)',
+    width: '0px',
+    opacity: 0,
+  });
+
+  // Scroll Progress (framer-motion window scroll)
+  const { scrollY, scrollYProgress } = useScroll();
+  const scrollTrackOpacity = useTransform(scrollY, [0, 8, 9], [0, 0, 1]);
 
   const isPortalLogin = location.pathname === '/portal/login';
-  const isPortal = location.pathname.startsWith('/portal') || ['/dashboard', '/roster', '/admin'].some(p => location.pathname.startsWith(p));
-  const isVerify = location.pathname.startsWith('/verify') || location.pathname.startsWith('/cert');
+  const isPortal =
+    location.pathname.startsWith('/portal') ||
+    ['/dashboard', '/roster', '/admin'].some((p) => location.pathname.startsWith(p));
+  const isVerify =
+    location.pathname.startsWith('/verify') || location.pathname.startsWith('/cert');
+
+  // Retain all 7 section links in exact order
+  const navLinks = [
+    { label: t('nav_services') || 'Services', href: '/services' },
+    { label: t('nav_work') || 'Work', href: '/portfolio' },
+    { label: t('nav_how_it_works') || 'How It Works', href: '/how-it-works' },
+    { label: t('nav_about') || 'About', href: '/about' },
+    { label: t('nav_team') || 'Team', href: '/team' },
+    { label: t('nav_blog') || 'Blog', href: '/blog' },
+    { label: 'Careers', href: '/careers' },
+  ];
+
+  const activeIdx = navLinks.findIndex((l) => location.pathname === l.href);
+  const targetIdx =
+    hoveredIdx !== null
+      ? hoveredIdx
+      : focusedIdx !== null
+      ? focusedIdx
+      : activeIdx !== -1
+      ? activeIdx
+      : null;
 
   // Measure the navbar's bottom edge at scrollY 0 on mount and on resize (debounced)
   useEffect(() => {
@@ -64,16 +108,32 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  // Retain all 7 section links in exact order
-  const navLinks = [
-    { label: t('nav_services') || 'Services', href: '/services' },
-    { label: t('nav_work') || 'Work', href: '/portfolio' },
-    { label: t('nav_how_it_works') || 'How It Works', href: '/how-it-works' },
-    { label: t('nav_about') || 'About', href: '/about' },
-    { label: t('nav_team') || 'Team', href: '/team' },
-    { label: t('nav_blog') || 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
-  ];
+  // Update Gliding Indicator position
+  useEffect(() => {
+    const updateGlide = () => {
+      if (
+        targetIdx !== null &&
+        linkRefs.current[targetIdx] &&
+        linksContainerRef.current
+      ) {
+        const linkEl = linkRefs.current[targetIdx]!;
+        const contRect = linksContainerRef.current.getBoundingClientRect();
+        const linkRect = linkEl.getBoundingClientRect();
+        const x = linkRect.left - contRect.left;
+        setGlideStyle({
+          transform: `translate3d(${Math.round(x)}px, -50%, 0)`,
+          width: `${Math.round(linkRect.width)}px`,
+          opacity: 1,
+        });
+      } else {
+        setGlideStyle((prev) => ({ ...prev, opacity: 0 }));
+      }
+    };
+
+    updateGlide();
+    window.addEventListener('resize', updateGlide);
+    return () => window.removeEventListener('resize', updateGlide);
+  }, [targetIdx, location.pathname]);
 
   const isActive = (href: string) => location.pathname === href;
 
@@ -105,29 +165,80 @@ export const Navbar: React.FC = () => {
           </span>
         </Link>
 
-        {/* Desktop Center Links */}
-        <div className="hidden lg:flex dh-nav-links">
-          {navLinks.map((link) => {
+        {/* Desktop Center Links with Gliding Pill Indicator */}
+        <div
+          ref={linksContainerRef}
+          className="hidden lg:flex dh-nav-links"
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          {/* Gliding Pill Indicator */}
+          <div
+            className="dh-nav-glide"
+            style={{
+              transform: glideStyle.transform,
+              width: glideStyle.width,
+              opacity: glideStyle.opacity,
+            }}
+            aria-hidden="true"
+          />
+
+          {navLinks.map((link, idx) => {
             const active = isActive(link.href);
             return (
               <Link
                 key={link.href}
+                ref={(el) => {
+                  linkRefs.current[idx] = el;
+                }}
                 to={link.href}
                 className={`dh-nav-link ${active ? 'dh-nav-link--active' : ''}`}
+                aria-current={active ? 'page' : undefined}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onFocus={() => setFocusedIdx(idx)}
+                onBlur={() => setFocusedIdx(null)}
               >
-                {link.label}
+                <span className="dh-nav-link-label">{link.label}</span>
+                {active && <span className="dh-nav-active-dot" aria-hidden="true" />}
               </Link>
             );
           })}
         </div>
 
-        {/* Desktop Right Cluster: ThemeSwitch, LanguageSelector, Contact */}
+        {/* Desktop Right Cluster: ThemeSwitch, LanguageSelector, Divider, Contact */}
         <div className="hidden lg:flex dh-nav-right">
           <ThemeSwitch />
           <LanguageSelector dropdownAlign="right" />
-          <Link to="/contact" className="dh-nav-contact-btn">
-            {t('nav.contactUs')}
-          </Link>
+
+          {/* 1px x 22px Divider */}
+          <span className="dh-nav-divider" aria-hidden="true" />
+
+          {/* Contact Button with Availability Dot, Arrow, Tooltip */}
+          <div className="dh-nav-contact-wrap">
+            <Link
+              to="/contact"
+              className="dh-nav-contact-btn"
+              aria-describedby={NAV_AVAILABLE ? 'nav-contact-tip' : undefined}
+            >
+              {NAV_AVAILABLE && (
+                <span className="dh-nav-avail-wrap" aria-hidden="true">
+                  <span className="dh-nav-avail-dot" />
+                  <span className="dh-nav-avail-ring" />
+                </span>
+              )}
+              <span>{t('nav.contactUs')}</span>
+              <ArrowUpRight className="dh-nav-contact-arrow" size={16} />
+            </Link>
+
+            {NAV_AVAILABLE && (
+              <div
+                id="nav-contact-tip"
+                role="tooltip"
+                className="dh-nav-tooltip"
+              >
+                {t('nav_contact_tooltip') || 'Proposal within 24 hours'}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mobile Action Bar: ThemeSwitch + Menu Trigger */}
@@ -142,6 +253,21 @@ export const Navbar: React.FC = () => {
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
+
+        {/* Scroll Progress Bar along bottom rim of navbar pill */}
+        <motion.div
+          className="dh-nav-scroll-track"
+          style={{ opacity: scrollTrackOpacity }}
+          aria-hidden="true"
+        >
+          <motion.div
+            className="dh-nav-scroll-fill"
+            style={{
+              scaleX: scrollYProgress,
+              transformOrigin: '0% 50%',
+            }}
+          />
+        </motion.div>
       </nav>
 
       {/* Mobile Menu Panel */}
@@ -171,7 +297,9 @@ export const Navbar: React.FC = () => {
             ))}
 
             <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-[var(--border-subtle)]">
-              <span className="text-xs font-semibold text-[var(--text-muted)]">{t('preferences')}</span>
+              <span className="text-xs font-semibold text-[var(--text-muted)]">
+                {t('preferences')}
+              </span>
               <div className="flex items-center space-x-2">
                 <ThemeSwitch />
                 <LanguageSelector dropdownAlign="left" />

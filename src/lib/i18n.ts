@@ -62,6 +62,26 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     hero_v5_trust_2: 'Verified specialists',
     hero_v5_trust_3: 'Proposal within 24 hours',
 
+    // Hero Scramble Rotator Messages (v6)
+    hero_msg_1_head: 'Chasing five|[[freelancers?]]',
+    hero_msg_1_sub: 'Get one managed team, one contract and one person accountable for every milestone.',
+    hero_msg_2_head: 'Website not|[[converting?]]',
+    hero_msg_2_sub: 'We design and build fast, conversion-focused sites that turn visitors into enquiries.',
+    hero_msg_3_head: 'Invisible|[[on Google?]]',
+    hero_msg_3_sub: 'SEO and growth campaigns that put you in front of buyers who are already searching.',
+    hero_msg_4_head: 'Buried in|[[manual work?]]',
+    hero_msg_4_sub: 'AI automations and live BI dashboards replace the repetitive tasks and the spreadsheets.',
+    hero_msg_5_head: 'Is your business|[[really secure?]]',
+    hero_msg_5_sub: 'Security audits and hardening that find the weak spots before attackers do.',
+
+    // Hero Trust Row (v6)
+    hero_v6_trust_1: 'Milestone guarantee',
+    hero_v6_trust_2: 'Verified specialists',
+    hero_v6_trust_3: 'Proposal in 24h',
+
+    // Navbar Tooltip (v6)
+    nav_contact_tooltip: 'Proposal within 24 hours',
+
     // Orbit Services Caption
     service_caption_built_for: 'Built for',
     orbit_service_1_name: 'Graphic Design & Branding',

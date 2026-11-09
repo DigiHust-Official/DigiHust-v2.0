@@ -1,4 +1,4 @@
-/* HeroBackdrop.css - Alignment Field Backdrop */
+/* HeroBackdrop.css - Panorama Ribbon Wave Backdrop */
 
 .dh-hero-backdrop {
   position: absolute;
@@ -9,40 +9,54 @@
   user-select: none;
 }
 
-/* Layer a: Static soft glow circle (gives glass something to refract) */
-.dh-hero-static-glow {
-  position: absolute;
-  width: 55vw;
-  height: 55vw;
-  border-radius: 50%;
-  right: -10vw;
-  top: 5vh;
-  pointer-events: none;
-}
-
-html[data-theme="light"] .dh-hero-static-glow,
-html.light .dh-hero-static-glow {
-  background: radial-gradient(closest-side, rgba(31, 122, 140, 0.14), transparent);
-}
-
-html[data-theme="dark"] .dh-hero-static-glow,
-html.dark .dh-hero-static-glow,
-:root .dh-hero-static-glow {
-  background: radial-gradient(closest-side, rgba(46, 196, 214, 0.10), transparent);
-}
-
-/* Layer b: Canvas wrapper with horizontal calming mask */
-.dh-hero-canvas-wrap {
+.dh-wave-parallax-layer {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.30) 34%, #000000 62%);
-  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.30) 34%, #000000 62%);
-}
-
-.dh-hero-canvas {
-  display: block;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  will-change: transform;
+}
+
+.dh-wave-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Static Layer Breathing Animation */
+.dh-wave-svg--static {
+  transform: translateZ(0);
+  will-change: opacity;
+  animation: dh-wave-breathe 12s ease-in-out infinite alternate;
+}
+
+@keyframes dh-wave-breathe {
+  0% {
+    opacity: 0.88;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.dh-wave-svg--motion {
+  pointer-events: none;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .dh-wave-parallax-layer {
+    transform: none !important;
+  }
+  .dh-wave-svg--static {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .dh-wave-svg--motion {
+    display: none !important;
+  }
 }

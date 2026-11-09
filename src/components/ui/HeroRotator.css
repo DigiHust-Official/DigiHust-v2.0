@@ -1,0 +1,245 @@
+/* HeroRotator.css - Scramble Headline Rotator */
+
+.dh-rot {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+/* Meta row: pause button + count + segments */
+.dh-rot__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(14px, 2.6vh, 26px);
+}
+
+.dh-rot__pause {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--dh-seg-track);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.15s ease, border-color 0.15s ease;
+  outline: none;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.dh-rot__pause:hover {
+  color: var(--text-heading);
+  border-color: var(--dh-seg-fill);
+}
+
+.dh-rot__pause:focus-visible {
+  outline: 2px solid var(--dh-focus-ring);
+  outline-offset: 3px;
+}
+
+.dh-rot__count {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.dh-rot__segments {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dh-rot__seg {
+  width: 28px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.dh-rot__seg:focus-visible {
+  outline: 2px solid var(--dh-focus-ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.dh-rot__seg-track {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--dh-seg-track);
+  overflow: hidden;
+  position: relative;
+  display: block;
+}
+
+.dh-rot__seg-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--dh-seg-fill);
+  transform-origin: left;
+  transform: scaleX(0);
+  display: block;
+}
+
+.dh-rot__seg-fill--active {
+  animation: dh-seg-progress 6500ms linear forwards;
+}
+
+.dh-rot:hover .dh-rot__seg-fill--active,
+.dh-rot:focus-within .dh-rot__seg-fill--active,
+.dh-rot__seg-fill--paused {
+  animation-play-state: paused !important;
+}
+
+.dh-rot__seg-fill--done {
+  transform: scaleX(1) !important;
+}
+
+@keyframes dh-seg-progress {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* Stacking Container for H1: Zero Layout Shift */
+.dh-rot__h1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(2.5rem, min(5.4vw, 11vh), 6rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--text-heading);
+}
+
+.dh-slide {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 160ms ease-out;
+  pointer-events: none;
+}
+
+.dh-slide--active {
+  pointer-events: auto;
+}
+
+.dh-rot__line {
+  white-space: nowrap;
+  display: block;
+  width: fit-content;
+}
+
+.dh-rot__seg-wrap {
+  display: inline;
+}
+
+/* Character Spans */
+.dh-ch {
+  display: inline-block;
+  color: var(--text-heading);
+  transition: color 0.1s ease;
+}
+
+.dh-ch--scr {
+  color: var(--dh-scr) !important;
+  opacity: 0.85;
+}
+
+.dh-ch--space {
+  width: 0.28em;
+}
+
+/* Highlight / Marker Phrase */
+.dh-mark {
+  background-image: linear-gradient(
+    transparent 62%,
+    var(--dh-mark) 62%,
+    var(--dh-mark) 94%,
+    transparent 94%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: inherit;
+  transition: background-size 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dh-mark--drawn {
+  background-size: 100% 100% !important;
+}
+
+/* Stacking Container for Sub-heading: Zero Layout Shift */
+.dh-rot__sub {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  margin: 0;
+  padding: 0;
+  margin-top: clamp(14px, 2.4vh, 24px);
+  max-width: 30rem;
+  font-size: clamp(1.05rem, min(1.5vw, 3.2vh), 1.5rem);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+.dh-subslide {
+  grid-area: 1 / 1;
+  display: block;
+  transition: opacity 450ms ease-out, transform 450ms ease-out;
+  pointer-events: none;
+}
+
+.dh-subslide--active {
+  pointer-events: auto;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .dh-slide,
+  .dh-subslide,
+  .dh-ch,
+  .dh-mark,
+  .dh-rot__seg-fill {
+    transition: none !important;
+    animation: none !important;
+  }
+  .dh-mark {
+    background-size: 100% 100% !important;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 1023px) {
+  .dh-rot__seg {
+    width: 20px;
+  }
+  .dh-rot__seg-track {
+    width: 20px;
+  }
+}
