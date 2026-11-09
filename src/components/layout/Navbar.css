@@ -277,43 +277,11 @@ html.dark .dh-nav-divider {
   border-radius: 999px;
 }
 
-/* Availability Dot (8px, #22C55E with 2.2s pulse ring) */
-.dh-nav-avail-wrap {
-  position: relative;
-  width: 8px;
-  height: 8px;
+/* Customer Support Headset icon */
+.dh-nav-contact-headset {
   margin-right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-}
-
-.dh-nav-avail-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #22C55E;
-  display: block;
-}
-
-.dh-nav-avail-ring {
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  border: 1.5px solid #22C55E;
-  animation: dh-avail-pulse 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-}
-
-@keyframes dh-avail-pulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
+  color: currentColor;
 }
 
 /* Trailing arrow icon */
@@ -490,9 +458,5 @@ html.dark .dh-nav-mobile-panel {
   .dh-nav-contact-arrow {
     transform: none !important;
     transition: none !important;
-  }
-  .dh-nav-avail-ring {
-    display: none !important;
-    animation: none !important;
   }
 }

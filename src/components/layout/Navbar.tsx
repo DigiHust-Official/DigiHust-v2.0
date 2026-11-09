@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Headset } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
@@ -212,19 +212,14 @@ export const Navbar: React.FC = () => {
           {/* 1px x 22px Divider */}
           <span className="dh-nav-divider" aria-hidden="true" />
 
-          {/* Contact Button with Availability Dot, Arrow, Tooltip */}
+          {/* Contact Button with Customer Support Headset, Arrow, Tooltip */}
           <div className="dh-nav-contact-wrap">
             <Link
               to="/contact"
               className="dh-nav-contact-btn"
               aria-describedby={NAV_AVAILABLE ? 'nav-contact-tip' : undefined}
             >
-              {NAV_AVAILABLE && (
-                <span className="dh-nav-avail-wrap" aria-hidden="true">
-                  <span className="dh-nav-avail-dot" />
-                  <span className="dh-nav-avail-ring" />
-                </span>
-              )}
+              <Headset size={18} className="dh-nav-contact-headset" aria-hidden="true" />
               <span>{t('nav.contactUs')}</span>
               <ArrowUpRight className="dh-nav-contact-arrow" size={16} />
             </Link>
@@ -311,7 +306,9 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileOpen(false)}
               className="dh-nav-contact-btn w-full mt-2 justify-center"
             >
-              {t('nav.contactUs')}
+              <Headset size={18} className="dh-nav-contact-headset" aria-hidden="true" />
+              <span>{t('nav.contactUs')}</span>
+              <ArrowUpRight className="dh-nav-contact-arrow" size={16} />
             </Link>
           </motion.div>
         )}
