@@ -217,14 +217,15 @@ html.dark .dh-nav-divider {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   width: 157.53px;
 }
 
 .dh-nav-contact-btn {
-  height: 44px;
-  padding-inline: 22px;
+  height: 40px;
+  padding-inline: 20px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
