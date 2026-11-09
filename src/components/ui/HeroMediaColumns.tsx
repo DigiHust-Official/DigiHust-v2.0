@@ -393,15 +393,10 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           aspect-ratio: 63 / 88;
           position: relative;
           margin-bottom: var(--hero-column-gap);
-          padding: 3.5%;
           border-radius: 12px;
           background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
           box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
-          display: grid;
-          grid-template-columns: var(--rail) 1fr var(--rail);
-          grid-template-areas: "rl win rr";
-          align-items: center;
-          --rail: clamp(14px, 5.2cqw, 20px);
+          --card-inset: clamp(20px, 11.962cqw, 32px);
           user-select: none;
           box-sizing: border-box;
         }
@@ -420,30 +415,36 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
 
         /* Rails */
         .dh-card-rail-left {
-          grid-area: rl;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: var(--card-inset);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          width: var(--rail);
-          height: 100%;
-          padding-top: clamp(2px, 1.2cqw, 4px);
+          padding-top: calc(var(--card-inset) / 2);
           z-index: 3;
           overflow: hidden;
+          box-sizing: border-box;
         }
 
         .dh-card-rail-right {
-          grid-area: rr;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: var(--card-inset);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
-          width: var(--rail);
-          height: 100%;
-          padding-top: clamp(2px, 1.2cqw, 4px);
+          padding-top: calc(var(--card-inset) / 2);
           z-index: 3;
           overflow: hidden;
           transform: rotate(180deg);
+          box-sizing: border-box;
         }
 
         .dh-card-rail-content {
@@ -509,12 +510,10 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           flex-shrink: 0;
         }
 
-        /* Window: recessed portrait media, 77.6% card height preserving Step 0 vertical ratio */
+        /* Window: recessed portrait media, even insets on all four sides */
         .dh-card-window {
-          grid-area: win;
-          position: relative;
-          width: 100%;
-          height: 77.6%;
+          position: absolute;
+          inset: var(--card-inset);
           border-radius: 6px;
           overflow: hidden;
           z-index: 1;
