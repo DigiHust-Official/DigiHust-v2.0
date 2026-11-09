@@ -386,7 +386,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           --dh-placeholder-gradient: linear-gradient(160deg, rgba(46, 196, 214, 0.10), rgba(46, 196, 214, 0.03));
         }
 
-        /* ── Silver Playing Card Styling ── */
+        /* ── Platinum Playing Card Styling ── */
         .dh-card {
           container-type: inline-size;
           width: 100%;
@@ -394,8 +394,17 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           position: relative;
           margin-bottom: var(--hero-column-gap);
           border-radius: 12px;
-          background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
-          box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
+          overflow: hidden;
+          background-image:
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px),
+            radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.40) 0%, transparent 65%),
+            linear-gradient(135deg, #f6f8fa 0%, #d3d8de 25%, #fafbfc 50%, #b7bfc8 75%, #eef0f3 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.95),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+            inset 1px 0 0 rgba(255, 255, 255, 0.50),
+            inset -1px 0 0 rgba(0, 0, 0, 0.10),
+            var(--dh-silver-shadow);
           --card-inset: clamp(20px, 11.962cqw, 32px);
           --dh-engrave-steel: #5d6773;
           user-select: none;
@@ -407,6 +416,52 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         html.dark .dh-card,
         html[data-theme="dark"] .dh-card {
           --dh-engrave-steel: #4a535d;
+          background-image:
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, rgba(0, 0, 0, 0.035) 1px 2px),
+            radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 65%),
+            linear-gradient(135deg, #cfd6dc 0%, #9aa4ae 25%, #bcc4cb 50%, #87929c 75%, #b2bcc4 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.85),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+            inset 1px 0 0 rgba(255, 255, 255, 0.40),
+            inset -1px 0 0 rgba(0, 0, 0, 0.20),
+            var(--dh-silver-shadow);
+        }
+
+        /* Hover Sheen Sweep across the metal frame */
+        .dh-card::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          bottom: -50%;
+          left: 0;
+          width: 50%;
+          background: linear-gradient(
+            105deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.08) 30%,
+            rgba(255, 255, 255, 0.55) 50%,
+            rgba(255, 255, 255, 0.08) 70%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: translateX(-260%) rotate(25deg);
+          pointer-events: none;
+          z-index: 2;
+          will-change: transform;
+          transition: transform 0.9s ease-out;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .dh-card:hover::after,
+          .dh-card:focus-visible::after {
+            transform: translateX(360%) rotate(25deg);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dh-card::after {
+            display: none !important;
+          }
         }
 
         /* Engraved inner line */
@@ -414,11 +469,11 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           content: '';
           position: absolute;
           inset: 2%;
-          border: 1px solid rgba(10, 31, 43, 0.20);
+          border: 1px solid rgba(10, 31, 43, 0.18);
           border-radius: 9px;
-          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
           pointer-events: none;
-          z-index: 2;
+          z-index: 3;
         }
 
         /* Rails */
@@ -433,7 +488,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           align-items: center;
           justify-content: flex-start;
           padding-top: calc(var(--card-inset) / 2);
-          z-index: 3;
+          z-index: 5;
           overflow: hidden;
           box-sizing: border-box;
         }
@@ -449,7 +504,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           align-items: center;
           justify-content: flex-start;
           padding-top: calc(var(--card-inset) / 2);
-          z-index: 3;
+          z-index: 5;
           overflow: hidden;
           transform: rotate(180deg);
           box-sizing: border-box;
@@ -552,8 +607,11 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           inset: var(--card-inset);
           border-radius: 6px;
           overflow: hidden;
-          z-index: 1;
-          box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.28), 0 1px 0 rgba(255, 255, 255, 0.60);
+          z-index: 4;
+          box-shadow:
+            inset 0 1px 3px rgba(0, 0, 0, 0.35),
+            inset 0 0 0 1px rgba(10, 31, 43, 0.28),
+            0 1px 0 rgba(255, 255, 255, 0.65);
         }
 
         /* Flat tint architectural placeholder */
