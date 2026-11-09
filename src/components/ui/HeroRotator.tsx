@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Pause, Play } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { HERO_MESSAGES, parseHead, HeadLine } from '../../data/heroMessages';
 import './HeroRotator.css';
 
-const DWELL_MS = 6500;
-const START_DELAY_MS = 60;
-const STAGGER_MS = 32;
-const JITTER_MS = 140;
-const FLICKER_MS = 50;
+const DWELL_MS = 3000;
+const START_DELAY_MS = 10;
+const STAGGER_MS = 10;
+const JITTER_MS = 40;
+const FLICKER_MS = 25;
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&@$?!<>/{}[]=+*';
 const GLYPHS_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const GLYPHS_LOWER = 'abcdefghijklmnopqrstuvwxyz';
@@ -34,8 +33,6 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
 }) => {
   const { t } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [animIter, setAnimIter] = useState(0);
-  const [isPausedManual, setIsPausedManual] = useState(false);
   const [isRotHovered, setIsRotHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(true);
@@ -92,14 +89,13 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
   // Compute pause state
   const isPaused =
     prefersReducedMotion ||
-    isPausedManual ||
     isRotHovered ||
     isButtonsHovered ||
     isFocusWithin ||
     !isIntersecting ||
     isDocHidden;
 
-  // Scramble execution function
+  // Scramble execution function (compressed to resolve <= 380ms, total change-over <= 500ms)
   const runScramble = useCallback(
     (newIndex: number, oldIndex?: number) => {
       if (prefersReducedMotion) return;
@@ -119,24 +115,24 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
       const oldSlideEl = oldIndex !== undefined ? slideRefs.current[oldIndex] : null;
       const oldSubEl = oldIndex !== undefined ? subRefs.current[oldIndex] : null;
 
-      // 1. Fade out old slide in 160ms
+      // 1. Fade out old slide in 120ms
       if (oldSlideEl && oldSlideEl !== newSlideEl) {
-        oldSlideEl.style.transition = 'opacity 160ms ease-out';
+        oldSlideEl.style.transition = 'opacity 120ms ease-out';
         oldSlideEl.style.opacity = '0';
         setTimeout(() => {
           if (activeIndexRef.current !== oldIndex) {
             oldSlideEl.style.visibility = 'hidden';
           }
-        }, 160);
+        }, 120);
       }
       if (oldSubEl && oldSubEl !== newSubEl) {
-        oldSubEl.style.transition = 'opacity 160ms ease-out';
+        oldSubEl.style.transition = 'opacity 120ms ease-out';
         oldSubEl.style.opacity = '0';
         setTimeout(() => {
           if (activeIndexRef.current !== oldIndex) {
             oldSubEl.style.visibility = 'hidden';
           }
-        }, 160);
+        }, 120);
       }
 
       if (!newSlideEl) return;
@@ -155,21 +151,21 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
         m.classList.remove('dh-mark--drawn');
       });
 
-      // Prepare subslide to fade in starting 380ms after scramble starts
+      // Prepare subslide to fade in starting 100ms after scramble starts (completes by 480ms)
       if (newSubEl) {
         newSubEl.style.visibility = 'visible';
         newSubEl.style.opacity = '0';
-        newSubEl.style.transform = 'translateY(8px)';
+        newSubEl.style.transform = 'translateY(6px)';
         newSubEl.style.transition = 'none';
 
         subTimerId.current = setTimeout(() => {
           if (activeIndexRef.current === newIndex && newSubEl) {
             newSubEl.style.transition =
-              'opacity 450ms cubic-bezier(0.16, 1, 0.3, 1), transform 450ms cubic-bezier(0.16, 1, 0.3, 1)';
+              'opacity 380ms cubic-bezier(0.16, 1, 0.3, 1), transform 380ms cubic-bezier(0.16, 1, 0.3, 1)';
             newSubEl.style.opacity = '1';
             newSubEl.style.transform = 'translateY(0)';
           }
-        }, 380);
+        }, 100);
       }
 
       // Measure every char span's width and lock it
@@ -188,13 +184,12 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
         el.classList.add('dh-ch--scr');
       });
 
-      // Setup character scramble schedules
+      // Setup character scramble schedules (capped at 380ms)
       const charStates: CharState[] = chEls.map((el, i) => {
         const target = el.getAttribute('data-target') || el.textContent || '';
-        // resolveAt = START_DELAY_MS + i * STAGGER_MS + random(0, JITTER_MS), capped at 950ms
         const rawResolve =
           START_DELAY_MS + i * STAGGER_MS + Math.floor(Math.random() * JITTER_MS);
-        const resolveAt = Math.min(rawResolve, 950);
+        const resolveAt = Math.min(rawResolve, 380);
 
         return {
           el,
@@ -236,7 +231,7 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
               if (markDone) {
                 markEl.classList.add('dh-mark--drawn');
                 markEl.style.transition =
-                  'background-size 600ms cubic-bezier(0.2, 0.7, 0.2, 1)';
+                  'background-size 350ms cubic-bezier(0.2, 0.7, 0.2, 1)';
                 markEl.style.backgroundSize = '100% 100%';
               }
             });
@@ -266,7 +261,7 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
           markEls.forEach((markEl) => {
             markEl.classList.add('dh-mark--drawn');
             markEl.style.transition =
-              'background-size 600ms cubic-bezier(0.2, 0.7, 0.2, 1)';
+              'background-size 350ms cubic-bezier(0.2, 0.7, 0.2, 1)';
             markEl.style.backgroundSize = '100% 100%';
           });
         }
@@ -280,7 +275,6 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
   // Initial load fonts.ready scramble trigger
   useEffect(() => {
     if (prefersReducedMotion) {
-      // Reduced motion: show message 1 statically, marker filled
       const s0 = slideRefs.current[0];
       const sub0 = subRefs.current[0];
       if (s0) {
@@ -332,67 +326,46 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
     };
   }, [prefersReducedMotion, runScramble]);
 
-  // Handle jumpTo slide
-  const jumpTo = (index: number) => {
-    if (index === activeIndex) return;
-    const prev = activeIndex;
-    setActiveIndex(index);
-    setAnimIter((c) => c + 1);
+  // Rotate to the next message every 3000ms looping forever
+  const dwellAccRef = useRef(0);
+  const lastTickRef = useRef<number | null>(null);
 
-    if (prefersReducedMotion) {
-      // Instant swap
-      const oldS = slideRefs.current[prev];
-      const newS = slideRefs.current[index];
-      const oldSub = subRefs.current[prev];
-      const newSub = subRefs.current[index];
-      if (oldS) {
-        oldS.style.visibility = 'hidden';
-        oldS.style.opacity = '0';
-      }
-      if (newS) {
-        newS.style.visibility = 'visible';
-        newS.style.opacity = '1';
-        const marks = newS.querySelectorAll<HTMLSpanElement>('[data-mark-phrase="true"]');
-        marks.forEach((m) => {
-          m.style.backgroundSize = '100% 100%';
-        });
-      }
-      if (oldSub) {
-        oldSub.style.visibility = 'hidden';
-        oldSub.style.opacity = '0';
-      }
-      if (newSub) {
-        newSub.style.visibility = 'visible';
-        newSub.style.opacity = '1';
-        newSub.style.transform = 'translateY(0)';
-      }
-      return;
-    }
-
-    runScramble(index, prev);
-  };
-
-  // Handle segment animationend
-  const handleAnimationEnd = () => {
+  useEffect(() => {
     if (prefersReducedMotion) return;
-    const next = (activeIndex + 1) % HERO_MESSAGES.length;
-    const prev = activeIndex;
-    setActiveIndex(next);
-    setAnimIter((c) => c + 1);
-    runScramble(next, prev);
-  };
 
-  const togglePause = () => {
-    setIsPausedManual((p) => !p);
-  };
+    let rafId: number;
+    const tick = (now: number) => {
+      if (lastTickRef.current === null) {
+        lastTickRef.current = now;
+      }
+      const dt = now - lastTickRef.current;
+      lastTickRef.current = now;
+
+      if (!isPaused) {
+        dwellAccRef.current += dt;
+        if (dwellAccRef.current >= DWELL_MS) {
+          dwellAccRef.current = 0;
+          const prev = activeIndexRef.current;
+          const next = (prev + 1) % HERO_MESSAGES.length;
+          activeIndexRef.current = next;
+          setActiveIndex(next);
+          runScramble(next, prev);
+        }
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [isPaused, prefersReducedMotion, runScramble]);
 
   return (
     <div
       ref={containerRef}
       className={`dh-rot ${className}`}
-      role="group"
-      aria-roledescription="carousel"
-      aria-label="Problems we solve for clients"
+      role="region"
+      aria-label="DigiHust Hero Headline Rotator"
       aria-live="off"
       onMouseEnter={() => setIsRotHovered(true)}
       onMouseLeave={() => setIsRotHovered(false)}
@@ -405,69 +378,6 @@ export const HeroRotator: React.FC<HeroRotatorProps> = ({
         }
       }}
     >
-      {/* ── META ROW (count + segments + pause button) ── */}
-      <div className="dh-rot__meta">
-        {/* The pause control is the first focusable element inside the carousel */}
-        <button
-          type="button"
-          className="dh-rot__pause"
-          onClick={togglePause}
-          aria-label={
-            isPausedManual ? 'Play headline rotation' : 'Pause headline rotation'
-          }
-          style={{ order: 3 }}
-        >
-          {isPausedManual ? <Play size={12} /> : <Pause size={12} />}
-        </button>
-
-        <span className="dh-rot__count" aria-hidden="true" style={{ order: 1 }}>
-          {String(activeIndex + 1).padStart(2, '0')} / 05
-        </span>
-
-        <div
-          className="dh-rot__segments"
-          role="tablist"
-          aria-label="Slides"
-          style={{ order: 2 }}
-        >
-          {HERO_MESSAGES.map((msg, i) => {
-            const isActive = activeIndex === i;
-            return (
-              <button
-                key={msg.id}
-                type="button"
-                role="tab"
-                className="dh-rot__seg"
-                aria-selected={isActive}
-                aria-current={isActive ? 'true' : undefined}
-                aria-label={`Show message ${i + 1} of 5`}
-                onClick={() => jumpTo(i)}
-              >
-                <span className="dh-rot__seg-track">
-                  <i
-                    key={isActive ? `active-${i}-${animIter}` : `inactive-${i}`}
-                    className={`dh-rot__seg-fill ${
-                      isActive && !prefersReducedMotion ? 'dh-rot__seg-fill--active' : ''
-                    } ${isActive && isPaused ? 'dh-rot__seg-fill--paused' : ''} ${
-                      i < activeIndex ? 'dh-rot__seg-fill--done' : ''
-                    }`}
-                    style={
-                      isActive && !prefersReducedMotion
-                        ? {
-                            animationDuration: `${DWELL_MS}ms`,
-                            animationPlayState: isPaused ? 'paused' : 'running',
-                          }
-                        : undefined
-                    }
-                    onAnimationEnd={isActive ? handleAnimationEnd : undefined}
-                  />
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* ── HEADLINE (H1, 5 stacked slides, zero layout shift) ── */}
       <h1 className="dh-rot__h1">
         {HERO_MESSAGES.map((msg, i) => {
