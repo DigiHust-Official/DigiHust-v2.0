@@ -1,8 +1,8 @@
 /* ── GlowCtaButton (Hero CTA Theme-Aware Tokens) ── */
 :root {
   --dh-glow-height: 56px;
-  --dh-glow-radius: 14px;
-  --dh-glow-padding-inline: 28px;
+  --dh-glow-radius: var(--dh-hero-btn-radius, 999px);
+  --dh-glow-padding-inline: clamp(24px, 2.2vw, 32px);
   --dh-glow-font-size: 17.5px;
   --dh-glow-arrow-size: 16px;
   --dh-nav-bottom: 80px;
@@ -185,8 +185,8 @@ html.dark .dh-glow-btn:hover,
 /* ── Outlined Explore Squads Hero Button ── */
 .dh-hero-explore-btn {
   height: var(--dh-hero-btn-h, 56px);
-  border-radius: var(--dh-hero-btn-radius, 14px);
-  padding-inline: var(--dh-glow-padding-inline, 28px);
+  border-radius: var(--dh-hero-btn-radius, 999px);
+  padding-inline: clamp(24px, 2.2vw, 32px);
   font-size: var(--dh-glow-font-size, 17.5px);
   font-weight: 600;
   display: inline-flex;
@@ -226,6 +226,7 @@ html.dark .dh-hero-explore-btn {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);

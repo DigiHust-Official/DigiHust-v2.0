@@ -28,7 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
-import { HeroWaves } from '../ui/HeroWaves';
+import { HeroBackdrop } from '../ui/HeroBackdrop';
 import { ServiceCard } from '../ui/ServiceCard';
 import { ProjectCard } from '../ui/ProjectCard';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
@@ -370,6 +370,11 @@ export const Home: React.FC = () => {
               height: auto !important;
             }
           }
+          @media (max-height: 639px) {
+            .dh-hero-trust-row {
+              display: none !important;
+            }
+          }
           @media (prefers-reduced-motion: reduce) {
             .hero-runway {
               --hero-runway: 0px !important;
@@ -387,18 +392,15 @@ export const Home: React.FC = () => {
           data-hero="true"
           className="relative lg:sticky lg:top-0 lg:h-screen lg:min-h-0 flex flex-col lg:block border-b border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-page)]"
         >
-          {/* 3 Flowing SVG wave paths behind hero per Item 9 */}
-          <HeroWaves />
-
-          {/* Ambient celestial glow for depth */}
-          <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-[var(--brand-teal)]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Animated Hero Backdrop (grid, drifting teal & periwinkle glows, pointer light) */}
+          <HeroBackdrop heroRef={heroRef} />
 
           {/* ── HERO CONTENT WRAPPER ────────────────────────────────────────── */}
           <div
             className="order-1 max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10 pt-24 sm:pt-28 pb-8 lg:p-0 lg:h-full lg:flex lg:flex-col lg:justify-center pointer-events-none"
             style={{
               '--dh-hero-btn-h': '56px',
-              '--dh-hero-btn-radius': '14px',
+              '--dh-hero-btn-radius': '999px',
             } as React.CSSProperties}
           >
             
@@ -410,10 +412,11 @@ export const Home: React.FC = () => {
               data-hero-desktop="true"
               className="hidden lg:flex lg:flex-col lg:justify-center pointer-events-auto"
               style={{
-                width: 'min(42vw, 44rem)',
-                minHeight: 'calc(100vh - 64px)',
-                marginTop: '64px',
-                transform: 'translateY(-2vh)',
+                width: 'min(44vw, 42rem)',
+                minHeight: 'calc(100vh - var(--dh-nav-bottom, 80px))',
+                paddingTop: 'calc(var(--dh-nav-bottom, 80px) + clamp(40px, 7vh, 72px))',
+                paddingBottom: 'clamp(28px, 5vh, 56px)',
+                alignSelf: 'flex-start',
               }}
             >
               {/* 1. Headline: 2 spans */}
@@ -421,55 +424,74 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="font-display font-extrabold text-[var(--text-heading)] m-0 p-0 w-fit"
                 style={{
-                  fontSize: 'clamp(2.75rem, 4.2vw, 4.9rem)',
-                  lineHeight: 1.05,
+                  fontSize: 'clamp(2rem, min(3.4vw, 7vh), 4.25rem)',
+                  lineHeight: 1.08,
                   letterSpacing: '-0.03em',
                 }}
               >
-                <span className="block w-fit text-[var(--text-heading)]">
-                  {hero?.headlineLine1 || t('hero_headline_1')}
+                <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap">
+                  {t('hero_v4_headline_1')}
                 </span>
-                <span
-                  className="block w-fit text-[var(--brand-teal-text)]"
-                  style={{ maxWidth: '8.4em', textWrap: 'balance' }}
-                >
-                  {hero?.headlineHighlight || hero?.headlineLine2 || t('hero_headline_2')}
+                <span className="block w-fit text-[var(--text-heading)] whitespace-nowrap mt-1">
+                  <span className="dh-hero-marker">
+                    {t('hero_v4_headline_2')}
+                  </span>
                 </span>
               </motion.h1>
 
               {/* 2. Paragraph */}
               <motion.p
                 variants={itemVariants}
-                className="text-[var(--text-muted)] m-0 mt-[28px] max-w-[34rem]"
+                className="text-[var(--text-muted)] m-0 mt-[clamp(14px,2.4vh,26px)] max-w-[33rem]"
                 style={{
-                  fontSize: 'clamp(1rem, 1.1vw, 1.25rem)',
-                  lineHeight: 1.65,
+                  fontSize: 'clamp(0.95rem, 1.05vw, 1.15rem)',
+                  lineHeight: 1.6,
+                  textWrap: 'pretty',
                 }}
               >
-                {hero?.subheadline || t('hero_sub')}
+                {t('hero_v4_subheadline')}
               </motion.p>
 
-              {/* 3. Buttons: margin-top 40px, gap 14px, both 56px high, px 28px, rounded 14px */}
+              {/* 3. Buttons: margin-top clamp(20px, 3.8vh, 36px), gap 14px */}
               <motion.div
                 variants={itemVariants}
-                className="flex items-center gap-[14px] mt-[40px] w-fit"
+                className="flex items-center gap-[14px] mt-[clamp(20px,3.8vh,36px)] w-fit"
               >
                 {/* Primary Button: GlowCtaButton */}
                 <GlowCtaButton
                   to="/contact"
-                  label={hero?.ctaPrimaryText || t('btn_scoped_quote')}
+                  label={t('hero_v4_btn_proposal')}
                 />
 
-                {/* Secondary Button: Explore Squads (Outlined button with hover sweep) */}
+                {/* Secondary Button: See Our Work */}
                 <Link
-                  to="/services"
+                  to="/portfolio"
                   className="dh-hero-explore-btn group"
                 >
                   <span className="dh-hero-explore-content">
-                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                    <span>{t('hero_v4_btn_work')}</span>
                     <ArrowUpRight className="dh-hero-explore-icon" />
                   </span>
                 </Link>
+              </motion.div>
+
+              {/* 4. Trust Row */}
+              <motion.div
+                variants={itemVariants}
+                className="dh-hero-trust-row flex flex-wrap items-center gap-x-[20px] gap-y-[8px] mt-[clamp(16px,3vh,28px)] select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_1')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_2')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[14px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_3')}</span>
+                </div>
               </motion.div>
             </motion.div>
 
@@ -482,11 +504,13 @@ export const Home: React.FC = () => {
             >
               <motion.h1
                 variants={itemVariants}
-                className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.14] tracking-tight mb-4"
+                className="font-display font-extrabold text-[2.15rem] sm:text-[2.6rem] text-[var(--text-heading)] leading-[1.12] tracking-tight mb-4"
               >
-                <span className="block">{hero?.headlineLine1 || t('hero_headline_1')}</span>
-                <span className="block text-[var(--brand-teal-text)]">
-                  {hero?.headlineHighlight || hero?.headlineLine2 || t('hero_headline_2')}
+                <span className="block">{t('hero_v4_headline_1')}</span>
+                <span className="block mt-1">
+                  <span className="dh-hero-marker">
+                    {t('hero_v4_headline_2')}
+                  </span>
                 </span>
               </motion.h1>
 
@@ -494,7 +518,7 @@ export const Home: React.FC = () => {
                 variants={itemVariants}
                 className="text-xs sm:text-sm text-[var(--text-muted)] max-w-[32rem] leading-[1.7] mb-6"
               >
-                {hero?.subheadline || t('hero_sub')}
+                {t('hero_v4_subheadline')}
               </motion.p>
 
               <motion.div
@@ -503,18 +527,36 @@ export const Home: React.FC = () => {
               >
                 <GlowCtaButton
                   to="/contact"
-                  label={hero?.ctaPrimaryText || t('btn_scoped_quote')}
+                  label={t('hero_v4_btn_proposal')}
                   className="w-full sm:w-auto"
                 />
                 <Link
-                  to="/services"
+                  to="/portfolio"
                   className="dh-hero-explore-btn group w-full sm:w-auto"
                 >
                   <span className="dh-hero-explore-content">
-                    <span>{hero?.ctaSecondaryText || t('btn_explore_capabilities')}</span>
+                    <span>{t('hero_v4_btn_work')}</span>
                     <ArrowUpRight className="dh-hero-explore-icon" />
                   </span>
                 </Link>
+              </motion.div>
+
+              <motion.div
+                variants={itemVariants}
+                className="dh-hero-trust-row flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_1')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_2')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--brand-teal-text)] shrink-0" strokeWidth={2} />
+                  <span className="text-[13px] font-medium text-[var(--text-muted)]">{t('hero_v4_trust_3')}</span>
+                </div>
               </motion.div>
             </motion.div>
 

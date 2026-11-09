@@ -159,7 +159,7 @@ export const GlowCtaButton: React.FC<GlowCtaButtonProps> = ({
       {/* Subtle top glossy sheen rim for glass-capsule effect */}
       <div
         className="absolute inset-0 pointer-events-none border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]"
-        style={{ borderRadius: 'var(--dh-hero-btn-radius, var(--dh-glow-radius, 14px))' }}
+        style={{ borderRadius: 'var(--dh-hero-btn-radius, var(--dh-glow-radius, 999px))' }}
         aria-hidden="true"
       />
 

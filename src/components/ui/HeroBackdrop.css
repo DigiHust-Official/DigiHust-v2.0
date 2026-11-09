@@ -1,0 +1,120 @@
+/* ── HeroBackdrop Styles ── */
+.dh-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Layer a: Grid */
+.dh-backdrop-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, var(--dh-backdrop-grid, rgba(2, 43, 58, 0.06)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--dh-backdrop-grid, rgba(2, 43, 58, 0.06)) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 85% 75% at 68% 45%, #000 18%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 68% 45%, #000 18%, transparent 78%);
+  pointer-events: none;
+}
+
+/* Layer b: Glow A (Teal) */
+.dh-glow-a {
+  position: absolute;
+  width: 60vw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  right: -8vw;
+  top: -12vh;
+  pointer-events: none;
+  will-change: transform;
+  background: radial-gradient(closest-side, rgba(31, 122, 140, 0.22), transparent);
+  animation: dh-drift-a 30s ease-in-out infinite alternate;
+}
+
+html[data-theme="dark"] .dh-glow-a,
+html.dark .dh-glow-a,
+[data-theme="dark"] .dh-glow-a {
+  background: radial-gradient(closest-side, rgba(46, 196, 214, 0.16), transparent);
+}
+
+@keyframes dh-drift-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-7vw, 6vh, 0) scale(1.08);
+  }
+}
+
+/* Layer c: Glow B (Periwinkle) */
+.dh-glow-b {
+  position: absolute;
+  width: 46vw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  left: -12vw;
+  bottom: -22vh;
+  pointer-events: none;
+  will-change: transform;
+  background: radial-gradient(closest-side, rgba(142, 155, 232, 0.22), transparent);
+  animation: dh-drift-b 38s ease-in-out infinite alternate;
+}
+
+html[data-theme="dark"] .dh-glow-b,
+html.dark .dh-glow-b,
+[data-theme="dark"] .dh-glow-b {
+  background: radial-gradient(closest-side, rgba(142, 155, 232, 0.14), transparent);
+}
+
+@keyframes dh-drift-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(8vw, -7vh, 0) scale(1.1);
+  }
+}
+
+/* Layer d: Pointer Light */
+.dh-pointer-light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  background: radial-gradient(closest-side, rgba(31, 122, 140, 0.12), transparent);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+html[data-theme="dark"] .dh-pointer-light,
+html.dark .dh-pointer-light,
+[data-theme="dark"] .dh-pointer-light {
+  background: radial-gradient(closest-side, rgba(46, 196, 214, 0.12), transparent);
+}
+
+/* Paused State */
+.dh-hero-backdrop[data-paused="true"] .dh-glow-a,
+.dh-hero-backdrop[data-paused="true"] .dh-glow-b {
+  animation-play-state: paused !important;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .dh-glow-a,
+  .dh-glow-b {
+    animation: none !important;
+    transform: none !important;
+  }
+  .dh-pointer-light {
+    display: none !important;
+  }
+}
+

@@ -39,6 +39,17 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     hero_orbit_instruction: 'Click any orbiting service node or central hub to explore',
     scroll_down: 'Scroll Down',
 
+    // Hero Redesign Keys (v4)
+    hero_v4_headline_1: 'Tired of chasing freelancers?',
+    hero_v4_headline_2: 'Get one team that delivers.',
+    hero_v4_subheadline:
+      'Missed deadlines, blame-shifting and five people to chase. DigiHust puts designers, developers, marketers and security specialists on one contract, with one person accountable for every milestone.',
+    hero_v4_btn_proposal: 'Get a Proposal in 24h',
+    hero_v4_btn_work: 'See Our Work',
+    hero_v4_trust_1: 'One contract, one point of contact',
+    hero_v4_trust_2: 'Milestone delivery guarantee',
+    hero_v4_trust_3: 'Verified specialists',
+
     // Orbit Services Caption
     service_caption_built_for: 'Built for',
     orbit_service_1_name: 'Graphic Design & Branding',

@@ -63,90 +63,81 @@ const FrameCard: React.FC<FrameCardProps> = ({
   const localizedLabel = frame.labelKey ? t(frame.labelKey) : frame.label;
   const displayLabel = localizedLabel || frame.label;
 
+  // Rank: 1 to 8 based on position in HERO_FRAMES
+  const rank = HERO_FRAMES.findIndex((f) => f.id === frame.id) + 1;
+
   return (
     <div
-      className={`hero-media-frame relative w-full aspect-[4/5] rounded-[6px] overflow-hidden select-none border border-[var(--border-subtle)] ${
-        hasSource ? 'has-media bg-transparent' : 'bg-[var(--bg-surface)]'
-      }`}
-      style={{
-        boxShadow: 'var(--hero-frame-shadow)',
-        marginBottom: 'var(--hero-column-gap)',
-      }}
+      className="hero-media-frame dh-card"
       tabIndex={isClone ? -1 : 0}
       aria-hidden={isClone}
+      aria-label={isClone ? undefined : displayLabel}
     >
-      {/* ── Media: <img> or <video> ── */}
-      {hasSource ? (
-        isVideo ? (
-          <video
-            ref={(el) => {
-              if (el && videoRefs && !videoRefs.current.includes(el)) {
-                videoRefs.current.push(el);
-              }
-            }}
-            src={frame.src}
-            poster={frame.poster}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover pointer-events-none"
-            aria-label={isClone ? '' : frame.alt}
-          />
-        ) : (
-          <img
-            src={frame.src}
-            alt={isClone ? '' : frame.alt}
-            decoding="async"
-            className="w-full h-full object-cover pointer-events-none"
-          />
-        )
-      ) : (
-        /* ── Architectural Placeholder ── */
-        <div className="w-full h-full flex flex-col items-center justify-center relative p-4 bg-[var(--bg-surface)]">
-          {/* Centered Lucide Icon: 34% width, strokeWidth 1.25, muted at 40% opacity */}
-          <div className="w-[34%] h-[34%] max-w-[120px] max-h-[120px] flex items-center justify-center text-[var(--text-muted)] opacity-40">
-            <IconComponent
-              strokeWidth={1.25}
-              className="w-full h-full object-contain"
+      {/* ── Window (4:5, relative, overflow hidden, radius 6px) ── */}
+      <div className="dh-card-window">
+        {/* Real media: <img> or <video> */}
+        {hasSource ? (
+          isVideo ? (
+            <video
+              ref={(el) => {
+                if (el && videoRefs && !videoRefs.current.includes(el)) {
+                  videoRefs.current.push(el);
+                }
+              }}
+              src={frame.src}
+              poster={frame.poster}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover pointer-events-none"
+              aria-label={isClone ? '' : frame.alt}
             />
+          ) : (
+            <img
+              src={frame.src}
+              alt={isClone ? '' : frame.alt}
+              decoding="async"
+              className="w-full h-full object-cover pointer-events-none"
+            />
+          )
+        ) : (
+          /* Architectural Placeholder */
+          <div
+            className="w-full h-full flex flex-col items-center justify-center relative p-4"
+            style={{
+              background: 'var(--dh-placeholder-gradient)',
+            }}
+          >
+            <div className="w-[30%] h-[30%] max-w-[100px] max-h-[100px] flex items-center justify-center text-[var(--dh-card-ink)] opacity-40">
+              <IconComponent
+                strokeWidth={1.25}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] font-mono text-[var(--dh-card-ink)] opacity-55">
+              {isVideo ? '4:5 · 1080x1350 · MP4 4-6s' : '4:5 · 1200x1500'}
+            </div>
           </div>
+        )}
 
-          {/* Dimension Specifications Line */}
-          <div className="text-[11px] font-mono text-[var(--text-muted)] opacity-75 mt-3 tracking-tight text-center">
-            {isVideo ? '4:5 · 1080x1350 · MP4 4-6s' : '4:5 · 1200x1500'}
-          </div>
+        {/* ── Corner Tabs (Top-Left & Mirrored Bottom-Right) ── */}
+        <div className="dh-card-tab dh-card-tab-tl" aria-hidden="true">
+          <span className="dh-card-tab-rank">{rank}</span>
+          <IconComponent className="dh-card-tab-icon" strokeWidth={1.75} />
         </div>
-      )}
 
-      {/* ── Bottom Scrim (only on real media: linear-gradient(to top, rgba(2,12,18,0.72), rgba(2,12,18,0) 38%)) ── */}
-      {hasSource && (
-        <div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            background:
-              'linear-gradient(to top, rgba(2, 12, 18, 0.72) 0%, rgba(2, 12, 18, 0) 38%)',
-          }}
-          aria-hidden="true"
-        />
-      )}
+        <div className="dh-card-tab dh-card-tab-br" aria-hidden="true">
+          <span className="dh-card-tab-rank">{rank}</span>
+          <IconComponent className="dh-card-tab-icon" strokeWidth={1.75} />
+        </div>
+      </div>
 
-      {/* ── Bottom-Left Label (14px inset: 11px tabular-nums + 12px weight 600) ── */}
-      <div className="absolute left-[14px] bottom-[14px] right-[14px] z-20 flex items-center pointer-events-none overflow-hidden">
-        <span
-          className={`text-[11px] font-mono tabular-nums mr-1.5 shrink-0 ${
-            hasSource ? 'text-white/70' : 'text-[var(--text-muted)]'
-          }`}
-        >
-          {frame.serviceNumber}
-        </span>
-        <span
-          className={`font-semibold text-[12px] truncate ${
-            hasSource ? 'text-white' : 'text-[var(--text-heading)]'
-          }`}
-        >
-          {displayLabel}
-        </span>
+      {/* ── Name Row Under Window ── */}
+      <div className="dh-card-name-row" aria-hidden="true">
+        <span className="dh-card-rule" />
+        <span className="dh-card-name">{displayLabel}</span>
+        <span className="dh-card-rule" />
       </div>
     </div>
   );
@@ -351,13 +342,130 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
       <style>{`
         .hero-media-columns-container {
           --hero-column-gap: clamp(12px, 1.2vw, 20px);
-          --hero-frame-shadow: 0 4px 14px rgba(2, 43, 58, 0.06);
+          --dh-placeholder-gradient: linear-gradient(160deg, rgba(31, 122, 140, 0.10), rgba(31, 122, 140, 0.03));
         }
         .dark .hero-media-columns-container,
         [data-theme="dark"] .hero-media-columns-container,
         html.dark .hero-media-columns-container,
         html[data-theme="dark"] .hero-media-columns-container {
-          --hero-frame-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+          --dh-placeholder-gradient: linear-gradient(160deg, rgba(46, 196, 214, 0.10), rgba(46, 196, 214, 0.03));
+        }
+
+        /* ── Playing Card Styling ── */
+        .dh-card {
+          container-type: inline-size;
+          width: 100%;
+          position: relative;
+          background: var(--dh-card-face);
+          border: 1px solid rgba(10, 31, 43, 0.14);
+          border-radius: 12px;
+          padding: 5.5% 5.5% 4%;
+          margin-bottom: var(--hero-column-gap);
+          box-shadow: var(--dh-card-shadow);
+          user-select: none;
+          box-sizing: border-box;
+        }
+
+        /* Inner border */
+        .dh-card::before {
+          content: '';
+          position: absolute;
+          inset: 2.5%;
+          border: 1px solid var(--dh-card-line);
+          border-radius: 9px;
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* Window: 4:5 aspect ratio */
+        .dh-card-window {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 5;
+          border-radius: 6px;
+          overflow: hidden;
+          z-index: 1;
+        }
+
+        .dh-card-window::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 1px solid rgba(10, 31, 43, 0.14);
+          border-radius: 6px;
+          pointer-events: none;
+          z-index: 5;
+        }
+
+        /* Corner tabs (Top-Left & Mirrored Bottom-Right) */
+        .dh-card-tab {
+          position: absolute;
+          background: var(--dh-card-face);
+          padding: 1.8cqw 2.2cqw 2.2cqw;
+          border-bottom-right-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.8cqw;
+          z-index: 10;
+          pointer-events: none;
+          box-sizing: border-box;
+        }
+
+        .dh-card-tab-tl {
+          left: 0;
+          top: 0;
+        }
+
+        .dh-card-tab-br {
+          right: 0;
+          bottom: 0;
+          transform: rotate(180deg);
+        }
+
+        .dh-card-tab-rank {
+          font-family: ui-serif, Georgia, "Times New Roman", serif;
+          font-weight: 700;
+          font-size: clamp(14px, 6.6cqw, 28px);
+          line-height: 1;
+          color: var(--dh-card-ink);
+        }
+
+        .dh-card-tab-icon {
+          width: clamp(11px, 5cqw, 20px);
+          height: clamp(11px, 5cqw, 20px);
+          color: var(--dh-card-ink);
+        }
+
+        /* Name row under window */
+        .dh-card-name-row {
+          margin-top: 3.2cqw;
+          display: flex;
+          align-items: center;
+          gap: 2.4cqw;
+          text-align: center;
+          width: 100%;
+          z-index: 1;
+          position: relative;
+        }
+
+        .dh-card-rule {
+          flex: 1;
+          min-width: 12px;
+          height: 1px;
+          background: var(--dh-card-line);
+        }
+
+        .dh-card-name {
+          text-transform: uppercase;
+          font-size: clamp(9.5px, 3cqw, 13px);
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          line-height: 1.25;
+          text-wrap: balance;
+          color: var(--dh-card-ink);
+          white-space: normal;
+          text-align: center;
         }
 
         /* Desktop Layout (lg and up) */
@@ -367,7 +475,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
             top: calc(var(--dh-nav-bottom, 68px) + 12px);
             bottom: 0;
             right: clamp(1.5rem, 2vw, 2rem);
-            width: min(38vw, 42rem);
+            width: min(34vw, 36rem);
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: var(--hero-column-gap);
