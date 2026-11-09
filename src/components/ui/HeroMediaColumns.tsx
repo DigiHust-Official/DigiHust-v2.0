@@ -661,19 +661,37 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         /* Desktop Layout (lg and up) */
         @media (min-width: 1024px) {
           .hero-media-columns-desktop {
+            --cards-tilt: -7deg;
+            --cards-shift-x: 0px;
             position: absolute;
-            top: calc(var(--dh-nav-bottom, 68px) + 12px);
-            bottom: 0;
+            top: 50%;
+            bottom: auto;
             right: var(--dh-gutter, clamp(16px, 3.5vw, 40px));
             width: min(34vw, 36rem);
+            height: 140%;
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: var(--hero-column-gap);
             z-index: 1;
             overflow: hidden;
-            mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 90%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 90%, transparent 100%);
+            transform: translateY(-50%) rotate(var(--cards-tilt)) translateX(var(--cards-shift-x));
+            transform-origin: center center;
+            will-change: transform;
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
             pointer-events: none;
+          }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1279px) {
+          .hero-media-columns-desktop {
+            --cards-tilt: -4deg;
+          }
+        }
+
+        @media (min-width: 1280px) and (max-width: 1399px) {
+          .hero-media-columns-desktop {
+            --cards-shift-x: 12px;
           }
         }
 
@@ -730,6 +748,21 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
                 ))}
               </div>
             )}
+
+            {/* Set 3 (Clone 4 frames to fill rotated 140% height at 1920x1080 and 1440x800) */}
+            {!shouldReduceMotion && (
+              <div className="w-full flex flex-col" aria-hidden="true">
+                {upFrames.map((frame) => (
+                  <FrameCard
+                    key={`${frame.id}-clone-3`}
+                    frame={frame}
+                    isClone={true}
+                    videoRefs={videoRefs}
+                    isMobile={false}
+                  />
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
 
@@ -757,6 +790,21 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
                 {downFrames.map((frame) => (
                   <FrameCard
                     key={`${frame.id}-clone`}
+                    frame={frame}
+                    isClone={true}
+                    videoRefs={videoRefs}
+                    isMobile={false}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Set 3 (Clone 4 frames to fill rotated 140% height at 1920x1080 and 1440x800) */}
+            {!shouldReduceMotion && (
+              <div className="w-full flex flex-col" aria-hidden="true">
+                {downFrames.map((frame) => (
+                  <FrameCard
+                    key={`${frame.id}-clone-3`}
                     frame={frame}
                     isClone={true}
                     videoRefs={videoRefs}
