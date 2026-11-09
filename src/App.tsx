@@ -6,7 +6,6 @@ import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { OfflineBanner } from './components/ui/OfflineBanner';
-import { ScrollProgress } from './components/ui/ScrollProgress';
 import { CookieConsent } from './components/ui/CookieConsent';
 import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 import { FloatingCTA } from './components/ui/FloatingCTA';
@@ -92,7 +91,6 @@ export const App: React.FC = () => {
         <LanguageProvider>
           <Router>
             <ScrollToTop />
-            <ScrollProgress />
             <GlobalLoaderOverlay />
             <OfflineBanner />
             <CookieConsent />

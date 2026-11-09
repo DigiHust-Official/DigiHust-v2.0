@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Headset } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { useLanguage } from '../../context/LanguageContext';
@@ -38,10 +38,6 @@ export const Navbar: React.FC = () => {
     width: '0px',
     opacity: 0,
   });
-
-  // Scroll Progress (framer-motion window scroll)
-  const { scrollY, scrollYProgress } = useScroll();
-  const scrollTrackOpacity = useTransform(scrollY, [0, 8, 9], [0, 0, 1]);
 
   const isPortalLogin = location.pathname === '/portal/login';
   const isPortal =
@@ -247,21 +243,6 @@ export const Navbar: React.FC = () => {
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-
-        {/* Scroll Progress Bar along bottom rim of navbar pill */}
-        <motion.div
-          className="dh-nav-scroll-track"
-          style={{ opacity: scrollTrackOpacity }}
-          aria-hidden="true"
-        >
-          <motion.div
-            className="dh-nav-scroll-fill"
-            style={{
-              scaleX: scrollYProgress,
-              transformOrigin: '0% 50%',
-            }}
-          />
-        </motion.div>
       </nav>
 
       {/* Mobile Menu Panel */}

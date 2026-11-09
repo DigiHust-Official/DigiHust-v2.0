@@ -337,37 +337,6 @@ html.dark .dh-nav-contact-btn:hover {
   transform: translateY(1px);
 }
 
-/* Scroll Progress Bar along bottom rim */
-.dh-nav-scroll-track {
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  bottom: 0;
-  height: 2px;
-  border-radius: 2px;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 10;
-}
-
-html[data-theme="light"] .dh-nav-scroll-track,
-html.light .dh-nav-scroll-track {
-  background: rgba(10, 31, 43, 0.08);
-}
-
-:root .dh-nav-scroll-track,
-html[data-theme="dark"] .dh-nav-scroll-track,
-html.dark .dh-nav-scroll-track {
-  background: rgba(255, 255, 255, 0.10);
-}
-
-.dh-nav-scroll-fill {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #1F7A8C, #2EC4D6 55%, #FF7A59);
-  border-radius: 2px;
-}
-
 /* Mobile Glass Menu */
 .dh-nav-mobile-panel {
   pointer-events: auto;
