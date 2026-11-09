@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 interface UseHeroHardScrollOptions {
   runwayRef: React.RefObject<HTMLElement | null>;
-  duration?: number; // default ~800ms
+  duration?: number; // default ~1500ms for a silky, cinematic glide
 }
 
 /**
@@ -12,12 +12,12 @@ interface UseHeroHardScrollOptions {
  * - Within the hero runway zone (scrollY 0 to runway bottom): one down-scroll gesture
  *   (wheel, touch swipe, PageDown/Space/ArrowDown) smoothly animates to the next section top.
  * - At the next section top: one up-scroll gesture animates back to scrollY 0.
- * - Locks input during the ~0.8s animation + trackpad inertia cooldown to prevent stutter.
+ * - Locks input during the ~1.5s animation + trackpad inertia cooldown to prevent stutter.
  * - Completely disabled on mobile (<1024px), prefers-reduced-motion, and when modals/mobile menus are open.
  */
 export function useHeroHardScroll({
   runwayRef,
-  duration = 800,
+  duration = 1500,
 }: UseHeroHardScrollOptions): void {
   const isAnimatingRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
@@ -62,7 +62,7 @@ export function useHeroHardScroll({
       return false;
     };
 
-    // Smooth scroll animation with cubic-bezier ease-in-out
+    // Smooth scroll animation with silky organic sinusoidal ease-in-out
     const animateScrollTo = (targetY: number) => {
       if (isAnimatingRef.current) return;
       isAnimatingRef.current = true;
@@ -71,24 +71,24 @@ export function useHeroHardScroll({
       const distance = targetY - startY;
       const startTime = performance.now();
 
-      const easeInOutCubic = (t: number) =>
-        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      // Silky, organic sinusoidal ease-in-out (smooth acceleration & soft deceleration)
+      const easeInOutSmooth = (t: number) => 0.5 * (1 - Math.cos(Math.PI * t));
 
       let rafId: number;
       const step = (now: number) => {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const ease = easeInOutCubic(progress);
+        const ease = easeInOutSmooth(progress);
 
         window.scrollTo(0, startY + distance * ease);
 
         if (progress < 1) {
           rafId = requestAnimationFrame(step);
         } else {
-          // Extra buffer (180ms) to swallow trackpad inertia
+          // Extra buffer (200ms) to swallow trackpad inertia
           setTimeout(() => {
             isAnimatingRef.current = false;
-          }, 180);
+          }, 200);
         }
       };
 
@@ -236,3 +236,4 @@ export function useHeroHardScroll({
     };
   }, [runwayRef, duration]);
 }
+
