@@ -25,22 +25,55 @@
 /* Light Mode Glass Bar */
 html[data-theme="light"] .dh-nav-bar,
 html.light .dh-nav-bar {
-  background: var(--dh-glass-bg, linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(223, 228, 233, 0.58)));
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.70);
-  box-shadow: var(--dh-glass-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(105, 120, 133, 0.28), 0 0 0 1px rgba(118, 132, 145, 0.30), 0 20px 40px -18px rgba(20, 45, 60, 0.35), 0 2px 6px rgba(20, 45, 60, 0.08));
+  background: rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(16px) saturate(170%) brightness(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(170%) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 16px 36px -12px rgba(20, 45, 60, 0.16),
+    0 2px 6px rgba(20, 45, 60, 0.04);
 }
 
 /* Dark Mode Glass Bar */
 :root .dh-nav-bar,
 html[data-theme="dark"] .dh-nav-bar,
 html.dark .dh-nav-bar {
-  background: var(--dh-glass-bg, linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)));
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: var(--dh-glass-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.20), inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 20px 40px -18px rgba(0, 0, 0, 0.65));
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(170%) brightness(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(170%) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 20px 40px -14px rgba(0, 0, 0, 0.60),
+    0 2px 6px rgba(0, 0, 0, 0.20);
+}
+
+/* Faint diagonal sheen on glass pill */
+.dh-nav-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 28%,
+    rgba(255, 255, 255, 0) 55%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+}
+
+.dh-nav-bar > a,
+.dh-nav-bar > div {
+  position: relative;
+  z-index: 1;
 }
 
 /* Fallback for browsers without backdrop-filter */
