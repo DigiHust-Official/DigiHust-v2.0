@@ -397,8 +397,16 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px), var(--dh-silver-face);
           box-shadow: var(--dh-silver-edge), var(--dh-silver-shadow);
           --card-inset: clamp(20px, 11.962cqw, 32px);
+          --dh-engrave-steel: #5d6773;
           user-select: none;
           box-sizing: border-box;
+        }
+
+        .dark .dh-card,
+        [data-theme="dark"] .dh-card,
+        html.dark .dh-card,
+        html[data-theme="dark"] .dh-card {
+          --dh-engrave-steel: #4a535d;
         }
 
         /* Engraved inner line */
@@ -458,8 +466,19 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card-corner-icon {
           width: clamp(13px, 5.8cqw, 20px);
           height: clamp(13px, 5.8cqw, 20px);
-          color: var(--dh-ink);
+          color: var(--dh-engrave-steel);
+          stroke: var(--dh-engrave-steel);
           flex-shrink: 0;
+        }
+
+        /* Left Rail: top light source */
+        .dh-card-rail-left .dh-card-corner-icon {
+          filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85)) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.30));
+        }
+
+        /* Right Rail (180deg rotated): inverted shadow offsets keep top highlight and bottom shadow */
+        .dh-card-rail-right .dh-card-corner-icon {
+          filter: drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.85)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.30));
         }
 
         .dh-card-rail-gap {
@@ -478,9 +497,21 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           font-family: 'Plus Jakarta Sans', var(--font-sans, sans-serif);
           font-weight: 600;
           letter-spacing: 0.04em;
-          color: var(--dh-ink);
-          opacity: 0.85;
+          color: transparent;
+          background-color: var(--dh-engrave-steel);
+          background-clip: text;
+          -webkit-background-clip: text;
           user-select: none;
+        }
+
+        /* Left Rail: top highlight, bottom shadow */
+        .dh-card-rail-left .dh-card-stacked-label {
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 -1px 0 rgba(0, 0, 0, 0.28);
+        }
+
+        /* Right Rail (180deg rotated): inverted offsets so light source remains from the top */
+        .dh-card-rail-right .dh-card-stacked-label {
+          text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.85), 0 1px 0 rgba(0, 0, 0, 0.28);
         }
 
         .dh-card-stacked-label--sm {
@@ -501,6 +532,11 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           justify-content: center;
           height: 1.08em;
           flex-shrink: 0;
+          color: inherit;
+          background-color: inherit;
+          background-clip: inherit;
+          -webkit-background-clip: inherit;
+          text-shadow: inherit;
         }
 
         .dh-card-stacked-space {
