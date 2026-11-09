@@ -284,7 +284,14 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
     if (downSetRef.current) observer.observe(downSetRef.current);
     measureHeights();
 
-    return () => observer.disconnect();
+    window.addEventListener('resize', measureHeights);
+    window.addEventListener('load', measureHeights);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measureHeights);
+      window.removeEventListener('load', measureHeights);
+    };
   }, []);
 
   // IntersectionObserver to pause loop and videos when hero is off-screen
@@ -394,7 +401,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
         .dh-card {
           container-type: inline-size;
           width: 100%;
-          aspect-ratio: 236.16 / 270.06;
+          aspect-ratio: 63 / 88;
           position: relative;
           margin-bottom: var(--hero-column-gap);
           padding: 3.5%;
