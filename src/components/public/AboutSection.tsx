@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight, Star } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { INITIAL_USERS } from '../../services/mockData';
 import './AboutSection.css';
 
 // 1. Image placeholder configuration at top of file for easy swapping
@@ -11,37 +12,19 @@ export const ABOUT_IMAGE = {
   alt: 'DigiHust managed digital business services',
 };
 
-// 2. Verified team member count (25 members in INITIAL_USERS from mockData.ts)
-export const TEAM_COUNT = 25;
+// 2. Data-driven filter of verified non-intern team members
+const ALLOWED_ROLE_PATTERN = /\b(specialist|freelancer|expert|management|manager|lead|head|director|founder|ceo|cto|coo|chief|principal)\b/i;
+const EXCLUDED_ROLE_PATTERN = /\b(intern|trainee|apprentice)\b/i;
 
-// 3. Real team member profile picture avatars from mockData / local assets
-export const AVATARS = [
-  {
-    src: 'https://ptvchzbzokyumeizsuge.supabase.co/storage/v1/object/public/avatars/usr-ceo-1.png?t=1788198288702',
-    alt: 'Mahad Abbas - Founder & CEO',
-    initials: 'MA',
-  },
-  {
-    src: 'https://ptvchzbzokyumeizsuge.supabase.co/storage/v1/object/public/avatars/usr-1788019490206.jpeg?t=1788310223059',
-    alt: 'Muhammad Haseeb - Co-founder',
-    initials: 'MH',
-  },
-  {
-    src: 'https://ptvchzbzokyumeizsuge.supabase.co/storage/v1/object/public/avatars/usr-1788119130873.png?t=1788253088287',
-    alt: 'Waliha Idrees - Creative Designer',
-    initials: 'WI',
-  },
-  {
-    src: 'https://ptvchzbzokyumeizsuge.supabase.co/storage/v1/object/public/avatars/usr-1788091129048.jpg?t=1788202106880',
-    alt: 'Fiza Shoaib - AI & UI/UX Specialist',
-    initials: 'FS',
-  },
-  {
-    src: 'https://ptvchzbzokyumeizsuge.supabase.co/storage/v1/object/public/avatars/usr-1788086854546.jpg?t=1788285469759',
-    alt: 'Muhammad Ammar - Full-Stack Developer',
-    initials: 'MA',
-  },
-];
+export const ALLOWED_MEMBERS = INITIAL_USERS.filter((user) => {
+  const combined = `${user.role || ''} ${user.roleTier || ''} ${user.title || ''}`;
+  if (EXCLUDED_ROLE_PATTERN.test(combined)) return false;
+  return ALLOWED_ROLE_PATTERN.test(combined);
+});
+
+// Big number = count of ALLOWED members from data-driven filter
+// TODO: When full team directory is populated in mockData, TEAM_COUNT will automatically reflect the total verified specialists
+export const TEAM_COUNT = ALLOWED_MEMBERS.length;
 
 function useCountUp(target: number, decimals: number, duration: number, inView: boolean, isDe: boolean) {
   const [displayValue, setDisplayValue] = useState<string>(() => {
@@ -92,10 +75,12 @@ export const AboutSection: React.FC = () => {
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
   const isDe = language === 'de';
 
-  // Count-up stats: 20 (Card 1), 25 (Card 2), 4.8 (Card 3)
+  // Count-up stats: 20 (Card 1), ALLOWED team count (Card 2), 4.8 (Card 3)
   const countCard1 = useCountUp(20, 0, 1200, isInView, isDe);
   const countCard2 = useCountUp(TEAM_COUNT, 0, 1200, isInView, isDe);
   const countCard3 = useCountUp(4.8, 1, 1200, isInView, isDe);
+
+  const displayAvatars = ALLOWED_MEMBERS.slice(0, 5);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 16 },
@@ -165,7 +150,7 @@ export const AboutSection: React.FC = () => {
           animate={isInView ? 'visible' : 'hidden'}
           variants={containerVariants}
         >
-          {/* CARD 1: Rich Brand Image Card (Spans 2 columns and 2 rows on desktop) */}
+          {/* CARD 1: Rich Brand Image Card */}
           <motion.article
             className="dh-about-card dh-about-card-hero"
             variants={cardVariants}
@@ -185,13 +170,13 @@ export const AboutSection: React.FC = () => {
               <span className="dh-about-hero-wordmark">DigiHust</span>
             </div>
 
-            {/* Top-Right Action Link */}
+            {/* Top-Right 36px rounded-square button (radius 11px) */}
             <Link
               to="/portfolio"
-              className="dh-about-link-btn"
+              className="dh-about-square-btn dh-about-card1-btn"
               aria-label={t('about_card1_link') || 'See our work'}
             >
-              <ArrowUpRight className="w-4 h-4" strokeWidth={2.2} />
+              <ArrowUpRight className="w-4 h-4" strokeWidth={2.4} />
             </Link>
 
             {/* Inset Translucent Bottom Glass Panel */}
@@ -200,81 +185,113 @@ export const AboutSection: React.FC = () => {
               <p className="dh-about-card1-caption">
                 {t('about_card1_caption') || 'Projects delivered across web, AI, growth and security'}
               </p>
-              <Link to="/portfolio" className="dh-about-card1-sublink">
-                <span>{t('about_card1_link') || 'See our work'}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2.4} />
-              </Link>
             </div>
           </motion.article>
 
-          {/* CARD 2: Domain Experts (Surface Card with 5 Real Team Member Avatars) */}
+          {/* CARD 2: Domain Experts */}
           <motion.article
             className="dh-about-card dh-about-card-delivery"
             variants={cardVariants}
           >
-            <div>
+            {/* TOP Cluster */}
+            <div className="dh-about-card-top">
               <div className="dh-about-card-label">
                 {t('about_card2_label') || 'Domain experts'}
               </div>
-              <div className="dh-about-stat mt-1">
+              <div className="dh-about-stat">
                 {countCard2}
               </div>
+            </div>
+
+            {/* BOTTOM Cluster (pinned with margin-top: auto) */}
+            <div className="dh-about-card-bottom">
               <div className="dh-about-avatars-row">
                 <div className="dh-about-avatar-cluster" aria-hidden="true">
-                  {AVATARS.map((avatar, idx) => (
+                  {displayAvatars.map((member) => (
                     <img
-                      key={idx}
-                      src={avatar.src}
-                      alt={avatar.alt}
+                      key={member.id}
+                      src={member.avatarUrl}
+                      alt={member.name}
                       className="dh-about-avatar-img"
                       loading="lazy"
                       onError={(e) => {
-                        // Safe fallback to initials avatar SVG if external image fails
                         e.currentTarget.style.display = 'none';
                       }}
                     />
                   ))}
                 </div>
               </div>
+              <p className="dh-about-statement">
+                {t('about_card2_text') || 'Verified specialists trained through Digiskill, each owning their craft end to end.'}
+              </p>
             </div>
-
-            <p className="dh-about-statement">
-              {t('about_card2_text') || 'Verified specialists trained through Digiskill, each owning their craft end to end.'}
-            </p>
           </motion.article>
 
-          {/* CARD 3: Customer Satisfaction (Warm Aura Accent Card) */}
+          {/* CARD 3: Customer Satisfaction */}
           <motion.article
             className="dh-about-card dh-about-card-turnaround"
             variants={cardVariants}
           >
-            <div>
+            {/* TOP Cluster */}
+            <div className="dh-about-card-top">
               <div className="dh-about-card-label">
                 {t('about_card3_label') || 'Customer satisfaction'}
               </div>
-              <div className="dh-about-stat mt-1 flex items-baseline">
+              <div className="dh-about-stat flex items-baseline">
                 <span>{countCard3}</span>
                 <span className="dh-about-stat-unit">/5</span>
               </div>
-              <div className="dh-about-stars-row" aria-label="Rating 4.8 out of 5 stars">
-                {[1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-current" strokeWidth={1.5} />
-                ))}
-                <Star className="w-3.5 h-3.5 fill-current opacity-60" strokeWidth={1.5} />
-              </div>
             </div>
 
-            <p className="dh-about-caption">
-              {t('about_card3_caption') || 'Overall rating from our clients'}
-            </p>
+            {/* BOTTOM Cluster */}
+            <div className="dh-about-card-bottom">
+              <div
+                className="dh-about-stars-row"
+                dir="ltr"
+                role="img"
+                aria-label="Rated 4.8 out of 5"
+              >
+                {[1, 2, 3, 4].map((i) => (
+                  <Star
+                    key={i}
+                    className="dh-about-star dh-about-star-fill"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                ))}
+                <div className="dh-about-star-partial" aria-hidden="true">
+                  <Star
+                    className="dh-about-star dh-about-star-outline"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="dh-about-star-fill-clip"
+                    style={{ clipPath: 'inset(0 20% 0 0)' }}
+                    aria-hidden="true"
+                  >
+                    <Star
+                      className="dh-about-star dh-about-star-fill"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <p className="dh-about-caption">
+                {t('about_card3_caption') || 'Overall rating from our clients'}
+              </p>
+            </div>
           </motion.article>
 
-          {/* CARD 4: Our Approach (High-Contrast Monochrome Card, Button Top-Right) */}
+          {/* CARD 4: Our Approach */}
           <motion.article
             className="dh-about-card dh-about-card-contact"
             variants={cardVariants}
           >
-            <div>
+            {/* TOP Cluster */}
+            <div className="dh-about-card-top">
               <div className="dh-about-card-label">
                 {t('about_card4_label') || 'Our approach'}
               </div>
@@ -282,17 +299,20 @@ export const AboutSection: React.FC = () => {
               {/* Action Button at TOP-RIGHT, avoiding bottom-right floating CTA */}
               <Link
                 to="/contact"
-                className="dh-about-card4-btn"
+                className="dh-about-square-btn dh-about-card4-btn"
                 aria-label={t('about_card4_link') || 'Start a project with DigiHust'}
               >
                 <ArrowUpRight className="w-4 h-4" strokeWidth={2.4} />
               </Link>
             </div>
 
-            <div>
-              <p className="dh-about-approach-text">
-                {t('about_card4_heading') || 'We find the real business problems, then build the solution.'}
-              </p>
+            {/* Statement directly under label */}
+            <p className="dh-about-approach-text">
+              {t('about_card4_heading') || 'We find the real business problems, then build the solution.'}
+            </p>
+
+            {/* BOTTOM Cluster: Caption bottom-left, keeping bottom-right 128px clear */}
+            <div className="dh-about-card-bottom dh-about-contact-bottom">
               <p className="dh-about-approach-caption">
                 {t('about_card4_caption') || 'Problem first, tools second.'}
               </p>
