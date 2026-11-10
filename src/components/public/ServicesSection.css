@@ -51,7 +51,7 @@ html.dark .dh-services {
   --dh-frame-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
   --dh-heading-primary: #F3F6FA;
-  --dh-heading-accent: rgb(var(--dh-wave-2, 255, 190, 120));
+  --dh-heading-accent: var(--dh-highlight, #2EC4D6);
 
   --dh-card-bg: #0F2431;
   --dh-card-hover-bg: #132C3B;
