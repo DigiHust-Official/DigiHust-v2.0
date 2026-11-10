@@ -178,10 +178,43 @@ export const ServiceIllustration: React.FC<ServiceIllustrationProps> = ({ id, cl
   }
 };
 
+// Framer Motion entrance variants (Item 5)
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 export const ServicesSection: React.FC = () => {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
 
   // Headline highlighter split: "One Company. Every Digital Need."
   const headingText = t('services_heading') || 'One Company. Every Digital Need.';
@@ -232,45 +265,56 @@ export const ServicesSection: React.FC = () => {
         </div>
 
         {/* 2x2 Checkerboard Grid */}
-        <div className="dh-services__grid">
+        <motion.div
+          className="dh-services__grid"
+          variants={containerVariants}
+          initial={prefersReducedMotion ? 'visible' : 'hidden'}
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+        >
           {FEATURED_SERVICES.map((svc, idx) => (
-            <Link
+            <motion.div
               key={svc.id}
-              to={svc.route}
-              className={`dh-services__card dh-services__card--slot-${idx + 1}`}
-              aria-label={`${t(svc.titleKey)} - ${t('services_learn_more') || 'Learn more'}`}
+              className="dh-services__card-wrap"
+              variants={prefersReducedMotion ? undefined : cardVariants}
             >
-              {/* TOP Cluster */}
-              <div className="dh-services__card-top">
-                <h3 className="dh-services__card-title">
-                  <span className="dh-services__card-title-box">
-                    {t(svc.titleKey)}
-                  </span>
-                </h3>
-              </div>
-
-              {/* BOTTOM Cluster */}
-              <div className="dh-services__card-bottom">
-                <div className="dh-services__learn-more">
-                  <span className="dh-services__learn-btn">
-                    <ArrowUpRight className="dh-services__arrow" strokeWidth={2} />
-                  </span>
-                  <span className="dh-services__learn-label">
-                    {t('services_learn_more') || 'Learn more'}
-                  </span>
+              <Link
+                to={svc.route}
+                className={`dh-services__card dh-services__card--slot-${idx + 1}`}
+                aria-label={`${t(svc.titleKey)} - ${t('services_learn_more') || 'Learn more'}`}
+              >
+                {/* TOP Cluster */}
+                <div className="dh-services__card-top">
+                  <h3 className="dh-services__card-title">
+                    <span className="dh-services__card-title-box">
+                      {t(svc.titleKey)}
+                    </span>
+                  </h3>
                 </div>
-              </div>
 
-              {/* Illustration (Right side, vertically centered) */}
-              <div className="dh-services__illustration">
-                <ServiceIllustration id={svc.id} />
-              </div>
+                {/* BOTTOM Cluster */}
+                <div className="dh-services__card-bottom">
+                  <div className="dh-services__learn-more">
+                    <span className="dh-services__learn-btn">
+                      <ArrowUpRight className="dh-services__arrow" strokeWidth={2} />
+                    </span>
+                    <span className="dh-services__learn-label">
+                      {t('services_learn_more') || 'Learn more'}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Screen reader only description for SEO */}
-              <span className="sr-only">{t(svc.descKey)}</span>
-            </Link>
+                {/* Illustration (Right side, vertically centered) */}
+                <div className="dh-services__illustration">
+                  <ServiceIllustration id={svc.id} />
+                </div>
+
+                {/* Screen reader only description for SEO */}
+                <span className="sr-only">{t(svc.descKey)}</span>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

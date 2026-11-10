@@ -376,4 +376,56 @@ html.dark .dh-services__card--slot-4 {
   width: 100%;
   height: 100%;
   display: block;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ── Motion & Hover Transitions (Item 5) ── */
+.dh-services__card-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dh-services__card:hover,
+.dh-services__card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 0 0 var(--card-lip-hover, var(--card-lip));
+}
+
+.dh-services__card:focus-visible {
+  outline: 2px solid var(--dh-focus-ring, #2EC4D6);
+  outline-offset: 3px;
+}
+
+.dh-services__card:hover .dh-services__arrow,
+.dh-services__card:focus-visible .dh-services__arrow {
+  transform: rotate(45deg);
+}
+
+.dh-services__card:hover .dh-services__illustration svg,
+.dh-services__card:focus-visible .dh-services__illustration svg {
+  transform: translate(6px, -6px);
+}
+
+/* prefers-reduced-motion safety */
+@media (prefers-reduced-motion: reduce) {
+  .dh-services__mark {
+    transition: none !important;
+    background-size: 100% 100% !important;
+  }
+
+  .dh-services__card,
+  .dh-services__card:hover,
+  .dh-services__card:focus-visible,
+  .dh-services__arrow,
+  .dh-services__card:hover .dh-services__arrow,
+  .dh-services__card:focus-visible .dh-services__arrow,
+  .dh-services__illustration,
+  .dh-services__illustration svg,
+  .dh-services__card:hover .dh-services__illustration svg,
+  .dh-services__card:focus-visible .dh-services__illustration svg {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: 0 5px 0 0 var(--card-lip) !important;
+  }
 }
