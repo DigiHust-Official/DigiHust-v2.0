@@ -153,9 +153,9 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   min-height: 0;
   aspect-ratio: auto;
   background-color: var(--dh-card-bg);
-  border: var(--dh-card-border);
+  border: none;
   box-shadow: var(--dh-card-shadow);
-  transition: transform 0.25s ease-out, border-color 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: transform 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
 @media (min-width: 768px) {
@@ -168,17 +168,12 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
 .dh-services-card:hover,
 .dh-services-card:focus-visible {
   transform: translateY(-4px);
-  border-color: var(--dh-hover-border);
+  background-color: rgba(255, 255, 255, 0.075);
 }
 
 .dh-services-card:focus-visible {
-  outline: 2px solid var(--dh-focus-ring, #2EC4D6);
+  outline: 2px solid rgba(46, 196, 214, 0.9);
   outline-offset: 3px;
-}
-
-.dh-services-card:hover .dh-services-card__img,
-.dh-services-card:focus-visible .dh-services-card__img {
-  transform: scale(1.04);
 }
 
 .dh-services-card:hover .dh-services-card__pill-arrow-wrap,
