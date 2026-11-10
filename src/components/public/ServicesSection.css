@@ -144,6 +144,12 @@
   border-radius: clamp(22px, 2.2vw, 32px);
   min-height: 190px;
   aspect-ratio: auto;
+  background-color: var(--card-bg);
+  border: var(--card-border);
+  box-shadow: 0 5px 0 0 var(--card-lip);
+  color: var(--card-color);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 @media (min-width: 768px) {
@@ -151,6 +157,142 @@
     aspect-ratio: 1.9 / 1;
     min-height: 0;
   }
+}
+
+/* ── Colors & Checkerboard Palette (Item 4) ── */
+
+/* Light theme defaults (root / light) */
+/* Light card styles: slots 1 and 3 on mobile */
+.dh-services__card--slot-1,
+.dh-services__card--slot-3 {
+  --card-bg: #FFFFFF;
+  --card-border: 1.5px solid #050D14;
+  --card-lip: #050D14;
+  --card-lip-hover: #050D14;
+  --card-color: #050D14;
+  --card-marker-bg: rgba(var(--dh-wave-2), 0.75);
+  --card-marker-color: #050D14;
+  --card-btn-bg: #050D14;
+  --card-btn-color: #FFFFFF;
+}
+
+/* Dark card styles: slots 2 and 4 on mobile */
+.dh-services__card--slot-2,
+.dh-services__card--slot-4 {
+  --card-bg: #050D14;
+  --card-border: 1.5px solid #050D14;
+  --card-lip: #050D14;
+  --card-lip-hover: #050D14;
+  --card-color: #F3F6FA;
+  --card-marker-bg: #F3F6FA;
+  --card-marker-color: #050D14;
+  --card-btn-bg: #F3F6FA;
+  --card-btn-color: #050D14;
+}
+
+/* Desktop checkerboard: slot 3 is dark, slot 4 is light */
+@media (min-width: 768px) {
+  .dh-services__card--slot-3 {
+    --card-bg: #050D14;
+    --card-border: 1.5px solid #050D14;
+    --card-lip: #050D14;
+    --card-lip-hover: #050D14;
+    --card-color: #F3F6FA;
+    --card-marker-bg: #F3F6FA;
+    --card-marker-color: #050D14;
+    --card-btn-bg: #F3F6FA;
+    --card-btn-color: #050D14;
+  }
+
+  .dh-services__card--slot-4 {
+    --card-bg: #FFFFFF;
+    --card-border: 1.5px solid #050D14;
+    --card-lip: #050D14;
+    --card-lip-hover: #050D14;
+    --card-color: #050D14;
+    --card-marker-bg: rgba(var(--dh-wave-2), 0.75);
+    --card-marker-color: #050D14;
+    --card-btn-bg: #050D14;
+    --card-btn-color: #FFFFFF;
+  }
+}
+
+/* Dark theme overrides */
+html[data-theme="dark"] .dh-services__card--slot-1,
+html[data-theme="dark"] .dh-services__card--slot-3,
+html.dark .dh-services__card--slot-1,
+html.dark .dh-services__card--slot-3 {
+  --card-bg: #F3F6FA;
+  --card-border: 1.5px solid #F3F6FA;
+  --card-lip: rgba(243, 246, 250, 0.35);
+  --card-lip-hover: rgba(243, 246, 250, 0.5);
+  --card-color: #050D14;
+  --card-marker-bg: rgba(var(--dh-wave-2), 0.75);
+  --card-marker-color: #050D14;
+  --card-btn-bg: #050D14;
+  --card-btn-color: #FFFFFF;
+}
+
+html[data-theme="dark"] .dh-services__card--slot-2,
+html[data-theme="dark"] .dh-services__card--slot-4,
+html.dark .dh-services__card--slot-2,
+html.dark .dh-services__card--slot-4 {
+  --card-bg: var(--dh-surface-alt, #102A38);
+  --card-border: 1.5px solid rgba(255, 255, 255, 0.14);
+  --card-lip: rgba(255, 255, 255, 0.12);
+  --card-lip-hover: rgba(255, 255, 255, 0.22);
+  --card-color: #F3F6FA;
+  --card-marker-bg: #F3F6FA;
+  --card-marker-color: #050D14;
+  --card-btn-bg: #F3F6FA;
+  --card-btn-color: #050D14;
+}
+
+@media (min-width: 768px) {
+  html[data-theme="dark"] .dh-services__card--slot-3,
+  html.dark .dh-services__card--slot-3 {
+    --card-bg: var(--dh-surface-alt, #102A38);
+    --card-border: 1.5px solid rgba(255, 255, 255, 0.14);
+    --card-lip: rgba(255, 255, 255, 0.12);
+    --card-lip-hover: rgba(255, 255, 255, 0.22);
+    --card-color: #F3F6FA;
+    --card-marker-bg: #F3F6FA;
+    --card-marker-color: #050D14;
+    --card-btn-bg: #F3F6FA;
+    --card-btn-color: #050D14;
+  }
+
+  html[data-theme="dark"] .dh-services__card--slot-4,
+  html.dark .dh-services__card--slot-4 {
+    --card-bg: #F3F6FA;
+    --card-border: 1.5px solid #F3F6FA;
+    --card-lip: rgba(243, 246, 250, 0.35);
+    --card-lip-hover: rgba(243, 246, 250, 0.5);
+    --card-color: #050D14;
+    --card-marker-bg: rgba(var(--dh-wave-2), 0.75);
+    --card-marker-color: #050D14;
+    --card-btn-bg: #050D14;
+    --card-btn-color: #FFFFFF;
+  }
+}
+
+/* Apply token variables to card children */
+.dh-services__card-title-box {
+  background-color: var(--card-marker-bg);
+  color: var(--card-marker-color);
+}
+
+.dh-services__learn-btn {
+  background-color: var(--card-btn-bg);
+  color: var(--card-btn-color);
+}
+
+.dh-services__learn-label {
+  color: var(--card-color);
+}
+
+.dh-services__illustration {
+  color: var(--card-color);
 }
 
 /* ── Card Anatomy (Item 3) ── */
