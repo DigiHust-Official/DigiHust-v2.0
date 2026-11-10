@@ -8,18 +8,53 @@
   padding-inline: clamp(1rem, 3vw, 2rem);
   background-color: var(--bg-page);
 
-  /* Unified Dark Theme tokens for this section in BOTH themes (Item 4 & 5) */
+  /* Light theme tokens (default, Item 5) */
+  --dh-frame-bg: radial-gradient(120% 45% at 50% 0%, rgba(31, 122, 140, 0.10) 0%, transparent 70%), linear-gradient(180deg, #EEF4F7 0%, #E4ECF1 100%);
+  --dh-frame-border: rgba(31, 122, 140, 0.5);
+  --dh-frame-shadow: 0 24px 60px rgba(10, 31, 43, 0.08);
+
+  --dh-heading-primary: #0A1F2B;
+  --dh-heading-accent: var(--brand-teal, #1F7A8C);
+
+  --dh-card-bg: #FFFFFF;
+  --dh-card-hover-bg: #F8FAFC;
+  --dh-card-border: none;
+  --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(10, 31, 43, 0.05);
+
+  --dh-card-num-bg: #EAF0F4;
+  --dh-card-num-color: #0A1F2B;
+
+  --dh-card-pill-border: rgba(10, 31, 43, 0.25);
+  --dh-card-pill-color: #0A1F2B;
+  --dh-card-arrow-bg: #EAF0F4;
+  --dh-card-arrow-color: #0A1F2B;
+
+  --dh-card-title-color: #0A1F2B;
+  --dh-card-desc-color: #4A6070;
+
+  --dh-img-ring: rgba(10, 31, 43, 0.12);
+  --dh-focus-ring: rgba(31, 122, 140, 0.9);
+}
+
+/* Dark theme overrides (Item 5) */
+html[data-theme="dark"] .dh-services,
+html.dark .dh-services {
+  --dh-frame-bg: radial-gradient(120% 45% at 50% 0%, rgba(31, 122, 140, 0.45) 0%, transparent 70%), linear-gradient(180deg, #0C2230 0%, #050D14 100%);
+  --dh-frame-border: rgba(46, 196, 214, 0.4);
+  --dh-frame-shadow: none;
+
   --dh-heading-primary: #F3F6FA;
   --dh-heading-accent: rgb(var(--dh-wave-2, 255, 190, 120));
 
-  --dh-card-bg: rgba(255, 255, 255, 0.045);
+  --dh-card-bg: rgba(255, 255, 255, 0.05);
+  --dh-card-hover-bg: rgba(255, 255, 255, 0.085);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
-  --dh-card-num-bg: rgba(255, 255, 255, 0.08);
+  --dh-card-num-bg: rgba(255, 255, 255, 0.09);
   --dh-card-num-color: #F3F6FA;
 
-  --dh-card-pill-border: 1px solid rgba(255, 255, 255, 0.32);
+  --dh-card-pill-border: rgba(255, 255, 255, 0.3);
   --dh-card-pill-color: #F3F6FA;
   --dh-card-arrow-bg: rgba(255, 255, 255, 0.14);
   --dh-card-arrow-color: #F3F6FA;
@@ -27,7 +62,7 @@
   --dh-card-title-color: #F3F6FA;
   --dh-card-desc-color: #A9B8C6;
 
-  --dh-hover-border: rgba(46, 196, 214, 0.5);
+  --dh-img-ring: rgba(243, 246, 250, 0.12);
   --dh-focus-ring: rgba(46, 196, 214, 0.9);
 }
 
