@@ -37,7 +37,6 @@ import { GlassCtaButton } from '../ui/GlassCtaButton';
 import { HeroRotator } from '../ui/HeroRotator';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
-import { AboutSection } from './AboutSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
@@ -559,9 +558,6 @@ export const Home: React.FC = () => {
           </div>
         </section>
       </div>
-
-      {/* ── SECTION 1.5: ABOUT US (BENTO GRID) ── */}
-      <AboutSection />
 
       {/* ── SECTION 2: SERVICES OVERVIEW ── */}
       <section id="capabilities" className="py-24 px-6 lg:px-8 relative bg-[var(--bg-page)]">

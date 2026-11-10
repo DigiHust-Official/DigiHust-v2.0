@@ -120,23 +120,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_turnaround: 'Quote Proposal Turnaround',
     metric_turnaround_sub: 'Rapid scope assessment',
 
-    // About Us (Bento)
-    about_eyebrow: 'ABOUT US',
-    about_title_1: 'One accountable partner',
-    about_title_2: 'that builds, grows and secures',
-    about_title_3_prefix: 'your',
-    about_title_3_suffix: 'digital business',
-    about_card1_label_1: 'Verified domain',
-    about_card1_label_2: 'specialists',
-    about_card1_link: 'Learn more about DigiHust',
-    about_card2_label: 'On-time milestone delivery',
-    about_card2_counter: '+12 specialists',
-    about_card2_statement: 'Fixed milestones, clear scope, and delivery you can measure.',
-    about_card3_label: 'Quote proposal turnaround',
-    about_card3_caption: 'Rapid scope assessment',
-    about_card4_label: 'Point of contact per project',
-    about_card4_caption: 'No freelancer juggling',
-
     // Services Section
     services_tag: 'Core Capabilities',
     services_heading: 'One Company. Every Digital Need.',
@@ -217,23 +200,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_contact_sub: 'Kein Freelancer-Chaos',
     metric_turnaround: 'Angebots-Reaktionszeit',
     metric_turnaround_sub: 'Schnelle Scope-Bewertung',
-
-    // About Us (Bento)
-    about_eyebrow: 'ÜBER UNS',
-    about_title_1: 'Ein verlässlicher Partner',
-    about_title_2: 'der aufbaut, skaliert und absichert',
-    about_title_3_prefix: 'Ihr',
-    about_title_3_suffix: 'digitales Unternehmen',
-    about_card1_label_1: 'Verifizierte',
-    about_card1_label_2: 'Fachspezialisten',
-    about_card1_link: 'Erfahren Sie mehr über DigiHust',
-    about_card2_label: 'Pünktliche Meilenstein-Lieferung',
-    about_card2_counter: '+12 Spezialisten',
-    about_card2_statement: 'Klare Meilensteine, transparenter Umfang und messbare Ergebnisse.',
-    about_card3_label: 'Angebotsausarbeitung',
-    about_card3_caption: 'Umfassende Prüfung in 24h',
-    about_card4_label: 'Fester Ansprechpartner Pro Projekt',
-    about_card4_caption: 'Kein Freelancer-Chaos',
 
     // Services Section
     services_tag: 'Kernkompetenzen',
@@ -316,23 +282,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_turnaround: 'سرعة تقديم العروض',
     metric_turnaround_sub: 'تقييم شامل خلال 24 ساعة',
 
-    // About Us (Bento)
-    about_eyebrow: 'من نحن',
-    about_title_1: 'شريك واحد مسؤول',
-    about_title_2: 'يبني، ينمي ويؤمن',
-    about_title_3_prefix: 'لنجاح',
-    about_title_3_suffix: 'مشروعك الرقمي',
-    about_card1_label_1: 'كفاءات معتمدة',
-    about_card1_label_2: 'ومتخصصة',
-    about_card1_link: 'تعرف أكثر على DigiHust',
-    about_card2_label: 'تسليم في الموعد المحدد',
-    about_card2_counter: '+12 متخصص',
-    about_card2_statement: 'مراحل واضحة، نطاق عمل محدد، وتسليم دقيق يمكنك قياسه.',
-    about_card3_label: 'عرض سعر جاهز',
-    about_card3_caption: 'تقييم شامل لنطاق العمل خلال 24 ساعة',
-    about_card4_label: 'جهة تواصل واحدة لكل مشروع',
-    about_card4_caption: 'تخلص من عشوائية إدارة المستقلين',
-
     // Services Section
     services_tag: 'الخدمات الأساسية',
     services_heading: 'شركة واحدة. جميع احتياجاتك الرقمية.',
@@ -413,23 +362,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_contact_sub: 'Sin malabares de freelancers',
     metric_turnaround: 'Tiempo de Propuesta',
     metric_turnaround_sub: 'Evaluación de alcance en 24h',
-
-    // About Us (Bento)
-    about_eyebrow: 'SOBRE NOSOTROS',
-    about_title_1: 'Un socio responsable',
-    about_title_2: 'que construye, escala y protege',
-    about_title_3_prefix: 'tu',
-    about_title_3_suffix: 'negocio digital',
-    about_card1_label_1: 'Especialistas',
-    about_card1_label_2: 'verificados',
-    about_card1_link: 'Más información sobre DigiHust',
-    about_card2_label: 'Entregas a tiempo',
-    about_card2_counter: '+12 especialistas',
-    about_card2_statement: 'Hitos claros, alcance transparente y entregas medibles.',
-    about_card3_label: 'Tiempo de propuesta',
-    about_card3_caption: 'Evaluación rápida de alcance',
-    about_card4_label: 'Punto de contacto por proyecto',
-    about_card4_caption: 'Sin malabares de freelancers',
 
     // Services Section
     services_tag: 'Capacidades Principales',
