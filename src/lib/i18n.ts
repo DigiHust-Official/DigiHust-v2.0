@@ -152,6 +152,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     service_feat_creative_desc: 'Design systems, Figma component libraries, and distinctive brand identities.',
     service_feat_ai_desc: 'Autonomous LLM agents, custom chatbots, and intelligent workflow automations.',
     service_feat_marketing_desc: 'Technical SEO audits, PPC campaigns, and data-driven revenue growth funnels.',
+    service_feat_cyber_title: 'Cybersecurity & Auditing',
+    service_feat_cyber_desc: 'Penetration testing, OWASP vulnerability assessments, and infrastructure hardening.',
+    service_feat_data_title: 'Data Intelligence & Analytics',
+    service_feat_data_desc: 'Executive dashboards, automated data pipelines, and actionable predictive business insights.',
+    service_feat_strategy_title: 'Business Strategy & Consulting',
+    service_feat_strategy_desc: 'Roadmaps, audits and technology planning that align your digital spend with business goals.',
+    service_feat_cloud_title: 'Cloud & DevOps Infrastructure',
+    service_feat_cloud_desc: 'Secure, scalable hosting, CI/CD pipelines and monitoring built for reliable releases.',
 
     // Model Advantage
     model_tag: 'The Model Advantage',
@@ -258,6 +266,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     service_feat_creative_desc: 'Designsysteme, Figma-Komponentenbibliotheken und unverwechselbare Markenidentitäten.',
     service_feat_ai_desc: 'Autonome LLM-Agenten, Chatbots und intelligente Workflow-Automatisierungen.',
     service_feat_marketing_desc: 'Technische SEO-Audits, PPC-Kampagnen und datengetriebene Wachstumstrichter.',
+    service_feat_cyber_title: 'Cybersicherheit & Audits',
+    service_feat_cyber_desc: 'Penetrationstests, OWASP-Sicherheitsanalysen und Härtung digitaler Infrastrukturen.',
+    service_feat_data_title: 'Daten-Intelligence & Analytik',
+    service_feat_data_desc: 'Executive Dashboards, automatisierte Datenpipelines und prädiktive Geschäftseinblicke.',
+    service_feat_strategy_title: 'Digitale Unternehmensstrategie',
+    service_feat_strategy_desc: 'Roadmaps, Technologie-Audits und strategische Planung für nachhaltigen ROI.',
+    service_feat_cloud_title: 'Cloud- & DevOps-Infrastruktur',
+    service_feat_cloud_desc: 'Sicheres Hosting, CI/CD-Pipelines und Monitoring für verlässliche Releases.',
 
     // Model Advantage
     model_tag: 'Der Modell-Vorteil',
@@ -364,6 +380,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     service_feat_creative_desc: 'أنظمة التصميم ومكتبات مكونات Figma والهويات البصرية المميزة.',
     service_feat_ai_desc: 'وكلاء الذكاء الاصطناعي المستقلون وروبوتات الدردشة وأتمتة مسارات العمل الذكية.',
     service_feat_marketing_desc: 'تدقيق تحسين محركات البحث الفني وحملات الإعلانات المدفوعة وقنوات نمو المبيعات.',
+    service_feat_cyber_title: 'الأمن السيبراني والتدقيق',
+    service_feat_cyber_desc: 'اختبارات الاختراق، تقييم ثغرات OWASP، وتحصين البنية التحتية الرقمية.',
+    service_feat_data_title: 'ذكاء البيانات والتحليلات',
+    service_feat_data_desc: 'لوحات قيادة تنفيذية، مسارات بيانات مؤتمتة، ورؤى أعمال تنبؤية دقيقة.',
+    service_feat_strategy_title: 'استراتيجية الأعمال والاستشارات',
+    service_feat_strategy_desc: 'خطط عمل وتدقيق تقني يربط استثماراتك الرقمية بأهداف النمو المؤسسي.',
+    service_feat_cloud_title: 'البنية التحتية السحابية وDevOps',
+    service_feat_cloud_desc: 'استضافة آمنة وقابلة للتوسع، مسارات CI/CD ومراقبة مستمرة للإطلاقات.',
 
     // Model Advantage
     model_tag: 'ميزة نموذج العمل',
@@ -470,6 +494,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     service_feat_creative_desc: 'Sistemas de diseño, librerías en Figma e identidades de marca distintivas.',
     service_feat_ai_desc: 'Agentes autónomos de IA, chatbots personalizados y automatizaciones de flujos.',
     service_feat_marketing_desc: 'Auditorías de SEO técnico, campañas PPC y embudos de conversión basados en datos.',
+    service_feat_cyber_title: 'Ciberseguridad y Auditorías',
+    service_feat_cyber_desc: 'Pruebas de penetración, análisis de vulnerabilidades OWASP y blindaje de infraestructura.',
+    service_feat_data_title: 'Inteligencia de Datos y Analítica',
+    service_feat_data_desc: 'Paneles ejecutivos, canalizaciones de datos y métricas predictivas para la toma de decisiones.',
+    service_feat_strategy_title: 'Estrategia y Consultoría Digital',
+    service_feat_strategy_desc: 'Hojas de ruta, auditorías y planificación tecnológica alineadas con tus metas de negocio.',
+    service_feat_cloud_title: 'Infraestructura Cloud y DevOps',
+    service_feat_cloud_desc: 'Alojamiento seguro y escalable, pipelines CI/CD y monitorización para despliegues continuos.',
 
     // Model Advantage
     model_tag: 'La Ventaja del Modelo',
@@ -576,6 +608,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     service_feat_creative_desc: 'Systèmes de design, bibliothèques Figma et identités de marque remarquables.',
     service_feat_ai_desc: 'Agents IA autonomes, chatbots personnalisés et flux d’automatisation intelligents.',
     service_feat_marketing_desc: 'Audits SEO techniques, campagnes PPC et tunnels de conversion axés sur les données.',
+    service_feat_cyber_title: 'Cybersécurité et Audits',
+    service_feat_cyber_desc: 'Tests d’intrusion, évaluations des vulnérabilités OWASP et durcissement des systèmes.',
+    service_feat_data_title: 'Intelligence de Données et Analytique',
+    service_feat_data_desc: 'Tableaux de bord de direction, pipelines de données et analyses décisionnelles prédictives.',
+    service_feat_strategy_title: 'Stratégie et Conseil Digital',
+    service_feat_strategy_desc: 'Feuilles de route, audits et planification technologique alignés sur vos objectifs métier.',
+    service_feat_cloud_title: 'Infrastructure Cloud et DevOps',
+    service_feat_cloud_desc: 'Hébergement sécurisé et évolutif, pipelines CI/CD et surveillance pour des livraisons fiables.',
 
     // Model Advantage
     model_tag: 'L’avantage du modèle',
