@@ -308,8 +308,8 @@ html.light .dh-about-card:hover {
   border-radius: 18px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
@@ -318,7 +318,7 @@ html.light .dh-about-card:hover {
 
 html[data-theme="dark"] .dh-about-card1-panel,
 html.dark .dh-about-card1-panel {
-  background: rgba(5, 13, 20, 0.55);
+  background: rgba(10, 26, 36, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
 }
@@ -330,7 +330,7 @@ html.dark .dh-about-card1-panel {
   line-height: 1;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  color: #0A1F2B;
+  color: var(--dh-text, #0A1F2B);
 }
 
 html[data-theme="dark"] .dh-about-card1-stat,
@@ -343,28 +343,61 @@ html.dark .dh-about-card1-stat {
   font-size: clamp(12.5px, 3.3cqw, 15px);
   line-height: 1.4;
   font-weight: 400;
-  color: #1A3340;
+  color: var(--dh-text, #0A1F2B);
 }
 
 html[data-theme="dark"] .dh-about-card1-caption,
 html.dark .dh-about-card1-caption {
-  color: #D5DFE8;
+  color: #F3F6FA;
 }
 
 /* ── CARD 2: Domain Experts ── */
 .dh-about-card-delivery {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background-color: var(--dh-surface-alt);
+  border: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: clamp(16px, 5.2cqw, 26px);
 }
 
+.dh-about-card-delivery .dh-about-card-label {
+  color: var(--text-muted);
+}
+
+.dh-about-card-delivery .dh-about-stat {
+  color: var(--dh-text);
+}
+
+.dh-about-card-delivery .dh-about-statement {
+  color: var(--text-body);
+}
+
+html[data-theme="light"] .dh-about-card-delivery,
+html.light .dh-about-card-delivery {
+  background-color: var(--dh-surface-alt);
+  border: none;
+}
+
 html[data-theme="dark"] .dh-about-card-delivery,
 html.dark .dh-about-card-delivery {
   background-color: var(--dh-surface-alt);
   border: 1px solid var(--border-subtle);
+}
+
+html[data-theme="dark"] .dh-about-card-delivery .dh-about-card-label,
+html.dark .dh-about-card-delivery .dh-about-card-label {
+  color: #A9B8C6;
+}
+
+html[data-theme="dark"] .dh-about-card-delivery .dh-about-stat,
+html.dark .dh-about-card-delivery .dh-about-stat {
+  color: #F3F6FA;
+}
+
+html[data-theme="dark"] .dh-about-card-delivery .dh-about-statement,
+html.dark .dh-about-card-delivery .dh-about-statement {
+  color: #F3F6FA;
 }
 
 @media (min-width: 1024px) {
@@ -450,8 +483,8 @@ html.dark .dh-about-avatar-img {
   padding: clamp(16px, 5.2cqw, 26px);
   background: linear-gradient(
     135deg,
-    rgba(var(--dh-wave-2), 0.85) 0%,
-    rgba(var(--dh-wave-1), 0.55) 100%
+    rgb(var(--dh-wave-1)) 0%,
+    rgb(var(--dh-wave-2)) 100%
   );
   border: 1px solid rgba(255, 122, 89, 0.35);
   color: #0A1F2B;
@@ -472,7 +505,7 @@ html.dark .dh-about-avatar-img {
 }
 
 .dh-about-card-turnaround .dh-about-card-label {
-  color: rgba(10, 31, 43, 0.72);
+  color: rgba(10, 31, 43, 0.75);
 }
 
 .dh-about-card-turnaround .dh-about-stat {
@@ -484,7 +517,7 @@ html.dark .dh-about-avatar-img {
   font-size: 0.32em;
   font-weight: 400;
   letter-spacing: -0.02em;
-  color: rgba(10, 31, 43, 0.65);
+  color: rgba(10, 31, 43, 0.75);
   margin-inline-start: 0.15em;
   align-self: baseline;
 }
@@ -549,6 +582,42 @@ html.dark .dh-about-avatar-img {
   margin-top: clamp(4px, 1.5cqw, 8px);
 }
 
+html[data-theme="dark"] .dh-about-card-turnaround,
+html.dark .dh-about-card-turnaround {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--dh-wave-1)) 0%,
+    rgb(var(--dh-wave-2)) 100%
+  );
+  border: 1px solid rgba(255, 122, 89, 0.45);
+  color: #050D14;
+}
+
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-card-label,
+html.dark .dh-about-card-turnaround .dh-about-card-label {
+  color: rgba(5, 13, 20, 0.75);
+}
+
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stat,
+html.dark .dh-about-card-turnaround .dh-about-stat {
+  color: #050D14;
+}
+
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stat-unit,
+html.dark .dh-about-card-turnaround .dh-about-stat-unit {
+  color: rgba(5, 13, 20, 0.75);
+}
+
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stars-row,
+html.dark .dh-about-card-turnaround .dh-about-stars-row {
+  color: #050D14;
+}
+
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-caption,
+html.dark .dh-about-card-turnaround .dh-about-caption {
+  color: #050D14;
+}
+
 @container (max-height: 190px) {
   .dh-about-stars-row {
     display: none;
@@ -563,15 +632,15 @@ html.dark .dh-about-avatar-img {
   padding: clamp(16px, 5.2cqw, 26px);
   background-color: #050D14;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: #F3F6FA;
 }
 
-/* Dark theme: off-white #F3F6FA with dark text #0A1F2B */
+/* Dark theme: off-white #F3F6FA with dark text #050D14 */
 html[data-theme="dark"] .dh-about-card-contact,
 html.dark .dh-about-card-contact {
   background-color: #F3F6FA;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #0A1F2B;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #050D14;
 }
 
 @media (min-width: 1024px) {
@@ -589,12 +658,12 @@ html.dark .dh-about-card-contact {
 }
 
 .dh-about-card-contact .dh-about-card-label {
-  color: #94A3B8;
+  color: rgba(243, 246, 250, 0.7);
 }
 
 html[data-theme="dark"] .dh-about-card-contact .dh-about-card-label,
 html.dark .dh-about-card-contact .dh-about-card-label {
-  color: #4A6070;
+  color: rgba(5, 13, 20, 0.7);
 }
 
 /* Top-Right 36px Rounded-Square Action Button */
@@ -634,13 +703,13 @@ html.dark .dh-about-card4-btn:hover {
   font-size: clamp(1.15rem, 6.2cqw, 1.9rem);
   line-height: 1.18;
   letter-spacing: -0.02em;
-  color: #FFFFFF;
+  color: #F3F6FA;
   margin-top: clamp(10px, 3.5cqw, 18px);
 }
 
 html[data-theme="dark"] .dh-about-approach-text,
 html.dark .dh-about-approach-text {
-  color: #0A1F2B;
+  color: #050D14;
 }
 
 .dh-about-approach-caption {
@@ -648,13 +717,15 @@ html.dark .dh-about-approach-text {
   font-size: clamp(12.5px, 3.3cqw, 15px);
   font-weight: 400;
   line-height: 1.4;
-  color: #CBD5E1;
+  color: #F3F6FA;
+  opacity: 0.85;
   margin-top: clamp(4px, 1.5cqw, 8px);
 }
 
 html[data-theme="dark"] .dh-about-approach-caption,
 html.dark .dh-about-approach-caption {
-  color: #4A6070;
+  color: #050D14;
+  opacity: 0.85;
 }
 
 @container (max-height: 180px) {
