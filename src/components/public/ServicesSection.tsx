@@ -14,7 +14,7 @@ export interface ServiceItem {
   image: string;
 }
 
-// TODO: swap service images when dedicated assets are available
+// TODO: SERVICE_IMAGES is the single place to swap service images for custom artwork later
 export const SERVICE_IMAGES: Record<string, string> = {
   's-web': '/hero/fullstack-poster.webp',
   's-creative': '/hero/branding.webp',

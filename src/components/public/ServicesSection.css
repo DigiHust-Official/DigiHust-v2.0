@@ -308,7 +308,7 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   overflow: hidden;
 }
 
-/* Image at bottom */
+/* ── Image at bottom (Item 6: Duotone treatment) ── */
 .dh-services-card__media {
   position: relative;
   margin-top: clamp(8px, 3cqw, 12px);
@@ -317,28 +317,78 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   border-radius: clamp(14px, 6.4cqw, 22px);
   overflow: hidden;
   box-sizing: border-box;
-  border: 1px solid var(--border-subtle);
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #050D14;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.dh-services-card__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    150deg,
+    rgb(var(--dh-wave-2, 255, 190, 120)) 0%,
+    #1F7A8C 48%,
+    #0A1A24 100%
+  );
+  mix-blend-mode: color;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.4s ease-out;
+  z-index: 1;
+}
+
+.dh-services-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 55%,
+    rgba(5, 13, 20, 0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dh-services-card:hover .dh-services-card__media::before,
+.dh-services-card:focus-visible .dh-services-card__media::before {
+  opacity: 0.35;
 }
 
 .dh-services-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
   display: block;
+  filter: grayscale(1) contrast(1.12) brightness(0.85);
   transition: transform 0.25s ease-out;
 }
 
-.dh-services-card__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 60%,
-    rgba(31, 122, 140, 0.1) 100%
-  );
-  pointer-events: none;
+/* Per-image object-position so the subject is visible */
+.dh-services-card[data-service="s-web"] .dh-services-card__img {
+  object-position: center 20%;
+}
+.dh-services-card[data-service="s-creative"] .dh-services-card__img {
+  object-position: center center;
+}
+.dh-services-card[data-service="s-ai"] .dh-services-card__img {
+  object-position: center 30%;
+}
+.dh-services-card[data-service="s-marketing"] .dh-services-card__img {
+  object-position: center 25%;
+}
+.dh-services-card[data-service="s-cybersecurity"] .dh-services-card__img {
+  object-position: center center;
+}
+.dh-services-card[data-service="s-data-intelligence"] .dh-services-card__img {
+  object-position: center center;
+}
+.dh-services-card[data-service="s-strategy"] .dh-services-card__img {
+  object-position: center 25%;
+}
+.dh-services-card[data-service="s-cloud-devops"] .dh-services-card__img {
+  object-position: center 40%;
 }
 
 /* ── Centered View All Pill ── */
@@ -439,6 +489,11 @@ html[dir="rtl"] .dh-services__view-all-pill:hover .dh-services__view-all-arrow-w
   .dh-services__view-all-arrow-wrap,
   .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
     transform: none !important;
+    transition: none !important;
+  }
+  .dh-services-card:hover .dh-services-card__media::before,
+  .dh-services-card:focus-visible .dh-services-card__media::before {
+    opacity: 1 !important;
     transition: none !important;
   }
 }
