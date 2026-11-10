@@ -742,3 +742,13 @@ html.dark .dh-about-approach-caption {
     display: none;
   }
 }
+
+/* ── Prefers-reduced-motion: disable transitions and transforms ── */
+@media (prefers-reduced-motion: reduce) {
+  .dh-about-card,
+  .dh-about-square-btn,
+  .dh-about-hero-img {
+    transition: none !important;
+    transform: none !important;
+  }
+}
