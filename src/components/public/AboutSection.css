@@ -4,14 +4,52 @@
   position: relative;
   background-color: var(--bg-page);
   border-bottom: 1px solid var(--border-subtle);
-  padding-block: clamp(4.5rem, 7vw, 6rem);
-  padding-inline: clamp(1.25rem, 4vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
+  padding-block: clamp(3rem, 6vw, 5rem);
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
 }
 
 .dh-about-container {
   max-width: 80rem; /* max-w-7xl */
   margin-inline: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Viewport Height Fitting on Desktop (>= 1024px) ── */
+@media (min-width: 1024px) {
+  .dh-about-section {
+    min-height: calc(100svh - var(--dh-nav-bottom, 72px));
+    height: calc(100svh - var(--dh-nav-bottom, 72px));
+    max-height: calc(100svh - var(--dh-nav-bottom, 72px));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(0.75rem, 2vh, 2.25rem);
+  }
+
+  .dh-about-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .dh-about-header {
+    flex-shrink: 0;
+    margin-bottom: clamp(0.625rem, 1.8vh, 1.5rem);
+  }
+
+  .dh-about-bento {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(0.625rem, 1.4vh, 1rem); /* 16px target */
+  }
 }
 
 /* ── Header Block ── */
@@ -19,7 +57,7 @@
   text-align: center;
   max-width: 52rem;
   margin-inline: auto;
-  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  width: 100%;
 }
 
 .dh-about-eyebrow {
@@ -27,12 +65,12 @@
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 1.2vh, 0.75rem);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.35rem, 1vh, 0.75rem);
 }
 
 .dh-about-eyebrow-dot {
@@ -46,7 +84,7 @@
 .dh-about-title {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 800;
-  font-size: clamp(1.9rem, 4vw, 3.4rem);
+  font-size: clamp(1.6rem, min(3.4vw, 6.4vh), 3.4rem);
   line-height: 1.15;
   letter-spacing: -0.025em;
   color: var(--text-heading);
@@ -62,16 +100,16 @@
   color: var(--text-muted);
 }
 
-/* Inline Chips */
+/* Inline circular icon chips */
 .dh-about-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   vertical-align: middle;
-  width: 32px;
-  height: 32px;
+  width: 1.15em;
+  height: 1.15em;
   border-radius: 9999px;
-  margin-inline: 0.375rem;
+  margin-inline: 0.35rem;
   flex-shrink: 0;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -80,40 +118,32 @@
   transform: scale(1.1);
 }
 
-@media (max-width: 640px) {
-  .dh-about-chip {
-    width: 26px;
-    height: 26px;
-    margin-inline: 0.2rem;
-  }
-}
-
 .dh-about-chip-teal {
-  background: rgba(46, 196, 214, 0.16);
-  border: 1px solid rgba(46, 196, 214, 0.40);
-  color: #2EC4D6;
-  box-shadow: 0 2px 10px rgba(46, 196, 214, 0.22);
+  background: color-mix(in srgb, var(--brand-teal) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-teal) 45%, transparent);
+  color: var(--dh-highlight);
+  box-shadow: 0 2px 10px rgba(46, 196, 214, 0.2);
 }
 
 html[data-theme="light"] .dh-about-chip-teal,
 html.light .dh-about-chip-teal {
-  background: rgba(31, 122, 140, 0.14);
-  border: 1px solid rgba(31, 122, 140, 0.35);
-  color: #1F7A8C;
+  background: color-mix(in srgb, var(--brand-teal) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-teal) 38%, transparent);
+  color: var(--brand-teal);
   box-shadow: 0 2px 8px rgba(31, 122, 140, 0.18);
 }
 
 .dh-about-chip-amber {
   background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.40);
+  border: 1px solid rgba(245, 158, 11, 0.42);
   color: #F59E0B;
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.22);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
 }
 
 html[data-theme="light"] .dh-about-chip-amber,
 html.light .dh-about-chip-amber {
   background: rgba(217, 119, 6, 0.14);
-  border: 1px solid rgba(217, 119, 6, 0.35);
+  border: 1px solid rgba(217, 119, 6, 0.38);
   color: #D97706;
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.18);
 }
@@ -121,15 +151,8 @@ html.light .dh-about-chip-amber {
 /* ── Bento Grid ── */
 .dh-about-bento {
   display: grid;
-  gap: 1.25rem;
-}
-
-/* Desktop layout (>= 1024px) */
-@media (min-width: 1024px) {
-  .dh-about-bento {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(2, minmax(210px, auto));
-  }
+  gap: 1rem; /* 16px */
+  width: 100%;
 }
 
 /* Tablet layout (640px to 1023px) */
@@ -151,8 +174,8 @@ html.light .dh-about-chip-amber {
 .dh-about-card {
   position: relative;
   border-radius: 24px;
-  border: 1px solid var(--border-subtle);
   overflow: hidden;
+  box-sizing: border-box;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.25s ease;
@@ -161,17 +184,17 @@ html.light .dh-about-chip-amber {
 .dh-about-card:hover {
   transform: translateY(-2px);
   border-color: var(--border-hover);
-  box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.3);
 }
 
 html[data-theme="light"] .dh-about-card:hover,
 html.light .dh-about-card:hover {
-  box-shadow: 0 16px 32px -12px rgba(2, 43, 58, 0.15);
+  box-shadow: 0 14px 28px -10px rgba(2, 43, 58, 0.14);
 }
 
 .dh-about-card-label {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.8125rem;
+  font-size: clamp(0.75rem, 1.3vh, 0.8125rem);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -181,15 +204,16 @@ html.light .dh-about-card:hover {
 .dh-about-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 800;
-  font-size: clamp(2.3rem, 4vw, 3.4rem);
+  font-size: clamp(1.8rem, min(3.2vw, 6vh), 3.4rem);
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
 }
 
-/* ── CARD 1: Image Hero Card ── */
+/* ── CARD 1: Large Image Frame ── */
 .dh-about-card-hero {
+  border: 1px solid var(--border-subtle);
   background-color: var(--dh-brand-navy);
   display: flex;
   flex-direction: column;
@@ -201,14 +225,15 @@ html.light .dh-about-card:hover {
   .dh-about-card-hero {
     grid-column: 1 / span 2;
     grid-row: 1 / span 2;
-    min-height: 450px;
+    min-height: 0;
   }
 }
 
 @media (min-width: 640px) and (max-width: 1023.98px) {
   .dh-about-card-hero {
     grid-column: 1 / span 2;
-    min-height: 300px;
+    min-height: 280px;
+    max-height: 340px;
   }
 }
 
@@ -218,7 +243,7 @@ html.light .dh-about-card:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center 25%;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -231,9 +256,9 @@ html.light .dh-about-card:hover {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(2, 43, 58, 0.08) 0%,
-    rgba(2, 43, 58, 0.25) 45%,
-    rgba(2, 43, 58, 0.85) 100%
+    rgba(2, 43, 58, 0.04) 0%,
+    rgba(2, 43, 58, 0.22) 50%,
+    rgba(2, 43, 58, 0.82) 100%
   );
   pointer-events: none;
 }
@@ -242,21 +267,21 @@ html[data-theme="light"] .dh-about-hero-overlay,
 html.light .dh-about-hero-overlay {
   background: linear-gradient(
     180deg,
-    rgba(15, 30, 45, 0.04) 0%,
-    rgba(15, 30, 45, 0.20) 45%,
-    rgba(2, 43, 58, 0.80) 100%
+    rgba(15, 30, 45, 0.03) 0%,
+    rgba(15, 30, 45, 0.18) 50%,
+    rgba(2, 43, 58, 0.78) 100%
   );
 }
 
-/* Card 1 Top-Right Action Link */
+/* Card 1 Top-Right Link Button */
 .dh-about-link-btn {
   position: absolute;
-  top: 1.25rem;
-  inset-inline-end: 1.25rem;
-  width: 40px;
-  height: 40px;
+  top: clamp(0.75rem, 1.8vh, 1rem);
+  inset-inline-end: clamp(0.75rem, 1.8vh, 1rem);
+  width: clamp(34px, 4.5vh, 40px);
+  height: clamp(34px, 4.5vh, 40px);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -270,91 +295,76 @@ html.light .dh-about-hero-overlay {
 }
 
 .dh-about-link-btn:hover {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.35);
   transform: scale(1.08) rotate(4deg);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Card 1 Frosted Bottom Panel */
+/* Card 1 Translucent Bottom Panel */
 .dh-about-card1-panel {
   position: relative;
   z-index: 2;
-  margin: 1rem;
-  padding: 0.875rem 1.25rem;
+  margin: clamp(0.625rem, 1.4vh, 1rem);
+  padding: clamp(0.625rem, 1.4vh, 1rem) clamp(0.875rem, 1.8vh, 1.25rem);
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  gap: 0.75rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.22);
 }
 
 html[data-theme="dark"] .dh-about-card1-panel,
 html.dark .dh-about-card1-panel {
-  background: rgba(10, 26, 36, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  background: rgba(10, 26, 36, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
 }
 
 .dh-about-card1-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 800;
-  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-size: clamp(1.6rem, min(2.8vw, 5vh), 2.4rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
-  color: #0A1F2B;
-}
-
-html[data-theme="dark"] .dh-about-card1-stat,
-html.dark .dh-about-card1-stat {
-  color: #F3F6FA;
+  color: var(--text-heading);
 }
 
 .dh-about-card1-label {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.8125rem;
+  font-size: clamp(0.75rem, 1.3vh, 0.875rem);
   font-weight: 600;
   line-height: 1.25;
-  color: #4A6070;
+  color: var(--text-heading);
   text-align: end;
-}
-
-html[data-theme="dark"] .dh-about-card1-label,
-html.dark .dh-about-card1-label {
-  color: #A9B8C6;
 }
 
 /* ── CARD 2: Milestone Delivery (Surface Card) ── */
 .dh-about-card-delivery {
   background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1.75rem;
+  padding: clamp(0.875rem, 2vh, 1.5rem);
 }
 
 @media (min-width: 1024px) {
   .dh-about-card-delivery {
     grid-column: 3 / span 1;
     grid-row: 1 / span 2;
+    min-height: 0;
   }
 }
 
 @media (min-width: 640px) and (max-width: 1023.98px) {
   .dh-about-card-delivery {
     grid-column: 1 / span 1;
-    padding: 1.5rem;
-  }
-}
-
-@media (max-width: 639.98px) {
-  .dh-about-card-delivery {
-    padding: 1.5rem;
   }
 }
 
@@ -362,7 +372,7 @@ html.dark .dh-about-card1-label {
 .dh-about-avatars-row {
   display: flex;
   align-items: center;
-  margin-top: 1.125rem;
+  margin-top: clamp(0.5rem, 1.2vh, 0.875rem);
 }
 
 .dh-about-avatar-cluster {
@@ -371,18 +381,18 @@ html.dark .dh-about-card1-label {
 }
 
 .dh-about-avatar {
-  width: 28px;
-  height: 28px;
+  width: clamp(22px, 3vh, 26px);
+  height: clamp(22px, 3vh, 26px);
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: #FFFFFF;
   border: 2px solid var(--bg-surface);
-  margin-inline-start: -0.5rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  margin-inline-start: -0.45rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
 }
 
@@ -397,19 +407,19 @@ html.dark .dh-about-card1-label {
 
 .dh-about-avatar-counter {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.75rem;
+  font-size: 0.725rem;
   font-weight: 600;
   color: var(--text-muted);
-  margin-inline-start: 0.625rem;
+  margin-inline-start: 0.5rem;
 }
 
 .dh-about-statement {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.9375rem;
-  line-height: 1.55;
+  font-size: clamp(0.8125rem, 1.4vh, 0.9375rem);
+  line-height: 1.5;
   color: var(--text-body);
   font-weight: 500;
-  margin-top: 1.5rem;
+  margin-top: clamp(0.75rem, 1.5vh, 1.25rem);
 }
 
 /* ── CARD 3: Proposal Turnaround (Accent Card) ── */
@@ -417,21 +427,22 @@ html.dark .dh-about-card1-label {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(254, 243, 199, 0.45) 0%, rgba(253, 230, 138, 0.22) 100%);
-  border-color: rgba(245, 158, 11, 0.25);
+  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  background-color: color-mix(in srgb, var(--brand-teal) 16%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--brand-teal) 30%, transparent);
 }
 
 html[data-theme="dark"] .dh-about-card-turnaround,
 html.dark .dh-about-card-turnaround {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.03) 100%);
-  border-color: rgba(245, 158, 11, 0.22);
+  background-color: color-mix(in srgb, var(--brand-teal) 22%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--brand-teal) 30%, transparent);
 }
 
 @media (min-width: 1024px) {
   .dh-about-card-turnaround {
     grid-column: 4 / span 1;
     grid-row: 1;
+    min-height: 0;
   }
 }
 
@@ -443,28 +454,35 @@ html.dark .dh-about-card-turnaround {
 
 .dh-about-caption {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.875rem;
-  line-height: 1.45;
+  font-size: clamp(0.75rem, 1.3vh, 0.875rem);
+  line-height: 1.4;
   color: var(--text-muted);
   font-weight: 500;
-  margin-top: 1.25rem;
+  margin-top: clamp(0.5rem, 1vh, 0.75rem);
 }
 
 /* ── CARD 4: Point of Contact (Dark Card) ── */
 .dh-about-card-contact {
-  background-color: var(--dh-brand-navy);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1.5rem;
-  border-color: rgba(255, 255, 255, 0.12);
+  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  background-color: var(--dh-brand-navy);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #FFFFFF;
+}
+
+html[data-theme="dark"] .dh-about-card-contact,
+html.dark .dh-about-card-contact {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
 }
 
 @media (min-width: 1024px) {
   .dh-about-card-contact {
     grid-column: 4 / span 1;
     grid-row: 2;
+    min-height: 0;
   }
 }
 
@@ -478,21 +496,36 @@ html.dark .dh-about-card-turnaround {
   color: #94A3B8;
 }
 
+html[data-theme="dark"] .dh-about-card-contact .dh-about-card-label,
+html.dark .dh-about-card-contact .dh-about-card-label {
+  color: var(--text-muted);
+}
+
 .dh-about-card-contact .dh-about-stat {
   color: #FFFFFF;
+}
+
+html[data-theme="dark"] .dh-about-card-contact .dh-about-stat,
+html.dark .dh-about-card-contact .dh-about-stat {
+  color: var(--text-heading);
 }
 
 .dh-about-card-contact .dh-about-caption {
   color: #CBD5E1;
 }
 
-/* Headset Decorative Button */
+html[data-theme="dark"] .dh-about-card-contact .dh-about-caption,
+html.dark .dh-about-card-contact .dh-about-caption {
+  color: var(--text-body);
+}
+
+/* Headset Decorative Glass Button */
 .dh-about-contact-btn {
   position: absolute;
-  bottom: 1.25rem;
-  inset-inline-end: 1.25rem;
-  width: 38px;
-  height: 38px;
+  bottom: clamp(0.75rem, 1.6vh, 1rem);
+  inset-inline-end: clamp(0.75rem, 1.6vh, 1rem);
+  width: clamp(32px, 4vh, 36px);
+  height: clamp(32px, 4vh, 36px);
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -501,8 +534,27 @@ html.dark .dh-about-card-turnaround {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2EC4D6;
+  color: var(--dh-highlight);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   pointer-events: none;
 }
 
+/* ── Short Heights Adaptations (max-height: 760px on desktop) ── */
+@media (max-height: 760px) and (min-width: 1024px) {
+  .dh-about-avatars-row {
+    display: none;
+  }
+
+  .dh-about-statement {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .dh-about-caption {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

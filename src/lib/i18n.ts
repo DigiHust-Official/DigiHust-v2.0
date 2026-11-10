@@ -1,4 +1,4 @@
-export type LanguageCode = 'en' | 'de' | 'ar' | 'es';
+export type LanguageCode = 'en' | 'de' | 'ar' | 'es' | 'fr';
 
 export interface LanguageOption {
   code: LanguageCode;
@@ -10,6 +10,7 @@ export interface LanguageOption {
 export const LANGUAGES: LanguageOption[] = [
   { code: 'en', label: 'English', flag: '🇬🇧', dir: 'ltr' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪', dir: 'ltr' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷', dir: 'ltr' },
   { code: 'ar', label: 'العربية', flag: '🇦🇪', dir: 'rtl' },
   { code: 'es', label: 'Español', flag: '🇪🇸', dir: 'ltr' },
 ];
@@ -115,10 +116,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_delivery_sub: 'Disciplined sprint management',
     metric_talent: 'Verified Domain Specialists',
     metric_talent_sub: 'Trained through Digiskill',
-    metric_contact: 'Of Contact Per Project',
+    metric_contact: 'Point of contact per project',
     metric_contact_sub: 'No freelancer juggling',
     metric_turnaround: 'Quote Proposal Turnaround',
     metric_turnaround_sub: 'Rapid scope assessment',
+
+    // About Us (Bento)
+    about_eyebrow: 'ABOUT US',
+    about_title_1: 'One accountable partner',
+    about_title_2: 'that builds, grows and secures',
+    about_title_3_prefix: 'your',
+    about_title_3_suffix: 'digital business',
+    about_card1_link: 'Learn more about DigiHust',
+    about_card2_counter: '+12 specialists',
+    about_card2_statement: 'Fixed milestones, clear scope, delivery you can measure.',
 
     // Services Section
     services_tag: 'Core Capabilities',
@@ -201,6 +212,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_turnaround: 'Angebots-Reaktionszeit',
     metric_turnaround_sub: 'Schnelle Scope-Bewertung',
 
+    // About Us (Bento)
+    about_eyebrow: 'ÜBER UNS',
+    about_title_1: 'Ein verlässlicher Partner',
+    about_title_2: 'der aufbaut, skaliert und absichert',
+    about_title_3_prefix: 'Ihr',
+    about_title_3_suffix: 'digitales Unternehmen',
+    about_card1_link: 'Erfahren Sie mehr über DigiHust',
+    about_card2_counter: '+12 Spezialisten',
+    about_card2_statement: 'Feste Meilensteine, klarer Projektumfang, messbare Ergebnisse.',
+
     // Services Section
     services_tag: 'Kernkompetenzen',
     services_heading: 'Ein Unternehmen. Alle digitalen Anforderungen.',
@@ -281,6 +302,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_contact_sub: 'بدون تشتت بين المستقلين',
     metric_turnaround: 'سرعة تقديم العروض',
     metric_turnaround_sub: 'تقييم شامل خلال 24 ساعة',
+
+    // About Us (Bento)
+    about_eyebrow: 'من نحن',
+    about_title_1: 'شريك واحد مسؤول',
+    about_title_2: 'يبني، ينمي ويؤمن',
+    about_title_3_prefix: 'مشروعك',
+    about_title_3_suffix: 'الرقمي',
+    about_card1_link: 'تعرف أكثر على DigiHust',
+    about_card2_counter: '+12 متخصص',
+    about_card2_statement: 'مراحل واضحة، نطاق عمل محدد، وتسليم دقيق يمكنك قياسه.',
 
     // Services Section
     services_tag: 'الخدمات الأساسية',
@@ -363,6 +394,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     metric_turnaround: 'Tiempo de Propuesta',
     metric_turnaround_sub: 'Evaluación de alcance en 24h',
 
+    // About Us (Bento)
+    about_eyebrow: 'SOBRE NOSOTROS',
+    about_title_1: 'Un socio responsable',
+    about_title_2: 'que construye, escala y protege',
+    about_title_3_prefix: 'tu',
+    about_title_3_suffix: 'negocio digital',
+    about_card1_link: 'Más información sobre DigiHust',
+    about_card2_counter: '+12 especialistas',
+    about_card2_statement: 'Hitos claros, alcance transparente y entregas medibles.',
+
     // Services Section
     services_tag: 'Capacidades Principales',
     services_heading: 'Una Empresa. Todas tus Necesidades Digitales.',
@@ -407,5 +448,96 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     footer_tagline: 'Hustle. Create. Deliver.',
     footer_desc: 'Una empresa. Talento digital especializado en ingeniería web, identidad de marca, flujos de IA y ciberseguridad.',
     footer_rights: 'DigiHust. Todos los derechos reservados.',
+  },
+
+  fr: {
+    // Nav
+    nav_services: 'Services',
+    nav_work: 'Projets',
+    nav_how_it_works: 'Comment ça marche',
+    nav_about: 'À propos',
+    nav_team: 'Équipe',
+    nav_blog: 'Blog',
+    nav_contact: 'Contact',
+    btn_get_quote: 'Obtenir un devis',
+    portal_text: 'Portail',
+    preferences: 'Préférences :',
+
+    // Hero
+    hero_trust_pill: 'Talents Spécialisés Coordonnés',
+    hero_headline_1: 'Vos Projets Digitaux.',
+    hero_headline_2: 'Gérés par des Experts.',
+    hero_sub: 'Du développement web sur mesure et design UI/UX aux automatisations IA, marketing de croissance et cybersécurité — DigiHust réunit des spécialistes vérifiés en équipes unifiées.',
+    btn_scoped_quote: 'Obtenir un devis',
+    btn_explore_capabilities: 'Explorer les services',
+    hero_active_squads: 'Équipes actives :',
+    hero_orbit_instruction: 'Cliquez sur un service ou le centre pour explorer',
+    scroll_down: 'Faire défiler vers le bas',
+
+    // Trust & Metrics
+    trust_brands: 'Plébiscité par des marques mondiales en pleine croissance :',
+    metric_delivery: 'Livraison des jalons dans les délais',
+    metric_delivery_sub: 'Gestion rigoureuse des sprints',
+    metric_talent: 'Spécialistes de domaine vérifiés',
+    metric_talent_sub: 'Formés et certifiés via Digiskill',
+    metric_contact: 'Point de contact unique par projet',
+    metric_contact_sub: 'Fini le jonglage entre freelances',
+    metric_turnaround: 'Délai de proposition de devis',
+    metric_turnaround_sub: 'Évaluation rapide du périmètre',
+
+    // About Us (Bento)
+    about_eyebrow: 'À PROPOS DE NOUS',
+    about_title_1: 'Un partenaire responsable',
+    about_title_2: 'qui conçoit, développe et sécurise',
+    about_title_3_prefix: 'votre',
+    about_title_3_suffix: 'entreprise digitale',
+    about_card1_link: 'En savoir plus sur DigiHust',
+    about_card2_counter: '+12 spécialistes',
+    about_card2_statement: 'Des jalons clairs, un périmètre défini, une livraison mesurable.',
+
+    // Services Section
+    services_tag: 'Compétences Clés',
+    services_heading: 'Une seule entreprise. Tous vos besoins digitaux.',
+    services_sub: 'Au lieu de recruter et coordonner 5 freelances isolés, DigiHust concrétise votre vision globale sous un même contrat.',
+    services_view_all: 'Voir tous les services en détail',
+    services_explore: 'Explorer le service',
+
+    // Model Advantage
+    model_tag: 'L’avantage du modèle',
+    model_heading: 'Une agence digitale structurée — sans le hasard des freelances.',
+    model_p1: 'Gérer cinq freelances signifie cinq négociations, des calendriers incompatibles, des rejets de responsabilité et une qualité inégale.',
+    model_p2: 'Avec DigiHust, vous collaborez avec une seule entité professionnelle. Nous définissons le périmètre et assignons des spécialistes certifiés à chaque étape.',
+    model_bullet_1: 'Un seul contrat, une seule facture, un interlocuteur unique',
+    model_bullet_2: 'Des spécialistes dédiés et adaptés à votre stack technique',
+    model_bullet_3: 'Assurance qualité interne rigoureuse avant chaque livraison',
+    model_bullet_4: 'Des talents sélectionnés et validés directement via Digiskill',
+
+    // Selected Work
+    work_tag: 'Études de cas',
+    work_heading: 'Projets sélectionnés',
+    work_view_all: 'Voir tous les projets',
+    work_read_case: 'Lire l’étude de cas',
+
+    // Testimonials
+    testimonials_tag: 'Avis clients',
+    testimonials_heading: 'Ce que disent les fondateurs à propos de DigiHust',
+    testimonials_sub: 'Des retours d’expérience authentiques de marques mondiales.',
+
+    // Pricing
+    pricing_tag: 'Offres transparentes',
+    pricing_heading: 'Guide d’investissement projet',
+    pricing_sub: 'Périmètres définis avec validation par étapes. Devis sur mesure sous 24h.',
+    pricing_popular: 'Le plus populaire',
+    btn_request_proposal: 'Demander un devis',
+
+    // CTA
+    cta_heading: 'Vous avez un projet en tête ?',
+    cta_sub: 'Transmettez-nous votre besoin dès aujourd’hui, nous vous répondrons avec un devis complet sous 24 heures.',
+    btn_start_proposal: 'Démarrer un projet',
+
+    // Footer
+    footer_tagline: 'Créer. Accélérer. Livrer.',
+    footer_desc: 'Une agence digitale unifiée. Spécialistes en ingénierie web, design de marque, IA et cybersécurité.',
+    footer_rights: 'DigiHust. Tous droits réservés.',
   },
 };

@@ -16,7 +16,7 @@ export const LANG_STORAGE_KEY = 'digihust_lang';
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     const saved = localStorage.getItem(LANG_STORAGE_KEY) as LanguageCode | null;
-    if (saved && (saved === 'en' || saved === 'de' || saved === 'ar' || saved === 'es')) {
+    if (saved && (saved === 'en' || saved === 'de' || saved === 'ar' || saved === 'es' || saved === 'fr')) {
       return saved;
     }
     return 'en';

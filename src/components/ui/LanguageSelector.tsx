@@ -43,6 +43,14 @@ export const FlagIcon: React.FC<{ code: string; className?: string }> = ({ code,
           <rect width="3" height="1" y="0.5" fill="#ffc400"/>
         </svg>
       );
+    case 'fr':
+      return (
+        <svg viewBox="0 0 3 2" className={`${className} rounded-[2px] shadow-sm flex-shrink-0`}>
+          <rect width="1" height="2" x="0" fill="#002395"/>
+          <rect width="1" height="2" x="1" fill="#ffffff"/>
+          <rect width="1" height="2" x="2" fill="#ed2939"/>
+        </svg>
+      );
     default:
       return <Globe className="w-3.5 h-3.5 text-[var(--brand-teal)]" />;
   }
