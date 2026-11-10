@@ -94,10 +94,34 @@ export const SERVICES: ServiceItem[] = [
   },
 ];
 
+// Motion variants (Item 5)
+const cardMotionVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (customIndex: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      delay: (customIndex % 4) * 0.07,
+    },
+  }),
+};
+
 export const ServicesSection: React.FC = () => {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
 
   // Heading split: "One Company." in Outfit 300, "Every Digital Need." in Fraunces italic 400
   const headingText = t('services_heading') || 'One Company. Every Digital Need.';
@@ -131,50 +155,59 @@ export const ServicesSection: React.FC = () => {
 
           {/* 4 Cards per row, 2 rows (desktop >= 1024px) */}
           <div className="dh-services__grid">
-            {SERVICES.map((svc) => (
-              <Link
+            {SERVICES.map((svc, idx) => (
+              <motion.div
                 key={svc.id}
-                to={svc.route}
-                className="dh-services-card"
-                data-service={svc.id}
-                aria-label={`${t(svc.titleKey)} - ${t('services_explore') || 'Explore Service'}`}
+                custom={idx}
+                variants={prefersReducedMotion ? undefined : cardMotionVariants}
+                initial={prefersReducedMotion ? false : 'hidden'}
+                whileInView="visible"
+                viewport={{ once: true, margin: '-40px' }}
+                className="dh-services-card-wrap"
               >
-                {/* TOP ROW */}
-                <div className="dh-services-card__top">
-                  <span className="dh-services-card__number" aria-hidden="true">
-                    {svc.number}
-                  </span>
-                  <span className="dh-services-card__pill">
-                    <span className="dh-services-card__pill-label">
-                      {t('services_explore') || 'Explore Service'}
+                <Link
+                  to={svc.route}
+                  className="dh-services-card"
+                  data-service={svc.id}
+                  aria-label={`${t(svc.titleKey)} - ${t('services_explore') || 'Explore Service'}`}
+                >
+                  {/* TOP ROW */}
+                  <div className="dh-services-card__top">
+                    <span className="dh-services-card__number" aria-hidden="true">
+                      {svc.number}
                     </span>
-                    <span className="dh-services-card__pill-arrow-wrap">
-                      <ArrowRight className="dh-services-card__pill-arrow" />
+                    <span className="dh-services-card__pill">
+                      <span className="dh-services-card__pill-label">
+                        {t('services_explore') || 'Explore Service'}
+                      </span>
+                      <span className="dh-services-card__pill-arrow-wrap">
+                        <ArrowRight className="dh-services-card__pill-arrow" />
+                      </span>
                     </span>
-                  </span>
-                </div>
+                  </div>
 
-                {/* MIDDLE / TEXT BLOCK */}
-                <div className="dh-services-card__text">
-                  <h3 className="dh-services-card__title">
-                    {t(svc.titleKey)}
-                  </h3>
-                  <p className="dh-services-card__desc">
-                    {t(svc.descKey)}
-                  </p>
-                </div>
+                  {/* MIDDLE / TEXT BLOCK */}
+                  <div className="dh-services-card__text">
+                    <h3 className="dh-services-card__title">
+                      {t(svc.titleKey)}
+                    </h3>
+                    <p className="dh-services-card__desc">
+                      {t(svc.descKey)}
+                    </p>
+                  </div>
 
-                {/* IMAGE AT BOTTOM */}
-                <div className="dh-services-card__media">
-                  <img
-                    src={svc.image}
-                    alt={t(svc.titleKey)}
-                    loading="lazy"
-                    className="dh-services-card__img"
-                  />
-                  <div className="dh-services-card__overlay" aria-hidden="true" />
-                </div>
-              </Link>
+                  {/* IMAGE AT BOTTOM */}
+                  <div className="dh-services-card__media">
+                    <img
+                      src={svc.image}
+                      alt={t(svc.titleKey)}
+                      loading="lazy"
+                      className="dh-services-card__img"
+                    />
+                    <div className="dh-services-card__overlay" aria-hidden="true" />
+                  </div>
+                </Link>
+              </motion.div>
             ))}
           </div>
 

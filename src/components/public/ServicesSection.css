@@ -152,11 +152,18 @@ html.dark .dh-services {
   }
 }
 
+.dh-services-card-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 /* ── Card Anatomy (Item 3 & 4) ── */
 .dh-services-card {
   position: relative;
   display: flex;
   flex-direction: column;
+  height: 100%;
   padding: clamp(14px, 6.4cqw, 22px);
   box-sizing: border-box;
   text-decoration: none;
@@ -174,6 +181,34 @@ html.dark .dh-services {
   .dh-services-card {
     aspect-ratio: 2 / 3;
   }
+}
+
+/* ── Interactive Hover & Motion (Item 5) ── */
+.dh-services-card:hover,
+.dh-services-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--dh-hover-border);
+}
+
+.dh-services-card:focus-visible {
+  outline: 2px solid var(--dh-focus-ring, #2EC4D6);
+  outline-offset: 3px;
+}
+
+.dh-services-card:hover .dh-services-card__img,
+.dh-services-card:focus-visible .dh-services-card__img {
+  transform: scale(1.04);
+}
+
+.dh-services-card:hover .dh-services-card__pill-arrow-wrap,
+.dh-services-card:focus-visible .dh-services-card__pill-arrow-wrap {
+  background-color: var(--brand-teal, #1F7A8C);
+  color: #FFFFFF;
+}
+
+.dh-services-card:hover .dh-services-card__pill-arrow,
+.dh-services-card:focus-visible .dh-services-card__pill-arrow {
+  transform: rotate(-45deg);
 }
 
 /* Top Row */
@@ -364,4 +399,27 @@ html.dark .dh-services {
   width: 14px;
   height: 14px;
   transition: transform 0.25s ease-out;
+}
+
+/* ── Prefers-reduced-motion safety (Item 5) ── */
+@media (prefers-reduced-motion: reduce) {
+  .dh-services-card,
+  .dh-services-card:hover,
+  .dh-services-card:focus-visible,
+  .dh-services-card__img,
+  .dh-services-card:hover .dh-services-card__img,
+  .dh-services-card:focus-visible .dh-services-card__img,
+  .dh-services-card__pill-arrow,
+  .dh-services-card:hover .dh-services-card__pill-arrow,
+  .dh-services-card:focus-visible .dh-services-card__pill-arrow,
+  .dh-services-card__pill-arrow-wrap,
+  .dh-services-card:hover .dh-services-card__pill-arrow-wrap,
+  .dh-services-card:focus-visible .dh-services-card__pill-arrow-wrap,
+  .dh-services__view-all-pill,
+  .dh-services__view-all-pill:hover,
+  .dh-services__view-all-arrow-wrap,
+  .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
+    transform: none !important;
+    transition: none !important;
+  }
 }
