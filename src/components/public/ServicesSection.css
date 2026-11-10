@@ -56,8 +56,8 @@ html.dark .dh-services {
   --dh-heading-primary: #F3F6FA;
   --dh-heading-accent: var(--dh-highlight, #2EC4D6);
 
-  --dh-card-bg: rgba(15, 36, 49, 0.78);
-  --dh-card-hover-bg: rgba(19, 44, 59, 0.86);
+  --dh-card-bg: rgba(15, 36, 49, 0.82);
+  --dh-card-hover-bg: rgba(19, 44, 59, 0.88);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.30);
 
@@ -119,6 +119,9 @@ html.dark .dh-services {
   overflow: clip;
   pointer-events: none;
   z-index: 0;
+  --ring-clear-top: calc(clamp(36px, 6vw, 90px) + clamp(2rem, 4.4vw, 4.1rem) * 1.08 + 16px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent var(--ring-clear-top), #000 calc(var(--ring-clear-top) + 140px));
+  mask-image: linear-gradient(180deg, transparent 0, transparent var(--ring-clear-top), #000 calc(var(--ring-clear-top) + 140px));
 }
 
 /* ── Decorative Liquid Ring (Item 2) ── */
