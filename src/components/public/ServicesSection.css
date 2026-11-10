@@ -87,9 +87,10 @@ html.dark .dh-services {
   box-sizing: border-box;
 }
 
-/* ── Section Frame (Item 2) ── */
+/* ── Section Frame (Item 2 & Video Layer) ── */
 .dh-services__frame {
   position: relative;
+  isolation: isolate;
   border-radius: clamp(28px, 3vw, 44px);
   border: 4px solid var(--dh-frame-border, rgba(46, 196, 214, 0.4));
   background: var(--dh-frame-bg);
@@ -100,8 +101,38 @@ html.dark .dh-services {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: clip;
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ── Decorative Looping Video Layer (Item 1) ── */
+.dh-services__bg {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: clip;
+  pointer-events: none;
+  z-index: 0;
+  --ring-size: clamp(380px, min(88vw, 112svh), 1100px);
+}
+
+.dh-services__video {
+  display: block;
+  position: sticky;
+  top: calc(50svh - var(--ring-size) / 2);
+  width: var(--ring-size);
+  height: var(--ring-size);
+  margin-inline: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Ensure content sits above video layer at z-index 1 */
+.dh-services__header,
+.dh-services__grid,
+.dh-services__footer {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Centered Heading (Item 2: One line on desktop, clamp(32px, 4.8vw, 72px) gap) ── */

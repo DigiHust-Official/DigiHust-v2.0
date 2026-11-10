@@ -120,6 +120,7 @@ const cardMotionVariants = {
 export const ServicesSection: React.FC = () => {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
@@ -149,6 +150,26 @@ export const ServicesSection: React.FC = () => {
       <div className="dh-services__container">
         {/* Big Rounded Frame */}
         <div className="dh-services__frame">
+          {/* Decorative Looping Ring Video (Item 1) */}
+          <div className="dh-services__bg" aria-hidden="true">
+            <video
+              ref={videoRef}
+              className="dh-services__video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/media/services-ring-poster.jpg"
+              disablePictureInPicture
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              <source src="/media/services-ring.webm" type="video/webm" />
+              <source src="/media/services-ring.mp4" type="video/mp4" />
+            </video>
+          </div>
+
           {/* Centered Heading */}
           <div className="dh-services__header">
             {/* Heading on ONE line on desktop, centered; visually-hidden subtext */}
