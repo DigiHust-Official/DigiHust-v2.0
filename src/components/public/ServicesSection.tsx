@@ -181,7 +181,7 @@ export const ServicesSection: React.FC = () => {
                         {t('services_more_info') || 'More info'}
                       </span>
                       <span className="dh-services-card__pill-arrow-wrap">
-                        <ArrowRight className="dh-services-card__pill-arrow" />
+                        <ArrowRight className="dh-services-card__pill-arrow" size={14} />
                       </span>
                     </span>
                   </div>
