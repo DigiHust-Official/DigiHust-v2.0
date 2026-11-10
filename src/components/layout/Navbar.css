@@ -7,6 +7,25 @@
   right: var(--dh-gutter, clamp(16px, 3.5vw, 40px));
   z-index: 9980;
   pointer-events: none;
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.dh-nav-header--hidden {
+  transform: translateY(calc(-100% - 24px));
+}
+
+.dh-nav-header--hidden:hover,
+.dh-nav-header--hidden:focus-within {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dh-nav-header {
+    transform: translateY(0) !important;
+    transition: none !important;
+  }
 }
 
 .dh-nav-bar {

@@ -67,10 +67,100 @@ export const Navbar: React.FC = () => {
       ? activeIdx
       : null;
 
+  // Auto-hide navbar state
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isNearTop, setIsNearTop] = useState(false);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+  const isHiddenRef = useRef(false);
+
+  // Computed visibility: always visible when top of page, hovering, focused, near top, mobile open, or language dropdown open
+  const isLanguageOpen = Boolean(
+    headerRef.current?.querySelector('[role="listbox"]')
+  );
+  const isHidden =
+    isScrolledDown &&
+    !mobileOpen &&
+    !isHovered &&
+    !isFocused &&
+    !isNearTop &&
+    !isLanguageOpen;
+
+  isHiddenRef.current = isHidden;
+
+  // Auto-hide scroll & desktop pointer tracking (passive listeners + rAF)
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    const onScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const delta = currentScrollY - lastScrollY.current;
+
+          if (currentScrollY < 80) {
+            setIsScrolledDown(false);
+          } else if (Math.abs(delta) >= 6) {
+            if (delta > 0) {
+              // Scrolling down
+              setIsScrolledDown(true);
+            } else {
+              // Scrolling up
+              setIsScrolledDown(false);
+            }
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    // Reveal navbar when pointer moves within top 60px of viewport (desktop only)
+    const onPointerMove = (e: PointerEvent) => {
+      if (window.innerWidth >= 1024) {
+        if (e.clientY <= 60) {
+          setIsNearTop(true);
+        } else {
+          setIsNearTop(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+
+    const header = headerRef.current;
+    const onFocusIn = () => setIsFocused(true);
+    const onFocusOut = (e: FocusEvent) => {
+      if (header && !header.contains(e.relatedTarget as Node)) {
+        setIsFocused(false);
+      }
+    };
+
+    if (header) {
+      header.addEventListener('focusin', onFocusIn);
+      header.addEventListener('focusout', onFocusOut);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pointermove', onPointerMove);
+      if (header) {
+        header.removeEventListener('focusin', onFocusIn);
+        header.removeEventListener('focusout', onFocusOut);
+      }
+    };
+  }, []);
+
   // Measure the navbar's bottom edge at scrollY 0 on mount and on resize (debounced)
+  // IMPORTANT: Do NOT re-measure while hidden, and ignore a bottom <= 0.
   useEffect(() => {
     const updateNavBottom = () => {
-      if (headerRef.current) {
+      if (headerRef.current && !isHiddenRef.current) {
         const bottom = headerRef.current.getBoundingClientRect().bottom;
         if (bottom > 0) {
           document.documentElement.style.setProperty('--dh-nav-bottom', `${bottom}px`);
@@ -82,9 +172,11 @@ export const Navbar: React.FC = () => {
 
     let resizeTimer: NodeJS.Timeout;
     const onResize = () => {
-      updateNavBottom();
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(updateNavBottom, 50);
+      if (!isHiddenRef.current) {
+        updateNavBottom();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateNavBottom, 50);
+      }
     };
 
     window.addEventListener('resize', onResize);
@@ -92,7 +184,9 @@ export const Navbar: React.FC = () => {
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined' && headerRef.current) {
       ro = new ResizeObserver(() => {
-        updateNavBottom();
+        if (!isHiddenRef.current) {
+          updateNavBottom();
+        }
       });
       ro.observe(headerRef.current);
     }
@@ -149,7 +243,18 @@ export const Navbar: React.FC = () => {
   }
 
   return (
-    <header ref={headerRef} className="dh-nav-header">
+    <header
+      ref={headerRef}
+      className={`dh-nav-header ${isHidden ? 'dh-nav-header--hidden' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setIsFocused(false);
+        }
+      }}
+    >
       <nav className="dh-nav-bar" aria-label="Main Navigation">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2.5 group select-none">
