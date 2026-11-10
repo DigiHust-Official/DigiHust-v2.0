@@ -178,7 +178,7 @@ export const ServicesSection: React.FC = () => {
                     </span>
                     <span className="dh-services-card__pill">
                       <span className="dh-services-card__pill-label">
-                        {t('services_explore') || 'Explore Service'}
+                        {t('services_more_info') || 'More info'}
                       </span>
                       <span className="dh-services-card__pill-arrow-wrap">
                         <ArrowRight className="dh-services-card__pill-arrow" />
@@ -186,15 +186,20 @@ export const ServicesSection: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* MIDDLE / TEXT BLOCK */}
-                  <div className="dh-services-card__text">
+                  {/* FLEXIBLE SPACER */}
+                  <div className="dh-services-card__spacer" />
+
+                  {/* TITLE BLOCK (reserved 2 lines height, flex-end alignment) */}
+                  <div className="dh-services-card__title-wrap">
                     <h3 className="dh-services-card__title">
                       {t(svc.titleKey)}
                     </h3>
-                    <p className="dh-services-card__desc">
-                      {t(svc.descKey)}
-                    </p>
                   </div>
+
+                  {/* DESCRIPTION BLOCK (reserved 3 lines height) */}
+                  <p className="dh-services-card__desc">
+                    {t(svc.descKey)}
+                  </p>
 
                   {/* IMAGE AT BOTTOM */}
                   <div className="dh-services-card__media">
@@ -204,7 +209,6 @@ export const ServicesSection: React.FC = () => {
                       loading="lazy"
                       className="dh-services-card__img"
                     />
-                    <div className="dh-services-card__overlay" aria-hidden="true" />
                   </div>
                 </Link>
               </motion.div>

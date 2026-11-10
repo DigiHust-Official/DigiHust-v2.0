@@ -158,13 +158,13 @@ html.dark .dh-services {
   height: 100%;
 }
 
-/* ── Card Anatomy (Item 3 & 4) ── */
+/* ── Card Anatomy (Item 1) ── */
 .dh-services-card {
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: clamp(14px, 6.4cqw, 22px);
+  padding: clamp(14px, 6.2cqw, 22px);
   box-sizing: border-box;
   text-decoration: none;
   border-radius: clamp(20px, 2.1vw, 30px);
@@ -218,7 +218,6 @@ html.dark .dh-services {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  margin-bottom: clamp(14px, 5cqw, 24px);
 }
 
 .dh-services-card__number {
@@ -279,12 +278,19 @@ html.dark .dh-services {
   transition: transform 0.25s ease-out;
 }
 
-/* Text Block */
-.dh-services-card__text {
-  margin-top: auto;
+/* Flexible Spacer */
+.dh-services-card__spacer {
+  flex: 1 1 auto;
+  min-height: 8px;
+}
+
+/* Title Block (reserved 2 lines, flex-end) */
+.dh-services-card__title-wrap {
   display: flex;
-  flex-direction: column;
-  gap: clamp(6px, 2cqw, 10px);
+  align-items: flex-end;
+  min-height: calc(2 * 1.15em);
+  height: calc(2 * 1.15em);
+  width: 100%;
 }
 
 .dh-services-card__title {
@@ -294,6 +300,7 @@ html.dark .dh-services {
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0;
+  width: 100%;
   color: var(--dh-card-title-color);
   text-align: start;
   display: -webkit-box;
@@ -302,13 +309,18 @@ html.dark .dh-services {
   overflow: hidden;
 }
 
+/* Description Block (reserved 3 lines, top-aligned) */
 .dh-services-card__desc {
+  margin-top: clamp(8px, 3cqw, 12px);
+  margin-bottom: 0;
+  min-height: calc(3 * 1.5em);
+  height: calc(3 * 1.5em);
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 400;
   font-size: clamp(12px, 4.4cqw, 14px);
   line-height: 1.5;
-  margin: 0;
   color: var(--dh-card-desc-color);
+  width: 100%;
   text-align: start;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -319,9 +331,9 @@ html.dark .dh-services {
 /* Image at bottom */
 .dh-services-card__media {
   position: relative;
-  margin-top: clamp(12px, 5cqw, 20px);
+  margin-top: clamp(8px, 3cqw, 12px);
   width: 100%;
-  aspect-ratio: 1 / 0.9;
+  aspect-ratio: 1 / 0.92;
   border-radius: clamp(14px, 6cqw, 22px);
   overflow: hidden;
   box-sizing: border-box;
