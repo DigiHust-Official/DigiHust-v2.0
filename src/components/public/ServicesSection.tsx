@@ -99,6 +99,12 @@ export const ServicesSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
 
+  // Heading split: "One Company." in Outfit 300, "Every Digital Need." in Fraunces italic 400
+  const headingText = t('services_heading') || 'One Company. Every Digital Need.';
+  const dotIndex = headingText.indexOf('.');
+  const firstPart = dotIndex !== -1 ? headingText.slice(0, dotIndex + 1) : headingText;
+  const secondPart = dotIndex !== -1 ? headingText.slice(dotIndex + 1).trim() : '';
+
   return (
     <section
       id="capabilities"
@@ -108,8 +114,22 @@ export const ServicesSection: React.FC = () => {
       aria-labelledby="dh-services-heading"
     >
       <div className="dh-services__container">
+        {/* Big Rounded Frame */}
         <div className="dh-services__frame">
-          {/* Content to be structured in next items */}
+          {/* Centered Heading */}
+          <div className="dh-services__header">
+            <h2 id="dh-services-heading" className="dh-services__title">
+              <span className="dh-services__title-primary">{firstPart}</span>{' '}
+              {secondPart && (
+                <span className="dh-services__title-accent">{secondPart}</span>
+              )}
+            </h2>
+            {t('services_sub') && (
+              <p className="dh-services__subtext">{t('services_sub')}</p>
+            )}
+          </div>
+
+          {/* Grid will be populated in Item 3 */}
           <div className="dh-services__grid">
             {SERVICES.map((svc) => (
               <div key={svc.id} className="dh-services__card-placeholder">
@@ -118,6 +138,18 @@ export const ServicesSection: React.FC = () => {
                 <p>{t(svc.descKey)}</p>
               </div>
             ))}
+          </div>
+
+          {/* Centered View All Pill */}
+          <div className="dh-services__footer">
+            <Link to="/services" className="dh-services__view-all-pill">
+              <span className="dh-services__view-all-label">
+                {t('services_view_all') || 'View all services in detail'}
+              </span>
+              <span className="dh-services__view-all-arrow-wrap">
+                <ArrowRight className="dh-services__view-all-arrow" />
+              </span>
+            </Link>
           </div>
         </div>
       </div>
