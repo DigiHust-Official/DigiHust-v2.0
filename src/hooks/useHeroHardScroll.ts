@@ -8,20 +8,15 @@ interface UseHeroHardScrollOptions {
 /**
  * useHeroHardScroll
  *
- * Scoped hard scroll on Home desktop (>= 1024px only) across 3 ordered stops:
+ * Scoped hard scroll on Home desktop (>= 1024px only) across ordered stops:
  *   Stop 0: Hero top (scrollY 0)
  *   Stop 1: About section top (data-hard-stop="about")
  *   Stop 2: Core Capabilities top (data-hard-stop="capabilities")
+ *   Stop 3: Why DigiHust top (data-hard-stop="why-digihust")
  *
- * Navigation:
- * - One wheel notch, one swipe, or down key (PageDown/Space/ArrowDown) moves to next stop.
- * - One wheel up or up key (PageUp/ArrowUp) moves to previous stop.
- * - Animated with scrollTo over ~0.8s with smooth organic ease-in-out.
- * - Input is locked during animation + 150ms trackpad inertia buffer.
- * - Past Stop 2 (Core Capabilities), native free scrolling resumes.
- * - When scrolling back up, re-engages at Core Capabilities top -> About -> Hero.
- * - Disabled on mobile (< 1024px), prefers-reduced-motion, open modals/menus, focused inputs,
- *   nested scrollables, and ctrl/meta zoom gestures.
+ * Inside Core Capabilities, normal native scrolling occurs.
+ * When the end of Core Capabilities is reached, a new downward gesture jumps to Stop 3.
+ * Scrolling up from Stop 3 jumps back to the end of Core Capabilities.
  */
 export function useHeroHardScroll({
   runwayRef,
@@ -29,6 +24,8 @@ export function useHeroHardScroll({
 }: UseHeroHardScrollOptions = {}): void {
   const isAnimatingRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
+  const lastWheelTimeRef = useRef<number>(0);
+  const endReachedTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // 1. Guard check: Reduced motion
@@ -86,7 +83,7 @@ export function useHeroHardScroll({
       return false;
     };
 
-    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities)
+    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities, 3: Why DigiHust)
     const getStops = (): number[] => {
       const stops: number[] = [0];
 
@@ -105,6 +102,13 @@ export function useHeroHardScroll({
       const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
       if (capEl) {
         const top = capEl.getBoundingClientRect().top + window.scrollY;
+        stops.push(Math.round(top));
+      }
+
+      // Stop 3: Why DigiHust top
+      const whyEl = document.querySelector<HTMLElement>('[data-hard-stop="why-digihust"]');
+      if (whyEl) {
+        const top = whyEl.getBoundingClientRect().top + window.scrollY;
         stops.push(Math.round(top));
       }
 
@@ -171,34 +175,63 @@ export function useHeroHardScroll({
       const s0 = stops[0];
       const s1 = stops[1];
       const s2 = stops[2];
+      const s3 = stops[3];
       const TOL = 40;
       const deltaY = e.deltaY;
       const THRESHOLD = 12;
 
       if (Math.abs(deltaY) < THRESHOLD) return;
 
-      // Past Core Capabilities: allow native free scroll down; if scrolling up near s2, re-engage
-      if (currentY > s2 + TOL) {
-        if (currentY <= s2 + 60 && deltaY < -THRESHOLD) {
-          e.preventDefault();
-          animateScrollTo(s1);
+      const now = performance.now();
+      const timeSinceLastWheel = now - lastWheelTimeRef.current;
+      lastWheelTimeRef.current = now;
+
+      // Check capabilities section bounds
+      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
+      let isAtServicesEnd = false;
+      let servicesReturnY = 0;
+
+      if (capEl) {
+        const capRect = capEl.getBoundingClientRect();
+        // End reached when bottom edge is within 2px of viewport bottom
+        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
+        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
+
+        if (!isAtServicesEnd) {
+          endReachedTimeRef.current = 0;
+        } else if (endReachedTimeRef.current === 0) {
+          endReachedTimeRef.current = now;
         }
-        return;
       }
 
+      const timeSinceEndReached = endReachedTimeRef.current > 0 ? now - endReachedTimeRef.current : 0;
+
       if (deltaY > 0) {
-        // Scrolling down
+        // ── SCROLLING DOWN ──
         if (currentY < s1 - TOL) {
           e.preventDefault();
           animateScrollTo(s1);
         } else if (currentY < s2 - TOL) {
           e.preventDefault();
           animateScrollTo(s2);
+        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
+          // At the end of services: require new gesture (gap >= 120ms) and >= 150ms since end reached
+          if (timeSinceLastWheel >= 120 && timeSinceEndReached >= 150) {
+            e.preventDefault();
+            animateScrollTo(s3);
+          }
         }
-        // At s2: do not preventDefault; free scroll takes over downwards
+        // Inside services: free native scroll down
       } else {
-        // Scrolling up
-        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+        // ── SCROLLING UP ──
+        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          // Scrolling UP from next section top: animate back to services end
+          e.preventDefault();
+          animateScrollTo(servicesReturnY);
+        } else if (currentY > s2 + 60) {
+          // Inside services: free native scroll up
+          return;
+        } else if (currentY <= s2 + 60 && currentY > s1 + TOL) {
           e.preventDefault();
           animateScrollTo(s1);
         } else if (currentY <= s1 + TOL && currentY > s0 + 5) {
@@ -236,11 +269,17 @@ export function useHeroHardScroll({
       const s0 = stops[0];
       const s1 = stops[1];
       const s2 = stops[2];
+      const s3 = stops[3];
       const TOL = 40;
 
-      // Below Core Capabilities: allow free native keyboard scroll
-      if (currentY > s2 + TOL) {
-        return;
+      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
+      let isAtServicesEnd = false;
+      let servicesReturnY = 0;
+
+      if (capEl) {
+        const capRect = capEl.getBoundingClientRect();
+        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
+        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
       }
 
       if (isDownKey) {
@@ -250,10 +289,19 @@ export function useHeroHardScroll({
         } else if (currentY < s2 - TOL) {
           e.preventDefault();
           animateScrollTo(s2);
+        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
+          e.preventDefault();
+          animateScrollTo(s3);
         }
-        // At s2: let down key scroll naturally into Core Capabilities
+        // Inside services: let down key scroll naturally
       } else if (isUpKey) {
-        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          e.preventDefault();
+          animateScrollTo(servicesReturnY);
+        } else if (currentY > s2 + 60) {
+          // Inside services: let up key scroll naturally
+          return;
+        } else if (currentY <= s2 + 60 && currentY > s1 + TOL) {
           e.preventDefault();
           animateScrollTo(s1);
         } else if (currentY <= s1 + TOL && currentY > s0 + 5) {
@@ -292,14 +340,21 @@ export function useHeroHardScroll({
       const s0 = stops[0];
       const s1 = stops[1];
       const s2 = stops[2];
+      const s3 = stops[3];
       const TOL = 40;
 
-      if (currentY > s2 + TOL) {
-        return;
+      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
+      let isAtServicesEnd = false;
+      let servicesReturnY = 0;
+
+      if (capEl) {
+        const capRect = capEl.getBoundingClientRect();
+        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
+        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
       }
 
       if (deltaY > 0) {
-        // Scrolling down
+        // ── SWIPE UP = SCROLL DOWN ──
         if (currentY < s1 - TOL) {
           e.preventDefault();
           touchStartYRef.current = null;
@@ -308,10 +363,20 @@ export function useHeroHardScroll({
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(s2);
+        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s3);
         }
       } else {
-        // Scrolling up
-        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+        // ── SWIPE DOWN = SCROLL UP ──
+        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(servicesReturnY);
+        } else if (currentY > s2 + 60) {
+          return;
+        } else if (currentY <= s2 + 60 && currentY > s1 + TOL) {
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(s1);

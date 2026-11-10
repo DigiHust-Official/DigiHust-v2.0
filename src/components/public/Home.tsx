@@ -568,7 +568,7 @@ export const Home: React.FC = () => {
       <ServicesSection />
 
       {/* ── SECTION 3: WHY DIGIHUST ── */}
-      <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] relative">
+      <section data-hard-stop="why-digihust" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] relative">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
