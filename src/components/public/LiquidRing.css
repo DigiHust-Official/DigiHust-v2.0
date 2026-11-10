@@ -1,0 +1,11 @@
+/* Decorative liquid-glass ring. Size comes from --ring-size set by the parent.
+   Theme: the parent sets --ring-dark: 1 (dark theme) or 0 (light theme). */
+.dh-ring {
+  display: block;
+  width: var(--ring-size, 720px);
+  height: var(--ring-size, 720px);
+  max-width: 100%;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.92;
+}

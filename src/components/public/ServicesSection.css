@@ -41,6 +41,9 @@
 
   --dh-img-ring: rgba(10, 31, 43, 0.12);
   --dh-focus-ring: rgba(31, 122, 140, 0.9);
+
+  /* Decorative Liquid Ring tokens (Item 2) */
+  --ring-dark: 0;
 }
 
 /* Dark theme overrides (Item 2: Tonal deep navy, no light gradient haze) */
@@ -78,6 +81,9 @@ html.dark .dh-services {
 
   --dh-img-ring: rgba(255, 255, 255, 0.08);
   --dh-focus-ring: rgba(46, 196, 214, 0.9);
+
+  /* Decorative Liquid Ring tokens (Item 2) */
+  --ring-dark: 1;
 }
 
 .dh-services__container {
@@ -113,6 +119,14 @@ html.dark .dh-services {
   overflow: clip;
   pointer-events: none;
   z-index: 0;
+}
+
+/* ── Decorative Liquid Ring (Item 2) ── */
+.dh-services__ring {
+  position: sticky;
+  top: calc(50svh - var(--ring-size) / 2);
+  margin-inline: auto;
+  --ring-size: clamp(360px, min(80vw, 96svh), 980px);
 }
 
 /* Ensure content sits above video layer at z-index 1 */
