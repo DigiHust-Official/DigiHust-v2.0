@@ -163,7 +163,7 @@
   }
 }
 
-/* ── Interactive Hover & Motion (Item 3) ── */
+/* ── Interactive Hover & Motion (Item 3: translateY -4px, teal arrow, 1.04 image scale) ── */
 .dh-services-card:hover,
 .dh-services-card:focus-visible {
   transform: translateY(-4px);
