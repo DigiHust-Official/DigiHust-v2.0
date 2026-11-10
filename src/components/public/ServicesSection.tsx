@@ -142,6 +142,7 @@ export const ServicesSection: React.FC = () => {
         <div className="dh-services__frame">
           {/* Centered Heading */}
           <div className="dh-services__header">
+            {/* Heading on ONE line on desktop, centered; visually-hidden subtext */}
             <h2 id="dh-services-heading" className="dh-services__title">
               <span className="dh-services__title-primary">{firstPart}</span>{' '}
               {secondPart && (
@@ -149,7 +150,7 @@ export const ServicesSection: React.FC = () => {
               )}
             </h2>
             {t('services_sub') && (
-              <p className="dh-services__subtext">{t('services_sub')}</p>
+              <p className="dh-services__subtext sr-only">{t('services_sub')}</p>
             )}
           </div>
 

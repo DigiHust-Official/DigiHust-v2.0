@@ -8,58 +8,27 @@
   padding-inline: clamp(1rem, 3vw, 2rem);
   background-color: var(--bg-page);
 
-  /* Light theme color tokens (default) */
-  --dh-frame-bg: linear-gradient(180deg, #FFFFFF 0%, #F6F9FB 55%, #EAF0F4 100%);
-  --dh-frame-border: 3px solid rgba(31, 122, 140, 0.55);
-  
-  --dh-heading-primary: #0A1F2B;
-  --dh-heading-accent: var(--brand-teal, #1F7A8C);
-  --dh-subtext-color: #4A6070;
-
-  --dh-card-bg: #FFFFFF;
-  --dh-card-border: 1px solid #D8E2E9;
-  --dh-card-shadow: 0 10px 30px rgba(10, 31, 43, 0.06);
-
-  --dh-card-num-bg: #EAF0F4;
-  --dh-card-num-color: #0A1F2B;
-
-  --dh-card-pill-border: 1px solid rgba(10, 31, 43, 0.28);
-  --dh-card-pill-color: #0A1F2B;
-  --dh-card-arrow-bg: #EAF0F4;
-  --dh-card-arrow-color: #0A1F2B;
-
-  --dh-card-title-color: #0A1F2B;
-  --dh-card-desc-color: #4A6070;
-
-  --dh-hover-border: rgba(31, 122, 140, 0.5);
-}
-
-/* Dark theme overrides */
-html[data-theme="dark"] .dh-services,
-html.dark .dh-services {
-  --dh-frame-bg: linear-gradient(180deg, #102A38 0%, #0A1A24 45%, #050D14 100%);
-  --dh-frame-border: 3px solid rgba(46, 196, 214, 0.45);
-
+  /* Unified Dark Theme tokens for this section in BOTH themes (Item 4 & 5) */
   --dh-heading-primary: #F3F6FA;
   --dh-heading-accent: rgb(var(--dh-wave-2, 255, 190, 120));
-  --dh-subtext-color: #A9B8C6;
 
-  --dh-card-bg: rgba(255, 255, 255, 0.05);
-  --dh-card-border: 1px solid rgba(255, 255, 255, 0.07);
-  --dh-card-shadow: none;
+  --dh-card-bg: rgba(255, 255, 255, 0.045);
+  --dh-card-border: none;
+  --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
-  --dh-card-num-bg: rgba(255, 255, 255, 0.09);
+  --dh-card-num-bg: rgba(255, 255, 255, 0.08);
   --dh-card-num-color: #F3F6FA;
 
-  --dh-card-pill-border: 1px solid rgba(255, 255, 255, 0.35);
+  --dh-card-pill-border: 1px solid rgba(255, 255, 255, 0.32);
   --dh-card-pill-color: #F3F6FA;
-  --dh-card-arrow-bg: rgba(255, 255, 255, 0.12);
+  --dh-card-arrow-bg: rgba(255, 255, 255, 0.14);
   --dh-card-arrow-color: #F3F6FA;
 
   --dh-card-title-color: #F3F6FA;
   --dh-card-desc-color: #A9B8C6;
 
   --dh-hover-border: rgba(46, 196, 214, 0.5);
+  --dh-focus-ring: rgba(46, 196, 214, 0.9);
 }
 
 .dh-services__container {
@@ -69,41 +38,53 @@ html.dark .dh-services {
   box-sizing: border-box;
 }
 
-/* ── Section Frame (Item 2 & 4) ── */
+/* ── Section Frame (Item 4: Dark panel in both themes) ── */
 .dh-services__frame {
   position: relative;
   border-radius: clamp(28px, 3vw, 44px);
-  border: var(--dh-frame-border);
-  background: var(--dh-frame-bg);
-  padding-top: clamp(24px, 3.2vw, 56px);
-  padding-inline: clamp(20px, 3.2vw, 56px);
-  padding-bottom: clamp(20px, 3.5vh, 40px);
+  border: 4px solid rgba(46, 196, 214, 0.5);
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgba(31, 122, 140, 0.55) 0%, transparent 70%),
+    linear-gradient(180deg, #0E2A38 0%, #071520 50%, #050D14 100%);
+  padding: clamp(22px, 3.4vw, 64px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-/* ── Centered Heading ── */
+/* In light theme, the frame is the same dark panel with an outer shadow (Item 4) */
+html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
+  box-shadow: 0 30px 80px rgba(5, 13, 20, 0.22);
+}
+
+/* ── Centered Heading (Item 4: One line on desktop, clamp(36px, 7vh, 84px) gap) ── */
 .dh-services__header {
   text-align: center;
-  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  margin-bottom: clamp(36px, 7vh, 84px);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .dh-services__title {
-  font-size: clamp(2rem, 4.6vw, 4.2rem);
+  font-size: clamp(1.85rem, 3.8vw, 3.8rem);
   letter-spacing: -0.02em;
-  line-height: 1.08;
+  line-height: 1.1;
   margin: 0;
   text-align: center;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: baseline;
   gap: 0.35em;
+}
+
+@media (min-width: 1024px) {
+  .dh-services__title {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
 }
 
 .dh-services__title-primary {
@@ -120,16 +101,15 @@ html.dark .dh-services {
 }
 
 .dh-services__subtext {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1.6;
-  max-width: 36rem;
-  margin-top: 1rem;
-  margin-bottom: 0;
-  margin-inline: auto;
-  text-align: center;
-  color: var(--dh-subtext-color);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* ── The Grid: 4 Cards per row, 2 rows (Item 2) ── */
