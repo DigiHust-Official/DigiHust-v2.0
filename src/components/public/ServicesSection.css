@@ -7,6 +7,59 @@
   padding-block: clamp(3rem, 6vw, 5rem);
   padding-inline: clamp(1rem, 3vw, 2rem);
   background-color: var(--bg-page);
+
+  /* Light theme color tokens (default) */
+  --dh-frame-bg: linear-gradient(180deg, #FFFFFF 0%, #F6F9FB 55%, #EAF0F4 100%);
+  --dh-frame-border: 3px solid rgba(31, 122, 140, 0.55);
+  
+  --dh-heading-primary: #0A1F2B;
+  --dh-heading-accent: var(--brand-teal, #1F7A8C);
+  --dh-subtext-color: #4A6070;
+
+  --dh-card-bg: #FFFFFF;
+  --dh-card-border: 1px solid #D8E2E9;
+  --dh-card-shadow: 0 10px 30px rgba(10, 31, 43, 0.06);
+
+  --dh-card-num-bg: #EAF0F4;
+  --dh-card-num-color: #0A1F2B;
+
+  --dh-card-pill-border: 1px solid rgba(10, 31, 43, 0.28);
+  --dh-card-pill-color: #0A1F2B;
+  --dh-card-arrow-bg: #EAF0F4;
+  --dh-card-arrow-color: #0A1F2B;
+
+  --dh-card-title-color: #0A1F2B;
+  --dh-card-desc-color: #4A6070;
+
+  --dh-hover-border: rgba(31, 122, 140, 0.5);
+}
+
+/* Dark theme overrides */
+html[data-theme="dark"] .dh-services,
+html.dark .dh-services {
+  --dh-frame-bg: linear-gradient(180deg, #102A38 0%, #0A1A24 45%, #050D14 100%);
+  --dh-frame-border: 3px solid rgba(46, 196, 214, 0.45);
+
+  --dh-heading-primary: #F3F6FA;
+  --dh-heading-accent: rgb(var(--dh-wave-2, 255, 190, 120));
+  --dh-subtext-color: #A9B8C6;
+
+  --dh-card-bg: rgba(255, 255, 255, 0.05);
+  --dh-card-border: 1px solid rgba(255, 255, 255, 0.07);
+  --dh-card-shadow: none;
+
+  --dh-card-num-bg: rgba(255, 255, 255, 0.09);
+  --dh-card-num-color: #F3F6FA;
+
+  --dh-card-pill-border: 1px solid rgba(255, 255, 255, 0.35);
+  --dh-card-pill-color: #F3F6FA;
+  --dh-card-arrow-bg: rgba(255, 255, 255, 0.12);
+  --dh-card-arrow-color: #F3F6FA;
+
+  --dh-card-title-color: #F3F6FA;
+  --dh-card-desc-color: #A9B8C6;
+
+  --dh-hover-border: rgba(46, 196, 214, 0.5);
 }
 
 .dh-services__container {
@@ -16,11 +69,12 @@
   box-sizing: border-box;
 }
 
-/* ── Section Frame (Item 2) ── */
+/* ── Section Frame (Item 2 & 4) ── */
 .dh-services__frame {
   position: relative;
   border-radius: clamp(28px, 3vw, 44px);
-  border: 3px solid;
+  border: var(--dh-frame-border);
+  background: var(--dh-frame-bg);
   padding-top: clamp(24px, 3.2vw, 56px);
   padding-inline: clamp(20px, 3.2vw, 56px);
   padding-bottom: clamp(20px, 3.5vh, 40px);
@@ -55,12 +109,14 @@
 .dh-services__title-primary {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 300;
+  color: var(--dh-heading-primary);
 }
 
 .dh-services__title-accent {
   font-family: 'Fraunces', serif;
   font-style: italic;
   font-weight: 400;
+  color: var(--dh-heading-accent);
 }
 
 .dh-services__subtext {
@@ -73,6 +129,7 @@
   margin-bottom: 0;
   margin-inline: auto;
   text-align: center;
+  color: var(--dh-subtext-color);
 }
 
 /* ── The Grid: 4 Cards per row, 2 rows (Item 3) ── */
@@ -95,7 +152,7 @@
   }
 }
 
-/* ── Card Anatomy (Item 3) ── */
+/* ── Card Anatomy (Item 3 & 4) ── */
 .dh-services-card {
   position: relative;
   display: flex;
@@ -107,6 +164,9 @@
   container-type: inline-size;
   overflow: hidden;
   min-height: 0;
+  background-color: var(--dh-card-bg);
+  border: var(--dh-card-border);
+  box-shadow: var(--dh-card-shadow);
   transition: transform 0.25s ease-out, border-color 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
@@ -139,6 +199,8 @@
   line-height: 1;
   flex-shrink: 0;
   user-select: none;
+  background-color: var(--dh-card-num-bg);
+  color: var(--dh-card-num-color);
 }
 
 .dh-services-card__pill {
@@ -149,7 +211,8 @@
   padding-inline-start: clamp(10px, 3.5cqw, 14px);
   padding-inline-end: 4px;
   border-radius: 9999px;
-  border: 1px solid;
+  border: var(--dh-card-pill-border);
+  color: var(--dh-card-pill-color);
   box-sizing: border-box;
   transition: all 0.25s ease-out;
 }
@@ -170,6 +233,8 @@
   height: 22px;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: var(--dh-card-arrow-bg);
+  color: var(--dh-card-arrow-color);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, color 0.25s ease-out;
 }
 
@@ -194,6 +259,7 @@
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0;
+  color: var(--dh-card-title-color);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -206,6 +272,7 @@
   font-size: clamp(12px, 4.4cqw, 14px);
   line-height: 1.5;
   margin: 0;
+  color: var(--dh-card-desc-color);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -262,11 +329,16 @@
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 500;
   font-size: 14px;
+  border: var(--dh-card-pill-border);
+  color: var(--dh-card-pill-color);
+  background-color: var(--dh-card-bg);
+  box-shadow: var(--dh-card-shadow);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out, color 0.25s ease-out;
 }
 
 .dh-services__view-all-pill:hover {
   transform: translateY(-2px);
+  border-color: var(--dh-hover-border);
 }
 
 .dh-services__view-all-arrow-wrap {
@@ -277,11 +349,15 @@
   height: 26px;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: var(--dh-card-arrow-bg);
+  color: var(--dh-card-arrow-color);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, color 0.25s ease-out;
 }
 
 .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
   transform: translateX(3px);
+  background-color: var(--brand-teal);
+  color: #FFFFFF;
 }
 
 .dh-services__view-all-arrow {
