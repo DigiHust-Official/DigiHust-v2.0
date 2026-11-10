@@ -112,11 +112,11 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   border-width: 0;
 }
 
-/* ── The Grid: 4 Cards per row, 2 rows (Item 2) ── */
+/* ── The Grid: 4 Cards per row, 2 rows (Item 1 & 2) ── */
 .dh-services__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(10px, 1.1vw, 18px);
+  gap: clamp(10px, 1.2vw, 18px);
   width: 100%;
 }
 
@@ -136,39 +136,41 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  container-type: inline-size;
 }
 
-/* ── Card Anatomy (Item 1 & 2) ── */
+/* ── Card Anatomy (Item 1: 7/15 ratio, 13.5cqw radius, 7cqw padding) ── */
 .dh-services-card {
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
-  padding: clamp(14px, 6.2cqw, 22px);
+  aspect-ratio: 7 / 15;
+  border-radius: 13.5cqw;
+  padding: 7cqw;
   box-sizing: border-box;
   text-decoration: none;
-  border-radius: clamp(22px, 2.4vw, 34px);
-  container-type: inline-size;
   overflow: hidden;
-  min-height: 0;
-  aspect-ratio: auto;
   background-color: var(--dh-card-bg);
   border: none;
   box-shadow: var(--dh-card-shadow);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 767px) {
   .dh-services-card {
-    aspect-ratio: 4 / 7;
+    aspect-ratio: auto;
+    min-height: 0;
   }
 }
 
-/* ── Interactive Hover & Motion (Item 5) ── */
+/* ── Interactive Hover & Motion (Item 3) ── */
 .dh-services-card:hover,
 .dh-services-card:focus-visible {
   transform: translateY(-4px);
-  background-color: rgba(255, 255, 255, 0.075);
+  background-color: var(--dh-card-hover-bg, rgba(255, 255, 255, 0.075));
 }
 
 .dh-services-card:focus-visible {
@@ -187,12 +189,16 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   transform: rotate(-45deg);
 }
 
-/* Top Row */
+.dh-services-card:hover .dh-services-card__img,
+.dh-services-card:focus-visible .dh-services-card__img {
+  transform: scale(1.04);
+}
+
+/* ── Top Row (Item 1: number circle + more-info pill) ── */
 .dh-services-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
   width: 100%;
 }
 
@@ -200,12 +206,12 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(30px, 11cqw, 38px);
-  height: clamp(30px, 11cqw, 38px);
+  width: 15cqw;
+  height: 15cqw;
   border-radius: 50%;
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 500;
-  font-size: 12px;
+  font-size: 4.6cqw;
   line-height: 1;
   flex-shrink: 0;
   user-select: none;
@@ -216,14 +222,13 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
 .dh-services-card__pill {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  height: clamp(30px, 11cqw, 38px);
-  padding: 3px 3px 3px 14px;
-  padding-block: 3px;
-  padding-inline-start: 14px;
-  padding-inline-end: 3px;
+  gap: 3cqw;
+  height: 15cqw;
+  padding-block: 0;
+  padding-inline-start: 6cqw;
+  padding-inline-end: 1.4cqw;
   border-radius: 9999px;
-  border: var(--dh-card-pill-border);
+  border: 1px solid var(--dh-card-pill-border);
   color: var(--dh-card-pill-color);
   box-sizing: border-box;
   transition: all 0.25s ease-out;
@@ -232,7 +237,7 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
 .dh-services-card__pill-label {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 500;
-  font-size: 12px;
+  font-size: 4.6cqw;
   line-height: 1;
   white-space: nowrap;
 }
@@ -241,8 +246,8 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(clamp(30px, 11cqw, 38px) - 6px);
-  height: calc(clamp(30px, 11cqw, 38px) - 6px);
+  width: calc(15cqw - 3cqw);
+  height: calc(15cqw - 3cqw);
   border-radius: 50%;
   flex-shrink: 0;
   background-color: var(--dh-card-arrow-bg);
@@ -256,49 +261,47 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   transition: transform 0.25s ease-out;
 }
 
-/* Flexible Spacer */
+/* ── Flexible Spacer (Item 1: ~27% of card height, shrinks to 24px on mobile) ── */
 .dh-services-card__spacer {
-  flex: 1 1 auto;
-  min-height: 8px;
+  flex: 1;
+  min-height: 16px;
 }
 
-/* Title Block (reserved 2 lines, flex-end) */
-.dh-services-card__title-wrap {
-  display: flex;
-  align-items: flex-end;
-  min-height: calc(2 * 1.15em);
-  height: calc(2 * 1.15em);
-  width: 100%;
-  font-size: clamp(1.25rem, 8.4cqw, 1.9rem);
-  line-height: 1.15;
+@media (max-width: 767px) {
+  .dh-services-card__spacer {
+    flex: 0 0 24px;
+    min-height: 24px;
+  }
 }
 
+/* ── Title (Item 1: single line, Outfit 300, clamp(1rem, 7.6cqw, 1.9rem), margin-bottom 3.5cqw) ── */
 .dh-services-card__title {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 300;
-  font-size: inherit;
-  line-height: 1.15;
+  font-size: clamp(1rem, 7.6cqw, 1.9rem);
+  line-height: 1.2;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin: 0;
+  margin-bottom: 3.5cqw;
   width: 100%;
   color: var(--dh-card-title-color);
   text-align: start;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
-/* Description Block (reserved 3 lines, top-aligned) */
+/* ── Description (Item 1: 3 lines, line-height 1.6, clamp(12px, 4.7cqw, 15px), margin-bottom 8cqw) ── */
 .dh-services-card__desc {
-  margin-top: clamp(8px, 3cqw, 12px);
-  margin-bottom: 0;
-  min-height: calc(3 * 1.5em);
-  height: calc(3 * 1.5em);
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 400;
-  font-size: clamp(12.5px, 4.2cqw, 15px);
-  line-height: 1.5;
+  font-size: clamp(12px, 4.7cqw, 15px);
+  line-height: 1.6;
+  min-height: calc(3 * 1.6em);
+  max-height: calc(3 * 1.6em);
+  height: calc(3 * 1.6em);
+  margin: 0;
+  margin-bottom: 8cqw;
   color: var(--dh-card-desc-color);
   width: 100%;
   text-align: start;
@@ -308,52 +311,16 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   overflow: hidden;
 }
 
-/* ── Image at bottom (Item 6: Duotone treatment) ── */
+/* ── Image at bottom (Item 1: aspect-ratio 9/8, radius 7.5cqw, 1px inner ring, natural colors) ── */
 .dh-services-card__media {
   position: relative;
-  margin-top: clamp(8px, 3cqw, 12px);
   width: 100%;
-  aspect-ratio: 1 / 0.92;
-  border-radius: clamp(14px, 6.4cqw, 22px);
+  aspect-ratio: 9 / 8;
+  border-radius: 7.5cqw;
   overflow: hidden;
   box-sizing: border-box;
-  background-color: #050D14;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-
-.dh-services-card__media::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    150deg,
-    rgb(var(--dh-wave-2, 255, 190, 120)) 0%,
-    #1F7A8C 48%,
-    #0A1A24 100%
-  );
-  mix-blend-mode: color;
-  opacity: 1;
-  pointer-events: none;
-  transition: opacity 0.4s ease-out;
-  z-index: 1;
-}
-
-.dh-services-card__media::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 55%,
-    rgba(5, 13, 20, 0.55) 100%
-  );
-  pointer-events: none;
-  z-index: 2;
-}
-
-.dh-services-card:hover .dh-services-card__media::before,
-.dh-services-card:focus-visible .dh-services-card__media::before {
-  opacity: 0.35;
+  box-shadow: inset 0 0 0 1px var(--dh-img-ring, rgba(10, 31, 43, 0.12));
+  margin: 0;
 }
 
 .dh-services-card__img {
@@ -361,7 +328,6 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(1) contrast(1.12) brightness(0.85);
   transition: transform 0.25s ease-out;
 }
 
@@ -506,11 +472,6 @@ html[dir="rtl"] .dh-services__view-all-pill:focus-visible .dh-services__view-all
   .dh-services__view-all-arrow-wrap,
   .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
     transform: none !important;
-    transition: none !important;
-  }
-  .dh-services-card:hover .dh-services-card__media::before,
-  .dh-services-card:focus-visible .dh-services-card__media::before {
-    opacity: 1 !important;
     transition: none !important;
   }
 }

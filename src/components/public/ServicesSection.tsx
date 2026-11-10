@@ -9,6 +9,7 @@ export interface ServiceItem {
   id: string;
   number: string;
   titleKey: string;
+  shortTitleKey: string;
   descKey: string;
   route: string;
   image: string;
@@ -32,65 +33,73 @@ export const SERVICES: ServiceItem[] = [
     id: 's-web',
     number: '01',
     titleKey: 'service_feat_web_title',
-    descKey: 'service_feat_web_desc',
+    shortTitleKey: 'service_feat_web_short',
     route: '/services/saas-mvp-development',
     image: SERVICE_IMAGES['s-web'],
+    descKey: 'service_feat_web_desc',
   },
   {
     id: 's-creative',
     number: '02',
     titleKey: 'service_feat_creative_title',
-    descKey: 'service_feat_creative_desc',
+    shortTitleKey: 'service_feat_creative_short',
     route: '/services/brand-identity-design-system',
     image: SERVICE_IMAGES['s-creative'],
+    descKey: 'service_feat_creative_desc',
   },
   {
     id: 's-ai',
     number: '03',
     titleKey: 'service_feat_ai_title',
-    descKey: 'service_feat_ai_desc',
+    shortTitleKey: 'service_feat_ai_short',
     route: '/services/ai-workflow-automation',
     image: SERVICE_IMAGES['s-ai'],
+    descKey: 'service_feat_ai_desc',
   },
   {
     id: 's-marketing',
     number: '04',
     titleKey: 'service_feat_marketing_title',
-    descKey: 'service_feat_marketing_desc',
+    shortTitleKey: 'service_feat_marketing_short',
     route: '/services/digital-marketing-seo',
     image: SERVICE_IMAGES['s-marketing'],
+    descKey: 'service_feat_marketing_desc',
   },
   {
     id: 's-cybersecurity',
     number: '05',
     titleKey: 'service_feat_cyber_title',
-    descKey: 'service_feat_cyber_desc',
+    shortTitleKey: 'service_feat_cyber_short',
     route: '/services/cybersecurity-audit',
     image: SERVICE_IMAGES['s-cybersecurity'],
+    descKey: 'service_feat_cyber_desc',
   },
   {
     id: 's-data-intelligence',
     number: '06',
     titleKey: 'service_feat_data_title',
-    descKey: 'service_feat_data_desc',
+    shortTitleKey: 'service_feat_data_short',
     route: '/services/data-intelligence-analytics',
     image: SERVICE_IMAGES['s-data-intelligence'],
+    descKey: 'service_feat_data_desc',
   },
   {
     id: 's-strategy',
     number: '07',
     titleKey: 'service_feat_strategy_title',
-    descKey: 'service_feat_strategy_desc',
+    shortTitleKey: 'service_feat_strategy_short',
     route: '/services#s-strategy',
     image: SERVICE_IMAGES['s-strategy'],
+    descKey: 'service_feat_strategy_desc',
   },
   {
     id: 's-cloud-devops',
     number: '08',
     titleKey: 'service_feat_cloud_title',
-    descKey: 'service_feat_cloud_desc',
+    shortTitleKey: 'service_feat_cloud_short',
     route: '/services#s-cloud-devops',
     image: SERVICE_IMAGES['s-cloud-devops'],
+    descKey: 'service_feat_cloud_desc',
   },
 ];
 
@@ -172,6 +181,9 @@ export const ServicesSection: React.FC = () => {
                   data-service={svc.id}
                   aria-label={`${t(svc.titleKey)} - ${t('services_explore') || 'Explore Service'}`}
                 >
+                  {/* Visually-hidden full title for SEO and screen readers */}
+                  <span className="sr-only">{t(svc.titleKey)}</span>
+
                   {/* TOP ROW */}
                   <div className="dh-services-card__top">
                     <span className="dh-services-card__number" aria-hidden="true">
@@ -190,12 +202,10 @@ export const ServicesSection: React.FC = () => {
                   {/* FLEXIBLE SPACER */}
                   <div className="dh-services-card__spacer" />
 
-                  {/* TITLE BLOCK (reserved 2 lines height, flex-end alignment) */}
-                  <div className="dh-services-card__title-wrap">
-                    <h3 className="dh-services-card__title">
-                      {t(svc.titleKey)}
-                    </h3>
-                  </div>
+                  {/* TITLE (Single line, short title) */}
+                  <h3 className="dh-services-card__title">
+                    {t(svc.shortTitleKey) || t(svc.titleKey)}
+                  </h3>
 
                   {/* DESCRIPTION BLOCK (reserved 3 lines height) */}
                   <p className="dh-services-card__desc">
