@@ -223,7 +223,7 @@ export const ServicesSection: React.FC = () => {
                 {t('services_view_all') || 'View all services in detail'}
               </span>
               <span className="dh-services__view-all-arrow-wrap">
-                <ArrowRight className="dh-services__view-all-arrow" />
+                <ArrowRight className="dh-services__view-all-arrow" size={14} />
               </span>
             </Link>
           </div>

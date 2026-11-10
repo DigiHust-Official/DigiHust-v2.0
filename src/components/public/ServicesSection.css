@@ -391,7 +391,7 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   object-position: center 40%;
 }
 
-/* ── Centered View All Pill ── */
+/* ── Centered View All Pill (Item 7: Restyled to match right pill) ── */
 .dh-services__footer {
   display: flex;
   justify-content: center;
@@ -401,41 +401,52 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
 .dh-services__view-all-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.65rem 0.85rem 0.65rem 1.5rem;
+  gap: 10px;
+  height: 42px;
+  padding-block: 4px;
+  padding-inline-start: 18px;
+  padding-inline-end: 4px;
   border-radius: 9999px;
   text-decoration: none;
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
   font-weight: 500;
   font-size: 14px;
-  border: var(--dh-card-pill-border);
-  color: var(--dh-card-pill-color);
-  background-color: var(--dh-card-bg);
-  box-shadow: var(--dh-card-shadow);
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #F3F6FA;
+  background-color: rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out, color 0.25s ease-out;
 }
 
-.dh-services__view-all-pill:hover {
+.dh-services__view-all-pill:hover,
+.dh-services__view-all-pill:focus-visible {
   transform: translateY(-2px);
-  border-color: var(--dh-hover-border);
+  background-color: rgba(255, 255, 255, 0.075);
+  border-color: rgba(46, 196, 214, 0.5);
+}
+
+.dh-services__view-all-pill:focus-visible {
+  outline: 2px solid rgba(46, 196, 214, 0.9);
+  outline-offset: 3px;
 }
 
 .dh-services__view-all-arrow-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   flex-shrink: 0;
-  background-color: var(--dh-card-arrow-bg);
-  color: var(--dh-card-arrow-color);
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #F3F6FA;
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, color 0.25s ease-out;
 }
 
-.dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
-  transform: translateX(3px);
-  background-color: var(--brand-teal);
+.dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap,
+.dh-services__view-all-pill:focus-visible .dh-services__view-all-arrow-wrap {
+  background-color: var(--brand-teal, #1F7A8C);
   color: #FFFFFF;
 }
 
@@ -445,6 +456,11 @@ html:not(.dark):not([data-theme="dark"]) .dh-services__frame {
   transition: transform 0.25s ease-out;
 }
 
+.dh-services__view-all-pill:hover .dh-services__view-all-arrow,
+.dh-services__view-all-pill:focus-visible .dh-services__view-all-arrow {
+  transform: rotate(-45deg);
+}
+
 /* ── Accessibility & RTL Layout (Item 7) ── */
 html[dir="rtl"] .dh-services-card__pill-arrow {
   transform: scaleX(-1);
@@ -452,15 +468,16 @@ html[dir="rtl"] .dh-services-card__pill-arrow {
 
 html[dir="rtl"] .dh-services-card:hover .dh-services-card__pill-arrow,
 html[dir="rtl"] .dh-services-card:focus-visible .dh-services-card__pill-arrow {
-  transform: scaleX(-1) rotate(45deg);
+  transform: scaleX(-1) rotate(-45deg);
 }
 
 html[dir="rtl"] .dh-services__view-all-arrow {
   transform: scaleX(-1);
 }
 
-html[dir="rtl"] .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
-  transform: translateX(-3px);
+html[dir="rtl"] .dh-services__view-all-pill:hover .dh-services__view-all-arrow,
+html[dir="rtl"] .dh-services__view-all-pill:focus-visible .dh-services__view-all-arrow {
+  transform: scaleX(-1) rotate(-45deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
