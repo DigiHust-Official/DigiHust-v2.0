@@ -429,3 +429,40 @@ html.dark .dh-services__card--slot-4 {
     box-shadow: 0 5px 0 0 var(--card-lip) !important;
   }
 }
+
+/* ── Accessibility & RTL Layout (Item 6) ── */
+html[dir="rtl"] .dh-services__card-title {
+  text-align: right;
+}
+
+html[dir="rtl"] .dh-services__arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .dh-services__card:hover .dh-services__arrow,
+html[dir="rtl"] .dh-services__card:focus-visible .dh-services__arrow {
+  transform: scaleX(-1) rotate(-45deg);
+}
+
+html[dir="rtl"] .dh-services__card:hover .dh-services__illustration svg,
+html[dir="rtl"] .dh-services__card:focus-visible .dh-services__illustration svg {
+  transform: translate(-6px, -6px);
+}
+
+html[dir="rtl"] .dh-services__link-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .dh-services__link:hover .dh-services__link-arrow {
+  transform: scaleX(-1) translateX(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[dir="rtl"] .dh-services__arrow,
+  html[dir="rtl"] .dh-services__card:hover .dh-services__arrow,
+  html[dir="rtl"] .dh-services__card:focus-visible .dh-services__arrow,
+  html[dir="rtl"] .dh-services__card:hover .dh-services__illustration svg,
+  html[dir="rtl"] .dh-services__card:focus-visible .dh-services__illustration svg {
+    transform: scaleX(-1) !important;
+  }
+}
