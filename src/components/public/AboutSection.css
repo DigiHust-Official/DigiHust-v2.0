@@ -159,22 +159,24 @@ html.light .dh-about-card:hover {
 /* Sentence-case labels: top-left */
 .dh-about-card-label {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(12.5px, 1.6vh, 13px);
-  font-weight: 500;
+  font-size: clamp(13px, 3.6cqw, 16px);
+  font-weight: 400;
   text-transform: none; /* sentence case */
   letter-spacing: 0;
+  line-height: 1.3;
   color: var(--text-muted);
 }
 
-/* Big numbers: Outfit 300 (light), line-height: 0.95, tabular-nums */
+/* Big numbers: Outfit 300 (light), line-height: 1, letter-spacing: -0.04em, tabular-nums */
 .dh-about-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 300;
-  font-size: clamp(2rem, 24cqh, 5.5rem);
-  line-height: 0.95;
+  font-size: clamp(2.5rem, 12.5cqw, 4.6rem);
+  line-height: 1;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
+  margin-top: clamp(6px, 2cqw, 12px);
 }
 
 /* ── CARD 1: Rich Brand Image Card ── */
@@ -287,8 +289,8 @@ html.light .dh-about-card:hover {
 .dh-about-card1-panel {
   position: relative;
   z-index: 2;
-  margin: clamp(0.625rem, 1.5vh, 1rem);
-  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  margin: clamp(10px, 3cqw, 16px);
+  padding: clamp(14px, 4.8cqw, 20px);
   border-radius: 18px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -310,8 +312,8 @@ html.dark .dh-about-card1-panel {
 .dh-about-card1-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 300;
-  font-size: clamp(2rem, 16cqh, 3.6rem);
-  line-height: 0.95;
+  font-size: clamp(2.2rem, 11cqw, 3.8rem);
+  line-height: 1;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   color: #0A1F2B;
@@ -324,9 +326,9 @@ html.dark .dh-about-card1-stat {
 
 .dh-about-card1-caption {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(12.5px, 1.5vh, 13.5px);
+  font-size: clamp(12.5px, 3.3cqw, 15px);
   line-height: 1.4;
-  font-weight: 500;
+  font-weight: 400;
   color: #1A3340;
 }
 
@@ -365,7 +367,7 @@ html.dark .dh-about-card1-sublink {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  padding: clamp(16px, 5.2cqw, 26px);
 }
 
 html[data-theme="dark"] .dh-about-card-delivery,
@@ -394,7 +396,7 @@ html.dark .dh-about-card-delivery {
   display: flex;
   align-items: center;
   margin-top: clamp(0.5rem, 1.2vh, 0.875rem);
-  margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
+  margin-bottom: clamp(6px, 1.8cqw, 12px);
 }
 
 .dh-about-avatar-cluster {
@@ -426,18 +428,15 @@ html.dark .dh-about-avatar-img {
 
 .dh-about-statement {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(12.5px, 1.4vh, 13.5px);
+  font-size: clamp(12.5px, 3.3cqw, 15px);
   line-height: 1.4;
   color: var(--text-body);
-  font-weight: 500;
+  font-weight: 400;
   margin-top: 0.5rem;
 }
 
 /* Container query for Card 2 */
-@container (max-height: 210px) {
-  .dh-about-avatars-row {
-    display: none;
-  }
+@container (max-height: 220px) {
   .dh-about-statement {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -446,12 +445,18 @@ html.dark .dh-about-avatar-img {
   }
 }
 
+@container (max-height: 180px) {
+  .dh-about-avatars-row {
+    display: none;
+  }
+}
+
 /* ── CARD 3: Customer Satisfaction (Warm Aura Accent Card) ── */
 .dh-about-card-turnaround {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  padding: clamp(16px, 5.2cqw, 26px);
   background: linear-gradient(
     135deg,
     rgba(var(--dh-wave-2), 0.85) 0%,
@@ -484,11 +489,13 @@ html.dark .dh-about-avatar-img {
 }
 
 .dh-about-stat-unit {
-  font-size: 0.45em;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.32em;
   font-weight: 400;
   letter-spacing: -0.02em;
   color: rgba(10, 31, 43, 0.65);
   margin-inline-start: 0.15em;
+  align-self: baseline;
 }
 
 .dh-about-stars-row {
@@ -501,11 +508,11 @@ html.dark .dh-about-avatar-img {
 
 .dh-about-card-turnaround .dh-about-caption {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(12.5px, 1.4vh, 13px);
+  font-size: clamp(12.5px, 3.3cqw, 15px);
   line-height: 1.4;
   color: #1A3340;
   font-weight: 600;
-  margin-top: 0.35rem;
+  margin-top: clamp(4px, 1.5cqw, 8px);
 }
 
 @container (max-height: 190px) {
@@ -519,7 +526,7 @@ html.dark .dh-about-avatar-img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+  padding: clamp(16px, 5.2cqw, 26px);
   background-color: #050D14;
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #FFFFFF;
@@ -594,11 +601,11 @@ html.dark .dh-about-card4-btn:hover {
 .dh-about-approach-text {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 300;
-  font-size: clamp(1.05rem, 12cqh, 1.45rem);
-  line-height: 1.25;
+  font-size: clamp(1.15rem, 6.2cqw, 1.9rem);
+  line-height: 1.18;
   letter-spacing: -0.02em;
   color: #FFFFFF;
-  margin-top: clamp(0.35rem, 1vh, 0.65rem);
+  margin-top: clamp(10px, 3.5cqw, 18px);
 }
 
 html[data-theme="dark"] .dh-about-approach-text,
@@ -608,10 +615,11 @@ html.dark .dh-about-approach-text {
 
 .dh-about-approach-caption {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(12px, 1.3vh, 13px);
-  font-weight: 600;
+  font-size: clamp(12.5px, 3.3cqw, 15px);
+  font-weight: 400;
+  line-height: 1.4;
   color: #CBD5E1;
-  margin-top: 0.35rem;
+  margin-top: clamp(4px, 1.5cqw, 8px);
 }
 
 html[data-theme="dark"] .dh-about-approach-caption,
@@ -619,11 +627,17 @@ html.dark .dh-about-approach-caption {
   color: #4A6070;
 }
 
-@container (max-height: 200px) {
+@container (max-height: 180px) {
   .dh-about-approach-text {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+}
+
+@container (max-height: 140px) {
+  .dh-about-approach-caption {
+    display: none;
   }
 }
