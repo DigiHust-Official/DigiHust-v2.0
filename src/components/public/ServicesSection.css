@@ -41,11 +41,6 @@
 
   --dh-img-ring: rgba(10, 31, 43, 0.12);
   --dh-focus-ring: rgba(31, 122, 140, 0.9);
-
-  /* Decorative video background tokens (Item 2) */
-  --dh-video-blend: multiply;
-  --dh-video-filter: invert(1) hue-rotate(105deg) saturate(1.1) brightness(1.02);
-  --dh-video-opacity: 0.7;
 }
 
 /* Dark theme overrides (Item 2: Tonal deep navy, no light gradient haze) */
@@ -83,11 +78,6 @@ html.dark .dh-services {
 
   --dh-img-ring: rgba(255, 255, 255, 0.08);
   --dh-focus-ring: rgba(46, 196, 214, 0.9);
-
-  /* Decorative video background tokens (Item 2) */
-  --dh-video-blend: screen;
-  --dh-video-filter: hue-rotate(-75deg) saturate(1.15) brightness(0.9);
-  --dh-video-opacity: 0.85;
 }
 
 .dh-services__container {
@@ -115,7 +105,7 @@ html.dark .dh-services {
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ── Decorative Looping Video Layer (Item 1) ── */
+/* ── Decorative Ring Background Layer (Item 1 & 2) ── */
 .dh-services__bg {
   position: absolute;
   inset: 0;
@@ -123,38 +113,6 @@ html.dark .dh-services {
   overflow: clip;
   pointer-events: none;
   z-index: 0;
-  --ring-size: clamp(380px, min(88vw, 112svh), 1100px);
-}
-
-.dh-services__video {
-  display: block;
-  position: sticky;
-  top: calc(50svh - var(--ring-size) / 2);
-  width: var(--ring-size);
-  height: var(--ring-size);
-  margin-inline: auto;
-  object-fit: contain;
-  pointer-events: none;
-  mix-blend-mode: var(--dh-video-blend, multiply);
-  filter: var(--dh-video-filter, none);
-  opacity: var(--dh-video-opacity, 0.7);
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-/* Mobile: poster-only via CSS background, completely disabling video playback (Item 4) */
-@media (max-width: 767px) {
-  .dh-services__video {
-    display: none !important;
-  }
-  .dh-services__bg {
-    background-image: url('/media/services-ring-poster.jpg');
-    background-position: center 25%;
-    background-size: min(85vw, 420px);
-    background-repeat: no-repeat;
-    mix-blend-mode: var(--dh-video-blend, multiply);
-    filter: var(--dh-video-filter, none);
-    opacity: var(--dh-video-opacity, 0.7);
-  }
 }
 
 /* Ensure content sits above video layer at z-index 1 */

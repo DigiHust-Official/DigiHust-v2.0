@@ -120,7 +120,6 @@ const cardMotionVariants = {
 export const ServicesSection: React.FC = () => {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
@@ -131,70 +130,6 @@ export const ServicesSection: React.FC = () => {
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
-  }, []);
-
-  // Performance & Accessibility: IntersectionObserver playback, prefers-reduced-motion, and saveData (Item 4)
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const video = videoRef.current;
-    const section = sectionRef.current;
-    if (!video || !section) return;
-
-    video.muted = true;
-
-    const checkDisabled = () => {
-      const isMobile = window.matchMedia('(max-width: 767px)').matches;
-      const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const isSaveData = Boolean(
-        (navigator as unknown as { connection?: { saveData?: boolean } }).connection?.saveData
-      );
-      return isMobile || isReducedMotion || isSaveData;
-    };
-
-    if (checkDisabled()) {
-      try {
-        video.pause();
-      } catch (_) {}
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            if (checkDisabled()) {
-              video.pause();
-            } else {
-              video.play().catch(() => {
-                // Silently handle autoplay restrictions if any
-              });
-            }
-          } else {
-            video.pause();
-          }
-        }
-      },
-      {
-        root: null,
-        threshold: 0,
-        rootMargin: '100px',
-      }
-    );
-
-    observer.observe(section);
-
-    const onResize = () => {
-      if (checkDisabled()) {
-        try {
-          video.pause();
-        } catch (_) {}
-      }
-    };
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', onResize);
-    };
   }, []);
 
   // Heading split: "One Company." in Outfit 300, "Every Digital Need." in Fraunces italic 400
@@ -214,25 +149,8 @@ export const ServicesSection: React.FC = () => {
       <div className="dh-services__container">
         {/* Big Rounded Frame */}
         <div className="dh-services__frame">
-          {/* Decorative Looping Ring Video (Item 1) */}
-          <div className="dh-services__bg" aria-hidden="true">
-            <video
-              ref={videoRef}
-              className="dh-services__video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/media/services-ring-poster.jpg"
-              disablePictureInPicture
-              tabIndex={-1}
-              aria-hidden="true"
-            >
-              <source src="/media/services-ring.webm" type="video/webm" />
-              <source src="/media/services-ring.mp4" type="video/mp4" />
-            </video>
-          </div>
+          {/* Decorative Ring Background Layer (Item 1 & 2) */}
+          <div className="dh-services__bg" aria-hidden="true"></div>
 
           {/* Centered Heading */}
           <div className="dh-services__header">
