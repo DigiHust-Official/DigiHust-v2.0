@@ -98,8 +98,22 @@ export const ServicesSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Placeholder for Bento Grid (to be styled in Item 2) */}
-        <div className="dh-services__grid" />
+        {/* 2x2 Checkerboard Grid */}
+        <div className="dh-services__grid">
+          {FEATURED_SERVICES.map((svc, idx) => (
+            <Link
+              key={svc.id}
+              to={svc.route}
+              className={`dh-services__card dh-services__card--slot-${idx + 1}`}
+              aria-label={`${t(svc.titleKey)} - ${t(svc.descKey)}`}
+            >
+              {/* Card content will be fully styled in Item 3 */}
+              <div className="dh-services__card-inner">
+                <span className="dh-services__card-title">{t(svc.titleKey)}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
