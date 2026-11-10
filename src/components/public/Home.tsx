@@ -559,31 +559,6 @@ export const Home: React.FC = () => {
         </section>
       </div>
 
-      {/* ── METRICS STRIP ── */}
-      <section className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] py-10 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { metric: '99.4%', label: t('metric_delivery'), sub: t('metric_delivery_sub') },
-            { metric: '100%', label: t('metric_talent'), sub: t('metric_talent_sub') },
-            { metric: '1 Point', label: t('metric_contact'), sub: t('metric_contact_sub') },
-            { metric: '24h', label: t('metric_turnaround'), sub: t('metric_turnaround_sub') },
-          ].map((item) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-              className="text-center sm:text-left"
-            >
-              <p className="font-display font-black text-3xl sm:text-4xl text-[var(--brand-teal-text)] mb-1">{item.metric}</p>
-              <p className="text-sm font-bold text-[var(--text-heading)] mb-0.5">{item.label}</p>
-              <p className="text-xs text-[var(--text-muted)]">{item.sub}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       {/* ── SECTION 2: SERVICES OVERVIEW ── */}
       <section id="capabilities" className="py-24 px-6 lg:px-8 relative bg-[var(--bg-page)]">
         <div className="max-w-7xl mx-auto">
