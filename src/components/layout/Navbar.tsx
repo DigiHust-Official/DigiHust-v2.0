@@ -130,8 +130,12 @@ export const Navbar: React.FC = () => {
       }
     };
 
+    const onShowNav = () => {
+      setIsScrolledDown(false);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('dh-show-nav', onShowNav);
 
     const header = headerRef.current;
     const onFocusIn = () => setIsFocused(true);
@@ -149,6 +153,7 @@ export const Navbar: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('dh-show-nav', onShowNav);
       if (header) {
         header.removeEventListener('focusin', onFocusIn);
         header.removeEventListener('focusout', onFocusOut);

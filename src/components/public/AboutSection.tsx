@@ -95,6 +95,7 @@ export const AboutSection: React.FC = () => {
     <section
       id="about"
       ref={sectionRef}
+      data-hard-stop="about"
       aria-labelledby="dh-about-heading"
       className="dh-about-section"
     >

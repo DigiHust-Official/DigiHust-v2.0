@@ -1,52 +1,76 @@
 import { useEffect, useRef } from 'react';
 
 interface UseHeroHardScrollOptions {
-  runwayRef: React.RefObject<HTMLElement | null>;
-  duration?: number; // default ~1500ms for a silky, cinematic glide
+  runwayRef?: React.RefObject<HTMLElement | null>;
+  duration?: number; // default ~800ms
 }
 
 /**
  * useHeroHardScroll
  *
- * Scoped hard scroll on the Home hero section (desktop >= 1024px only).
- * - Within the hero runway zone (scrollY 0 to runway bottom): one down-scroll gesture
- *   (wheel, touch swipe, PageDown/Space/ArrowDown) smoothly animates to the next section top.
- * - At the next section top: one up-scroll gesture animates back to scrollY 0.
- * - Locks input during the ~1.5s animation + trackpad inertia cooldown to prevent stutter.
- * - Completely disabled on mobile (<1024px), prefers-reduced-motion, and when modals/mobile menus are open.
+ * Scoped hard scroll on Home desktop (>= 1024px only) across 3 ordered stops:
+ *   Stop 0: Hero top (scrollY 0)
+ *   Stop 1: About section top (data-hard-stop="about")
+ *   Stop 2: Core Capabilities top (data-hard-stop="capabilities")
+ *
+ * Navigation:
+ * - One wheel notch, one swipe, or down key (PageDown/Space/ArrowDown) moves to next stop.
+ * - One wheel up or up key (PageUp/ArrowUp) moves to previous stop.
+ * - Animated with scrollTo over ~0.8s with smooth organic ease-in-out.
+ * - Input is locked during animation + 150ms trackpad inertia buffer.
+ * - Past Stop 2 (Core Capabilities), native free scrolling resumes.
+ * - When scrolling back up, re-engages at Core Capabilities top -> About -> Hero.
+ * - Disabled on mobile (< 1024px), prefers-reduced-motion, open modals/menus, focused inputs,
+ *   nested scrollables, and ctrl/meta zoom gestures.
  */
 export function useHeroHardScroll({
   runwayRef,
-  duration = 1500,
-}: UseHeroHardScrollOptions): void {
+  duration = 800,
+}: UseHeroHardScrollOptions = {}): void {
   const isAnimatingRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // 1. Guard checks: Reduced motion & Viewport >= 1024px
+    // 1. Guard check: Reduced motion
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches;
     if (prefersReducedMotion) return;
 
+    // 2. Guard check: Viewport >= 1024px
     const isDesktop = () => window.innerWidth >= 1024;
     if (!isDesktop()) return;
 
-    // Helper: check if a modal or mobile menu is open
+    // Helper: check if a modal, mobile menu, or language dropdown is open
     const isModalOrMenuOpen = () => {
       return (
         document.body.classList.contains('overflow-hidden') ||
         document.body.style.overflow === 'hidden' ||
         Boolean(document.querySelector('[role="dialog"]')) ||
-        Boolean(document.querySelector('.dh-nav-mobile-panel'))
+        Boolean(document.querySelector('.dh-nav-mobile-panel')) ||
+        Boolean(document.querySelector('[role="listbox"]'))
       );
     };
 
-    // Helper: check if target is inside an internally scrollable element
+    // Helper: check if target is inside an internally scrollable element or form field
     const isInsideScrollable = (target: EventTarget | null): boolean => {
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.tagName === 'SELECT')
+      ) {
+        return true;
+      }
+
       let el = target as HTMLElement | null;
       while (el && el !== document.body && el !== document.documentElement) {
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+        if (
+          el.tagName === 'INPUT' ||
+          el.tagName === 'TEXTAREA' ||
+          el.tagName === 'SELECT'
+        ) {
           return true;
         }
         const style = window.getComputedStyle(el);
@@ -62,83 +86,124 @@ export function useHeroHardScroll({
       return false;
     };
 
-    // Smooth scroll animation with silky organic sinusoidal ease-in-out
+    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities)
+    const getStops = (): number[] => {
+      const stops: number[] = [0];
+
+      // Stop 1: About section top
+      const aboutEl = document.querySelector<HTMLElement>('[data-hard-stop="about"]');
+      if (aboutEl) {
+        const top = aboutEl.getBoundingClientRect().top + window.scrollY;
+        stops.push(Math.round(top));
+      } else if (runwayRef?.current) {
+        const rect = runwayRef.current.getBoundingClientRect();
+        const bottom = rect.top + window.scrollY + runwayRef.current.offsetHeight;
+        stops.push(Math.round(bottom));
+      }
+
+      // Stop 2: Core Capabilities top
+      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
+      if (capEl) {
+        const top = capEl.getBoundingClientRect().top + window.scrollY;
+        stops.push(Math.round(top));
+      }
+
+      return stops;
+    };
+
+    // Custom rAF tween over ~0.8s with silky sinusoidal ease-in-out
     const animateScrollTo = (targetY: number) => {
       if (isAnimatingRef.current) return;
       isAnimatingRef.current = true;
 
       const startY = window.scrollY;
       const distance = targetY - startY;
-      const startTime = performance.now();
 
-      // Silky, organic sinusoidal ease-in-out (smooth acceleration & soft deceleration)
-      const easeInOutSmooth = (t: number) => 0.5 * (1 - Math.cos(Math.PI * t));
+      if (Math.abs(distance) < 2) {
+        isAnimatingRef.current = false;
+        return;
+      }
+
+      const startTime = performance.now();
+      const easeInOut = (t: number) => 0.5 * (1 - Math.cos(Math.PI * t));
 
       let rafId: number;
       const step = (now: number) => {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const ease = easeInOutSmooth(progress);
+        const ease = easeInOut(progress);
 
         window.scrollTo(0, startY + distance * ease);
 
         if (progress < 1) {
           rafId = requestAnimationFrame(step);
         } else {
-          // Extra buffer (200ms) to swallow trackpad inertia
+          window.scrollTo(0, targetY);
+
+          // Notify Navbar to reveal if hidden
+          window.dispatchEvent(new CustomEvent('dh-show-nav'));
+
+          // 150ms trackpad inertia cooldown buffer to ignore trailing events
           setTimeout(() => {
             isAnimatingRef.current = false;
-          }, 200);
+          }, 150);
         }
       };
 
       rafId = requestAnimationFrame(step);
     };
 
-    const getRunwayBounds = () => {
-      const runway = runwayRef.current;
-      if (!runway) return null;
-      const rect = runway.getBoundingClientRect();
-      const top = rect.top + window.scrollY;
-      const bottom = top + runway.offsetHeight;
-      return { top, bottom, height: runway.offsetHeight };
-    };
-
     // Wheel event handler
     const handleWheel = (e: WheelEvent) => {
       if (!isDesktop() || isModalOrMenuOpen()) return;
+      if (e.ctrlKey || e.metaKey) return; // Allow pinch-to-zoom / ctrl-zoom
       if (isInsideScrollable(e.target)) return;
 
-      // If animation is in progress, swallow wheel events (prevents trackpad inertia glitches)
       if (isAnimatingRef.current) {
         e.preventDefault();
         return;
       }
 
-      const bounds = getRunwayBounds();
-      if (!bounds) return;
+      const stops = getStops();
+      if (stops.length < 3) return;
 
       const currentY = window.scrollY;
+      const s0 = stops[0];
+      const s1 = stops[1];
+      const s2 = stops[2];
+      const TOL = 40;
       const deltaY = e.deltaY;
-      const THRESHOLD = 14;
+      const THRESHOLD = 12;
 
-      // 1. Inside hero runway zone (from scrollY 0 up to near bottom of runway)
-      // Scrolling down -> animate to bottom of runway (next section top)
-      if (currentY >= 0 && currentY < bounds.bottom - 40) {
-        if (deltaY > THRESHOLD) {
+      if (Math.abs(deltaY) < THRESHOLD) return;
+
+      // Past Core Capabilities: allow native free scroll down; if scrolling up near s2, re-engage
+      if (currentY > s2 + TOL) {
+        if (currentY <= s2 + 60 && deltaY < -THRESHOLD) {
           e.preventDefault();
-          animateScrollTo(bounds.bottom);
+          animateScrollTo(s1);
         }
+        return;
       }
-      // 2. Near next section top (within 50px of runway bottom)
-      // Scrolling up -> animate back to hero top (scrollY 0)
-      else if (
-        currentY >= bounds.bottom - 40 &&
-        currentY <= bounds.bottom + 60
-      ) {
-        if (deltaY < -THRESHOLD) {
+
+      if (deltaY > 0) {
+        // Scrolling down
+        if (currentY < s1 - TOL) {
           e.preventDefault();
-          animateScrollTo(0);
+          animateScrollTo(s1);
+        } else if (currentY < s2 - TOL) {
+          e.preventDefault();
+          animateScrollTo(s2);
+        }
+        // At s2: do not preventDefault; free scroll takes over downwards
+      } else {
+        // Scrolling up
+        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+          e.preventDefault();
+          animateScrollTo(s1);
+        } else if (currentY <= s1 + TOL && currentY > s0 + 5) {
+          e.preventDefault();
+          animateScrollTo(s0);
         }
       }
     };
@@ -148,17 +213,6 @@ export function useHeroHardScroll({
       if (!isDesktop() || isModalOrMenuOpen()) return;
       if (isInsideScrollable(e.target)) return;
 
-      if (isAnimatingRef.current) {
-        if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '].includes(e.key)) {
-          e.preventDefault();
-        }
-        return;
-      }
-
-      const bounds = getRunwayBounds();
-      if (!bounds) return;
-
-      const currentY = window.scrollY;
       const isDownKey =
         e.key === 'ArrowDown' ||
         e.key === 'PageDown' ||
@@ -168,16 +222,44 @@ export function useHeroHardScroll({
         e.key === 'PageUp' ||
         (e.key === ' ' && e.shiftKey);
 
-      if (currentY >= 0 && currentY < bounds.bottom - 40 && isDownKey) {
+      if (!isDownKey && !isUpKey) return;
+
+      if (isAnimatingRef.current) {
         e.preventDefault();
-        animateScrollTo(bounds.bottom);
-      } else if (
-        currentY >= bounds.bottom - 40 &&
-        currentY <= bounds.bottom + 60 &&
-        isUpKey
-      ) {
-        e.preventDefault();
-        animateScrollTo(0);
+        return;
+      }
+
+      const stops = getStops();
+      if (stops.length < 3) return;
+
+      const currentY = window.scrollY;
+      const s0 = stops[0];
+      const s1 = stops[1];
+      const s2 = stops[2];
+      const TOL = 40;
+
+      // Below Core Capabilities: allow free native keyboard scroll
+      if (currentY > s2 + TOL) {
+        return;
+      }
+
+      if (isDownKey) {
+        if (currentY < s1 - TOL) {
+          e.preventDefault();
+          animateScrollTo(s1);
+        } else if (currentY < s2 - TOL) {
+          e.preventDefault();
+          animateScrollTo(s2);
+        }
+        // At s2: let down key scroll naturally into Core Capabilities
+      } else if (isUpKey) {
+        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+          e.preventDefault();
+          animateScrollTo(s1);
+        } else if (currentY <= s1 + TOL && currentY > s0 + 5) {
+          e.preventDefault();
+          animateScrollTo(s0);
+        }
       }
     };
 
@@ -198,26 +280,46 @@ export function useHeroHardScroll({
       }
 
       const touchCurrentY = e.touches[0].clientY;
-      const deltaY = touchStartYRef.current - touchCurrentY; // positive = swiping up = scrolling down
-      const SWIPE_THRESHOLD = 35;
+      const deltaY = touchStartYRef.current - touchCurrentY; // > 0 = swiping up = scrolling down
+      const SWIPE_THRESHOLD = 30;
 
-      const bounds = getRunwayBounds();
-      if (!bounds) return;
+      if (Math.abs(deltaY) < SWIPE_THRESHOLD) return;
+
+      const stops = getStops();
+      if (stops.length < 3) return;
 
       const currentY = window.scrollY;
+      const s0 = stops[0];
+      const s1 = stops[1];
+      const s2 = stops[2];
+      const TOL = 40;
 
-      if (currentY >= 0 && currentY < bounds.bottom - 40 && deltaY > SWIPE_THRESHOLD) {
-        e.preventDefault();
-        touchStartYRef.current = null;
-        animateScrollTo(bounds.bottom);
-      } else if (
-        currentY >= bounds.bottom - 40 &&
-        currentY <= bounds.bottom + 60 &&
-        deltaY < -SWIPE_THRESHOLD
-      ) {
-        e.preventDefault();
-        touchStartYRef.current = null;
-        animateScrollTo(0);
+      if (currentY > s2 + TOL) {
+        return;
+      }
+
+      if (deltaY > 0) {
+        // Scrolling down
+        if (currentY < s1 - TOL) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s1);
+        } else if (currentY < s2 - TOL) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s2);
+        }
+      } else {
+        // Scrolling up
+        if (currentY > s1 + TOL && currentY <= s2 + TOL) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s1);
+        } else if (currentY <= s1 + TOL && currentY > s0 + 5) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s0);
+        }
       }
     };
 
@@ -236,4 +338,3 @@ export function useHeroHardScroll({
     };
   }, [runwayRef, duration]);
 }
-

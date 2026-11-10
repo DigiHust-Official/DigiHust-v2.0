@@ -564,7 +564,7 @@ export const Home: React.FC = () => {
       <AboutSection />
 
       {/* ── SECTION 2: SERVICES OVERVIEW ── */}
-      <section id="capabilities" className="py-24 px-6 lg:px-8 relative bg-[var(--bg-page)]">
+      <section id="capabilities" data-hard-stop="capabilities" className="py-24 px-6 lg:px-8 relative bg-[var(--bg-page)]">
         <div className="max-w-7xl mx-auto">
           <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
