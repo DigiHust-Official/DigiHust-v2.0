@@ -16,8 +16,8 @@
   --dh-heading-primary: #0A1F2B;
   --dh-heading-accent: var(--brand-teal, #1F7A8C);
 
-  --dh-card-bg: #FFFFFF;
-  --dh-card-hover-bg: #F8FAFC;
+  --dh-card-bg: rgba(255, 255, 255, 0.78);
+  --dh-card-hover-bg: rgba(248, 250, 252, 0.88);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(10, 31, 43, 0.05);
 
@@ -58,8 +58,8 @@ html.dark .dh-services {
   --dh-heading-primary: #F3F6FA;
   --dh-heading-accent: var(--dh-highlight, #2EC4D6);
 
-  --dh-card-bg: #0F2431;
-  --dh-card-hover-bg: #132C3B;
+  --dh-card-bg: rgba(15, 36, 49, 0.78);
+  --dh-card-hover-bg: rgba(19, 44, 59, 0.86);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.30);
 
@@ -247,6 +247,8 @@ html.dark .dh-services {
   background-color: var(--dh-card-bg);
   border: none;
   box-shadow: var(--dh-card-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
@@ -478,6 +480,8 @@ html.dark .dh-services {
   color: var(--dh-card-pill-color);
   background-color: var(--dh-card-bg);
   box-shadow: var(--dh-card-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
   transition: transform 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out, color 0.25s ease-out;
 }
 
@@ -569,5 +573,19 @@ html[dir="rtl"] .dh-services__view-all-pill:focus-visible .dh-services__view-all
   .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
     transform: none !important;
     transition: none !important;
+  }
+}
+
+/* ── Fallback for browsers without backdrop-filter (Item 3) ── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dh-services {
+    --dh-card-bg: #FFFFFF;
+    --dh-card-hover-bg: #F8FAFC;
+  }
+
+  html[data-theme="dark"] .dh-services,
+  html.dark .dh-services {
+    --dh-card-bg: #0F2431;
+    --dh-card-hover-bg: #132C3B;
   }
 }
