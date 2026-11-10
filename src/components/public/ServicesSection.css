@@ -141,6 +141,22 @@ html.dark .dh-services {
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
+/* Mobile: poster-only via CSS background, completely disabling video playback (Item 4) */
+@media (max-width: 767px) {
+  .dh-services__video {
+    display: none !important;
+  }
+  .dh-services__bg {
+    background-image: url('/media/services-ring-poster.jpg');
+    background-position: center 25%;
+    background-size: min(85vw, 420px);
+    background-repeat: no-repeat;
+    mix-blend-mode: var(--dh-video-blend, multiply);
+    filter: var(--dh-video-filter, none);
+    opacity: var(--dh-video-opacity, 0.7);
+  }
+}
+
 /* Ensure content sits above video layer at z-index 1 */
 .dh-services__header,
 .dh-services__grid,

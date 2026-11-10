@@ -133,6 +133,70 @@ export const ServicesSection: React.FC = () => {
     return () => mql.removeEventListener('change', handler);
   }, []);
 
+  // Performance & Accessibility: IntersectionObserver playback, prefers-reduced-motion, and saveData (Item 4)
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const video = videoRef.current;
+    const section = sectionRef.current;
+    if (!video || !section) return;
+
+    video.muted = true;
+
+    const checkDisabled = () => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches;
+      const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isSaveData = Boolean(
+        (navigator as unknown as { connection?: { saveData?: boolean } }).connection?.saveData
+      );
+      return isMobile || isReducedMotion || isSaveData;
+    };
+
+    if (checkDisabled()) {
+      try {
+        video.pause();
+      } catch (_) {}
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (checkDisabled()) {
+              video.pause();
+            } else {
+              video.play().catch(() => {
+                // Silently handle autoplay restrictions if any
+              });
+            }
+          } else {
+            video.pause();
+          }
+        }
+      },
+      {
+        root: null,
+        threshold: 0,
+        rootMargin: '100px',
+      }
+    );
+
+    observer.observe(section);
+
+    const onResize = () => {
+      if (checkDisabled()) {
+        try {
+          video.pause();
+        } catch (_) {}
+      }
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   // Heading split: "One Company." in Outfit 300, "Every Digital Need." in Fraunces italic 400
   const headingText = t('services_heading') || 'One Company. Every Digital Need.';
   const dotIndex = headingText.indexOf('.');
