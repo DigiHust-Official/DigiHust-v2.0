@@ -129,14 +129,52 @@ export const ServicesSection: React.FC = () => {
             )}
           </div>
 
-          {/* Grid will be populated in Item 3 */}
+          {/* 4 Cards per row, 2 rows (desktop >= 1024px) */}
           <div className="dh-services__grid">
             {SERVICES.map((svc) => (
-              <div key={svc.id} className="dh-services__card-placeholder">
-                <span>{svc.number}</span>
-                <h3>{t(svc.titleKey)}</h3>
-                <p>{t(svc.descKey)}</p>
-              </div>
+              <Link
+                key={svc.id}
+                to={svc.route}
+                className="dh-services-card"
+                data-service={svc.id}
+                aria-label={`${t(svc.titleKey)} - ${t('services_explore') || 'Explore Service'}`}
+              >
+                {/* TOP ROW */}
+                <div className="dh-services-card__top">
+                  <span className="dh-services-card__number" aria-hidden="true">
+                    {svc.number}
+                  </span>
+                  <span className="dh-services-card__pill">
+                    <span className="dh-services-card__pill-label">
+                      {t('services_explore') || 'Explore Service'}
+                    </span>
+                    <span className="dh-services-card__pill-arrow-wrap">
+                      <ArrowRight className="dh-services-card__pill-arrow" />
+                    </span>
+                  </span>
+                </div>
+
+                {/* MIDDLE / TEXT BLOCK */}
+                <div className="dh-services-card__text">
+                  <h3 className="dh-services-card__title">
+                    {t(svc.titleKey)}
+                  </h3>
+                  <p className="dh-services-card__desc">
+                    {t(svc.descKey)}
+                  </p>
+                </div>
+
+                {/* IMAGE AT BOTTOM */}
+                <div className="dh-services-card__media">
+                  <img
+                    src={svc.image}
+                    alt={t(svc.titleKey)}
+                    loading="lazy"
+                    className="dh-services-card__img"
+                  />
+                  <div className="dh-services-card__overlay" aria-hidden="true" />
+                </div>
+              </Link>
             ))}
           </div>
 
