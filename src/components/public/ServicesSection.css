@@ -41,6 +41,11 @@
 
   --dh-img-ring: rgba(10, 31, 43, 0.12);
   --dh-focus-ring: rgba(31, 122, 140, 0.9);
+
+  /* Decorative video background tokens (Item 2) */
+  --dh-video-blend: multiply;
+  --dh-video-filter: invert(1) hue-rotate(105deg) saturate(1.1) brightness(1.02);
+  --dh-video-opacity: 0.7;
 }
 
 /* Dark theme overrides (Item 2: Tonal deep navy, no light gradient haze) */
@@ -78,6 +83,11 @@ html.dark .dh-services {
 
   --dh-img-ring: rgba(255, 255, 255, 0.08);
   --dh-focus-ring: rgba(46, 196, 214, 0.9);
+
+  /* Decorative video background tokens (Item 2) */
+  --dh-video-blend: screen;
+  --dh-video-filter: hue-rotate(-75deg) saturate(1.15) brightness(0.9);
+  --dh-video-opacity: 0.85;
 }
 
 .dh-services__container {
@@ -125,6 +135,10 @@ html.dark .dh-services {
   margin-inline: auto;
   object-fit: contain;
   pointer-events: none;
+  mix-blend-mode: var(--dh-video-blend, multiply);
+  filter: var(--dh-video-filter, none);
+  opacity: var(--dh-video-opacity, 0.7);
+  transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 /* Ensure content sits above video layer at z-index 1 */
