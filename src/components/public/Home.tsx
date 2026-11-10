@@ -38,6 +38,7 @@ import { HeroRotator } from '../ui/HeroRotator';
 import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { AboutSection } from './AboutSection';
+import { ServicesSection } from './ServicesSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
@@ -563,38 +564,8 @@ export const Home: React.FC = () => {
       {/* ── SECTION 1.5: ABOUT US (BENTO GRID) ── */}
       <AboutSection />
 
-      {/* ── SECTION 2: SERVICES OVERVIEW ── */}
-      <section id="capabilities" data-hard-stop="capabilities" className="py-24 px-6 lg:px-8 relative bg-[var(--bg-page)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('services_tag')}</p>
-              <h2 className="font-display font-extrabold text-4xl text-[var(--text-heading)] mb-2">{t('services_heading')}</h2>
-              <p className="text-base text-[var(--text-body)] max-w-xl">
-                {t('services_sub')}
-              </p>
-            </div>
-            <Link to="/services" className="inline-flex items-center space-x-1.5 text-sm font-bold text-[var(--brand-teal-text)] hover:underline">
-              <span>{t('services_view_all')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {servicesList.map((svc) => (
-              <motion.div
-                key={svc.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="h-full"
-              >
-                <ServiceCard service={svc} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── SECTION 2: SERVICES OVERVIEW (2x2 CHECKERBOARD BENTO) ── */}
+      <ServicesSection />
 
       {/* ── SECTION 3: WHY DIGIHUST ── */}
       <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] relative">
