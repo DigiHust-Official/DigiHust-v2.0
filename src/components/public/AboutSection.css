@@ -7,7 +7,6 @@
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  padding-block: clamp(3rem, 6vw, 5rem);
   padding-inline: clamp(1.25rem, 4vw, 2rem);
 }
 
@@ -18,28 +17,29 @@
   box-sizing: border-box;
 }
 
-/* ── Viewport Height Fitting on Desktop (>= 1024px) ── */
+/* ── Desktop Viewport Height Fitting (>= 1024px) ── */
 @media (min-width: 1024px) {
   .dh-about-section {
-    min-height: calc(100svh - var(--dh-nav-bottom, 72px));
-    height: calc(100svh - var(--dh-nav-bottom, 72px));
-    max-height: calc(100svh - var(--dh-nav-bottom, 72px));
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding-block: clamp(0.75rem, 2vh, 2.25rem);
+    overflow: hidden;
+    padding-top: calc(var(--dh-nav-bottom, 72px) + clamp(8px, 1.6vh, 20px));
+    padding-bottom: clamp(16px, 3vh, 32px);
   }
 
   .dh-about-container {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .dh-about-header {
-    flex-shrink: 0;
-    margin-bottom: clamp(0.625rem, 1.8vh, 1.5rem);
+    flex: none;
+    margin-bottom: clamp(0.5rem, 1.5vh, 1.25rem);
   }
 
   .dh-about-bento {
@@ -47,8 +47,40 @@
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 1fr 1fr;
-    gap: clamp(0.625rem, 1.4vh, 1rem); /* 16px target */
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.4vh, 1rem); /* 16px target */
+  }
+}
+
+/* ── Non-Desktop Layouts (< 1024px) ── */
+@media (max-width: 1023.98px) {
+  .dh-about-section {
+    height: auto;
+    min-height: auto;
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .dh-about-header {
+    margin-bottom: 2rem;
+  }
+
+  .dh-about-bento {
+    display: grid;
+    gap: 1rem;
+  }
+}
+
+/* Tablet (640px to 1023px) */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .dh-about-bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile (< 640px) */
+@media (max-width: 639.98px) {
+  .dh-about-bento {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -65,28 +97,28 @@
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(0.7rem, 1.2vh, 0.75rem);
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-size: clamp(11px, 1.1vh, 12px);
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: clamp(0.35rem, 1vh, 0.75rem);
+  margin-bottom: clamp(0.25rem, 0.8vh, 0.5rem);
 }
 
 .dh-about-eyebrow-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 9999px;
-  background-color: var(--dh-highlight);
-  box-shadow: 0 0 8px var(--dh-highlight);
+  background-color: var(--brand-teal);
+  box-shadow: 0 0 6px var(--brand-teal);
 }
 
 .dh-about-title {
   font-family: var(--font-heading, 'Outfit', sans-serif);
-  font-weight: 800;
-  font-size: clamp(1.6rem, min(3.4vw, 6.4vh), 3.4rem);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-weight: 500;
+  font-size: clamp(1.5rem, min(3.6vw, 6.4vh), 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   color: var(--text-heading);
   margin: 0;
   text-wrap: balance;
@@ -97,85 +129,38 @@
 }
 
 .dh-about-title-muted {
+  font-weight: 500;
   color: var(--text-muted);
 }
 
-/* Inline circular icon chips */
+/* Solid circular inline chips (no icon, no glow) */
 .dh-about-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   vertical-align: middle;
-  width: 1.15em;
-  height: 1.15em;
+  width: 0.85em;
+  height: 0.85em;
   border-radius: 9999px;
-  margin-inline: 0.35rem;
+  margin-inline: 0.3em;
   flex-shrink: 0;
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dh-about-chip:hover {
-  transform: scale(1.1);
+  position: relative;
+  top: -0.05em;
 }
 
 .dh-about-chip-teal {
-  background: color-mix(in srgb, var(--brand-teal) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--brand-teal) 45%, transparent);
-  color: var(--dh-highlight);
-  box-shadow: 0 2px 10px rgba(46, 196, 214, 0.2);
+  background-color: var(--brand-teal);
 }
 
-html[data-theme="light"] .dh-about-chip-teal,
-html.light .dh-about-chip-teal {
-  background: color-mix(in srgb, var(--brand-teal) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--brand-teal) 38%, transparent);
-  color: var(--brand-teal);
-  box-shadow: 0 2px 8px rgba(31, 122, 140, 0.18);
+.dh-about-chip-coral {
+  background-color: rgb(var(--dh-wave-1));
 }
 
-.dh-about-chip-amber {
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.42);
-  color: #F59E0B;
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
-}
-
-html[data-theme="light"] .dh-about-chip-amber,
-html.light .dh-about-chip-amber {
-  background: rgba(217, 119, 6, 0.14);
-  border: 1px solid rgba(217, 119, 6, 0.38);
-  color: #D97706;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.18);
-}
-
-/* ── Bento Grid ── */
-.dh-about-bento {
-  display: grid;
-  gap: 1rem; /* 16px */
-  width: 100%;
-}
-
-/* Tablet layout (640px to 1023px) */
-@media (min-width: 640px) and (max-width: 1023.98px) {
-  .dh-about-bento {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Mobile layout (< 640px) */
-@media (max-width: 639.98px) {
-  .dh-about-bento {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-/* ── Common Card Styles ── */
+/* ── Common Card Styles & Container Query ── */
 .dh-about-card {
   position: relative;
   border-radius: 24px;
   overflow: hidden;
   box-sizing: border-box;
+  container-type: size;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.25s ease;
@@ -184,34 +169,36 @@ html.light .dh-about-chip-amber {
 .dh-about-card:hover {
   transform: translateY(-2px);
   border-color: var(--border-hover);
-  box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.25);
 }
 
 html[data-theme="light"] .dh-about-card:hover,
 html.light .dh-about-card:hover {
-  box-shadow: 0 14px 28px -10px rgba(2, 43, 58, 0.14);
+  box-shadow: 0 14px 28px -10px rgba(2, 43, 58, 0.12);
 }
 
+/* Sentence-case labels: top-left */
 .dh-about-card-label {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(0.75rem, 1.3vh, 0.8125rem);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: clamp(12.5px, 1.6vh, 13px);
+  font-weight: 500;
+  text-transform: none; /* sentence case */
+  letter-spacing: 0;
   color: var(--text-muted);
 }
 
+/* Big numbers: Outfit 300 (light), line-height: 0.95, tabular-nums */
 .dh-about-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
-  font-weight: 800;
-  font-size: clamp(1.8rem, min(3.2vw, 6vh), 3.4rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-weight: 300;
+  font-size: clamp(2rem, 24cqh, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   color: var(--text-heading);
 }
 
-/* ── CARD 1: Large Image Frame ── */
+/* ── CARD 1: Rich Brand Image Card ── */
 .dh-about-card-hero {
   border: 1px solid var(--border-subtle);
   background-color: var(--dh-brand-navy);
@@ -232,8 +219,7 @@ html.light .dh-about-card:hover {
 @media (min-width: 640px) and (max-width: 1023.98px) {
   .dh-about-card-hero {
     grid-column: 1 / span 2;
-    min-height: 280px;
-    max-height: 340px;
+    min-height: 300px;
   }
 }
 
@@ -251,29 +237,47 @@ html.light .dh-about-card:hover {
   transform: scale(1.03);
 }
 
+/* Brand tint overlay: teal (55% top-left) to transparent + bottom darkening */
 .dh-about-hero-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    180deg,
-    rgba(2, 43, 58, 0.04) 0%,
-    rgba(2, 43, 58, 0.22) 50%,
-    rgba(2, 43, 58, 0.82) 100%
+    135deg,
+    rgba(31, 122, 140, 0.55) 0%,
+    rgba(31, 122, 140, 0.18) 45%,
+    rgba(5, 13, 20, 0.68) 100%
   );
   pointer-events: none;
 }
 
-html[data-theme="light"] .dh-about-hero-overlay,
-html.light .dh-about-hero-overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(15, 30, 45, 0.03) 0%,
-    rgba(15, 30, 45, 0.18) 50%,
-    rgba(2, 43, 58, 0.78) 100%
-  );
+/* Top-left Brand Logo Wordmark */
+.dh-about-hero-logo {
+  position: absolute;
+  top: clamp(0.75rem, 1.8vh, 1rem);
+  inset-inline-start: clamp(0.75rem, 1.8vh, 1rem);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+  pointer-events: none;
 }
 
-/* Card 1 Top-Right Link Button */
+.dh-about-hero-logo img {
+  height: clamp(22px, 3vh, 26px);
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.dh-about-hero-wordmark {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-weight: 700;
+  font-size: clamp(14px, 1.8vh, 16px);
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+
+/* Card 1 Top-Right Round Glass Button */
 .dh-about-link-btn {
   position: absolute;
   top: clamp(0.75rem, 1.8vh, 1rem);
@@ -281,7 +285,7 @@ html.light .dh-about-hero-overlay {
   width: clamp(34px, 4.5vh, 40px);
   height: clamp(34px, 4.5vh, 40px);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -295,63 +299,100 @@ html.light .dh-about-hero-overlay {
 }
 
 .dh-about-link-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.32);
   transform: scale(1.08) rotate(4deg);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Card 1 Translucent Bottom Panel */
+/* Card 1 Translucent Bottom Glass Panel */
 .dh-about-card1-panel {
   position: relative;
   z-index: 2;
-  margin: clamp(0.625rem, 1.4vh, 1rem);
-  padding: clamp(0.625rem, 1.4vh, 1rem) clamp(0.875rem, 1.8vh, 1.25rem);
+  margin: clamp(0.625rem, 1.5vh, 1rem);
+  padding: clamp(0.75rem, 1.8vh, 1.25rem);
   border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 html[data-theme="dark"] .dh-about-card1-panel,
 html.dark .dh-about-card1-panel {
-  background: rgba(10, 26, 36, 0.72);
+  background: rgba(5, 13, 20, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
 }
 
 .dh-about-card1-stat {
   font-family: var(--font-heading, 'Outfit', sans-serif);
-  font-weight: 800;
-  font-size: clamp(1.6rem, min(2.8vw, 5vh), 2.4rem);
-  line-height: 1;
+  font-weight: 300;
+  font-size: clamp(2rem, 16cqh, 3.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
-  color: var(--text-heading);
+  color: #0A1F2B;
 }
 
-.dh-about-card1-label {
+html[data-theme="dark"] .dh-about-card1-stat,
+html.dark .dh-about-card1-stat {
+  color: #F3F6FA;
+}
+
+.dh-about-card1-caption {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(0.75rem, 1.3vh, 0.875rem);
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--text-heading);
-  text-align: end;
+  font-size: clamp(12.5px, 1.5vh, 13.5px);
+  line-height: 1.4;
+  font-weight: 500;
+  color: #1A3340;
 }
 
-/* ── CARD 2: Milestone Delivery (Surface Card) ── */
+html[data-theme="dark"] .dh-about-card1-caption,
+html.dark .dh-about-card1-caption {
+  color: #D5DFE8;
+}
+
+.dh-about-card1-sublink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-teal);
+  margin-top: 0.25rem;
+}
+
+html[data-theme="dark"] .dh-about-card1-sublink,
+html.dark .dh-about-card1-sublink {
+  color: var(--dh-highlight);
+}
+
+/* Hide secondary link in Card 1 when height is restricted */
+@container (max-height: 220px) {
+  .dh-about-card1-sublink {
+    display: none;
+  }
+}
+
+/* ── CARD 2: Domain Experts ── */
 .dh-about-card-delivery {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(0.875rem, 2vh, 1.5rem);
+  padding: clamp(0.75rem, 1.8vh, 1.25rem);
+}
+
+html[data-theme="dark"] .dh-about-card-delivery,
+html.dark .dh-about-card-delivery {
+  background-color: var(--dh-surface-alt);
+  border: 1px solid var(--border-subtle);
 }
 
 @media (min-width: 1024px) {
@@ -365,14 +406,16 @@ html.dark .dh-about-card1-panel {
 @media (min-width: 640px) and (max-width: 1023.98px) {
   .dh-about-card-delivery {
     grid-column: 1 / span 1;
+    min-height: 260px;
   }
 }
 
-/* Avatars Row */
+/* Overlapping Avatars Row: 36px, 2px ring in card color, -10px overlap */
 .dh-about-avatars-row {
   display: flex;
   align-items: center;
   margin-top: clamp(0.5rem, 1.2vh, 0.875rem);
+  margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
 }
 
 .dh-about-avatar-cluster {
@@ -380,62 +423,63 @@ html.dark .dh-about-card1-panel {
   align-items: center;
 }
 
-.dh-about-avatar {
-  width: clamp(22px, 3vh, 26px);
-  height: clamp(22px, 3vh, 26px);
+.dh-about-avatar-img {
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 700;
-  color: #FFFFFF;
+  object-fit: cover;
   border: 2px solid var(--bg-surface);
-  margin-inline-start: -0.45rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  margin-inline-start: -10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
-.dh-about-avatar:first-child {
-  margin-inline-start: 0;
+html[data-theme="dark"] .dh-about-avatar-img,
+html.dark .dh-about-avatar-img {
+  border-color: var(--dh-surface-alt);
+  background-color: var(--dh-surface-alt);
 }
 
-.dh-about-avatar-1 { background-color: #1F7A8C; }
-.dh-about-avatar-2 { background-color: #022B3A; }
-.dh-about-avatar-3 { background-color: #334155; }
-.dh-about-avatar-4 { background-color: #0E7490; }
-
-.dh-about-avatar-counter {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: 0.725rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-inline-start: 0.5rem;
+.dh-about-avatar-img:first-child {
+  margin-inline-start: 0;
 }
 
 .dh-about-statement {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(0.8125rem, 1.4vh, 0.9375rem);
-  line-height: 1.5;
+  font-size: clamp(12.5px, 1.4vh, 13.5px);
+  line-height: 1.4;
   color: var(--text-body);
   font-weight: 500;
-  margin-top: clamp(0.75rem, 1.5vh, 1.25rem);
+  margin-top: 0.5rem;
 }
 
-/* ── CARD 3: Proposal Turnaround (Accent Card) ── */
+/* Container query for Card 2 */
+@container (max-height: 210px) {
+  .dh-about-avatars-row {
+    display: none;
+  }
+  .dh-about-statement {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ── CARD 3: Customer Satisfaction (Warm Aura Accent Card) ── */
 .dh-about-card-turnaround {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: clamp(0.75rem, 1.8vh, 1.25rem);
-  background-color: color-mix(in srgb, var(--brand-teal) 16%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--brand-teal) 30%, transparent);
-}
-
-html[data-theme="dark"] .dh-about-card-turnaround,
-html.dark .dh-about-card-turnaround {
-  background-color: color-mix(in srgb, var(--brand-teal) 22%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--brand-teal) 30%, transparent);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--dh-wave-2), 0.85) 0%,
+    rgba(var(--dh-wave-1), 0.55) 100%
+  );
+  border: 1px solid rgba(255, 122, 89, 0.35);
+  color: #0A1F2B;
 }
 
 @media (min-width: 1024px) {
@@ -452,30 +496,62 @@ html.dark .dh-about-card-turnaround {
   }
 }
 
-.dh-about-caption {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
-  font-size: clamp(0.75rem, 1.3vh, 0.875rem);
-  line-height: 1.4;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: clamp(0.5rem, 1vh, 0.75rem);
+.dh-about-card-turnaround .dh-about-card-label {
+  color: rgba(10, 31, 43, 0.72);
 }
 
-/* ── CARD 4: Point of Contact (Dark Card) ── */
+.dh-about-card-turnaround .dh-about-stat {
+  color: #0A1F2B;
+}
+
+.dh-about-stat-unit {
+  font-size: 0.45em;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: rgba(10, 31, 43, 0.65);
+  margin-inline-start: 0.15em;
+}
+
+.dh-about-stars-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 0.25rem;
+  color: #B45309; /* amber-700 for crisp 4.8 star indication */
+}
+
+.dh-about-card-turnaround .dh-about-caption {
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(12.5px, 1.4vh, 13px);
+  line-height: 1.4;
+  color: #1A3340;
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+@container (max-height: 190px) {
+  .dh-about-stars-row {
+    display: none;
+  }
+}
+
+/* ── CARD 4: Our Approach (High-Contrast Monochrome Card) ── */
 .dh-about-card-contact {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: clamp(0.75rem, 1.8vh, 1.25rem);
-  background-color: var(--dh-brand-navy);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: #050D14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #FFFFFF;
 }
 
+/* Dark theme: off-white #F3F6FA with dark text #0A1F2B */
 html[data-theme="dark"] .dh-about-card-contact,
 html.dark .dh-about-card-contact {
-  background-color: var(--bg-subtle);
-  border: 1px solid var(--border-subtle);
+  background-color: #F3F6FA;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #0A1F2B;
 }
 
 @media (min-width: 1024px) {
@@ -498,63 +574,77 @@ html.dark .dh-about-card-contact {
 
 html[data-theme="dark"] .dh-about-card-contact .dh-about-card-label,
 html.dark .dh-about-card-contact .dh-about-card-label {
-  color: var(--text-muted);
+  color: #4A6070;
 }
 
-.dh-about-card-contact .dh-about-stat {
-  color: #FFFFFF;
-}
-
-html[data-theme="dark"] .dh-about-card-contact .dh-about-stat,
-html.dark .dh-about-card-contact .dh-about-stat {
-  color: var(--text-heading);
-}
-
-.dh-about-card-contact .dh-about-caption {
-  color: #CBD5E1;
-}
-
-html[data-theme="dark"] .dh-about-card-contact .dh-about-caption,
-html.dark .dh-about-card-contact .dh-about-caption {
-  color: var(--text-body);
-}
-
-/* Headset Decorative Glass Button */
-.dh-about-contact-btn {
+/* Top-Right Round Glass Button (Keeps interactive controls away from bottom-right CTA) */
+.dh-about-card4-btn {
   position: absolute;
-  bottom: clamp(0.75rem, 1.6vh, 1rem);
-  inset-inline-end: clamp(0.75rem, 1.6vh, 1rem);
+  top: clamp(0.75rem, 1.8vh, 1rem);
+  inset-inline-end: clamp(0.75rem, 1.8vh, 1rem);
   width: clamp(32px, 4vh, 36px);
   height: clamp(32px, 4vh, 36px);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--dh-highlight);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
+  color: #FFFFFF;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
 }
 
-/* ── Short Heights Adaptations (max-height: 760px on desktop) ── */
-@media (max-height: 760px) and (min-width: 1024px) {
-  .dh-about-avatars-row {
-    display: none;
-  }
+.dh-about-card4-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(1.08) rotate(4deg);
+}
 
-  .dh-about-statement {
+html[data-theme="dark"] .dh-about-card4-btn,
+html.dark .dh-about-card4-btn {
+  background: #0A1F2B;
+  border: 1px solid rgba(10, 31, 43, 0.3);
+  color: #FFFFFF;
+}
+
+html[data-theme="dark"] .dh-about-card4-btn:hover,
+html.dark .dh-about-card4-btn:hover {
+  background: #102A38;
+}
+
+.dh-about-approach-text {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-weight: 300;
+  font-size: clamp(1.05rem, 12cqh, 1.45rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  margin-top: clamp(0.35rem, 1vh, 0.65rem);
+}
+
+html[data-theme="dark"] .dh-about-approach-text,
+html.dark .dh-about-approach-text {
+  color: #0A1F2B;
+}
+
+.dh-about-approach-caption {
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(12px, 1.3vh, 13px);
+  font-weight: 600;
+  color: #CBD5E1;
+  margin-top: 0.35rem;
+}
+
+html[data-theme="dark"] .dh-about-approach-caption,
+html.dark .dh-about-approach-caption {
+  color: #4A6070;
+}
+
+@container (max-height: 200px) {
+  .dh-about-approach-text {
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  .dh-about-caption {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
