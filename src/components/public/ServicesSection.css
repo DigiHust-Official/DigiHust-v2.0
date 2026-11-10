@@ -124,12 +124,18 @@ html.dark .dh-services {
   mask-image: linear-gradient(180deg, transparent 0, transparent var(--ring-clear-top), #000 calc(var(--ring-clear-top) + 140px));
 }
 
-/* ── Decorative Liquid Ring (Item 2) ── */
+/* ── Decorative Liquid Ring (Item 2 & 4) ── */
 .dh-services__ring {
   position: sticky;
   top: calc(50svh - var(--ring-size) / 2);
   margin-inline: auto;
   --ring-size: clamp(360px, min(80vw, 96svh), 980px);
+}
+
+@media (max-width: 767px) {
+  .dh-services__ring {
+    --ring-size: clamp(280px, 90vw, 420px);
+  }
 }
 
 /* Ensure content sits above video layer at z-index 1 */
