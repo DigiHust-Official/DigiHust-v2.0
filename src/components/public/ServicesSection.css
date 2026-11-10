@@ -295,6 +295,7 @@ html.dark .dh-services {
   letter-spacing: -0.01em;
   margin: 0;
   color: var(--dh-card-title-color);
+  text-align: start;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -308,6 +309,7 @@ html.dark .dh-services {
   line-height: 1.5;
   margin: 0;
   color: var(--dh-card-desc-color);
+  text-align: start;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -401,7 +403,32 @@ html.dark .dh-services {
   transition: transform 0.25s ease-out;
 }
 
-/* ── Prefers-reduced-motion safety (Item 5) ── */
+/* ── Accessibility & RTL Layout (Item 7) ── */
+html[dir="rtl"] .dh-services-card__pill-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .dh-services-card:hover .dh-services-card__pill-arrow,
+html[dir="rtl"] .dh-services-card:focus-visible .dh-services-card__pill-arrow {
+  transform: scaleX(-1) rotate(45deg);
+}
+
+html[dir="rtl"] .dh-services__view-all-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
+  transform: translateX(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[dir="rtl"] .dh-services-card__pill-arrow,
+  html[dir="rtl"] .dh-services-card:hover .dh-services-card__pill-arrow,
+  html[dir="rtl"] .dh-services-card:focus-visible .dh-services-card__pill-arrow,
+  html[dir="rtl"] .dh-services__view-all-arrow {
+    transform: scaleX(-1) !important;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .dh-services-card,
   .dh-services-card:hover,
