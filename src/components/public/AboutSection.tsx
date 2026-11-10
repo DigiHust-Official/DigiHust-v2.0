@@ -150,11 +150,9 @@ export const AboutSection: React.FC = () => {
               {t('about_title_1') || 'One accountable partner'}
             </span>
             <span className="dh-about-title-line">
-              {t('about_title_2') || 'that builds, grows and secures'}{' '}
-              <span className="dh-about-chip dh-about-chip-teal" aria-hidden="true" />
+              {t('about_title_2') || 'that builds, grows and secures'}
             </span>
             <span className="dh-about-title-line dh-about-title-muted">
-              <span className="dh-about-chip dh-about-chip-coral" aria-hidden="true" />{' '}
               {t('about_title_3') || 'your digital business'}
             </span>
           </h2>

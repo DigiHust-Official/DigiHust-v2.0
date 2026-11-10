@@ -39,7 +39,7 @@
 
   .dh-about-header {
     flex: none;
-    margin-bottom: clamp(0.5rem, 1.5vh, 1.25rem);
+    margin-bottom: clamp(20px, 4.5vh, 48px);
   }
 
   .dh-about-bento {
@@ -102,15 +102,15 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: clamp(0.25rem, 0.8vh, 0.5rem);
+  margin-bottom: 14px;
 }
 
 .dh-about-eyebrow-dot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 9999px;
-  background-color: var(--brand-teal);
-  box-shadow: 0 0 6px var(--brand-teal);
+  background-color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .dh-about-title {
@@ -131,27 +131,6 @@
 .dh-about-title-muted {
   font-weight: 500;
   color: var(--text-muted);
-}
-
-/* Solid circular inline chips (no icon, no glow) */
-.dh-about-chip {
-  display: inline-block;
-  vertical-align: middle;
-  width: 0.85em;
-  height: 0.85em;
-  border-radius: 9999px;
-  margin-inline: 0.3em;
-  flex-shrink: 0;
-  position: relative;
-  top: -0.05em;
-}
-
-.dh-about-chip-teal {
-  background-color: var(--brand-teal);
-}
-
-.dh-about-chip-coral {
-  background-color: rgb(var(--dh-wave-1));
 }
 
 /* ── Common Card Styles & Container Query ── */
