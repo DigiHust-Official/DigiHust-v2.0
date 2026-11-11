@@ -15,7 +15,7 @@
   grid-template-rows: 1fr;
   margin: 0;
   padding: 0;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(2.5rem, min(5.75vw, 11.8vh), 6.45rem);
   line-height: 1.02;
@@ -90,7 +90,7 @@
   padding: 0;
   margin-top: clamp(14px, 2.4vh, 24px);
   max-width: 36rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   font-size: clamp(1.1rem, min(1.58vw, 3.36vh), 1.58rem);
   font-weight: 600;
   line-height: 1.4;

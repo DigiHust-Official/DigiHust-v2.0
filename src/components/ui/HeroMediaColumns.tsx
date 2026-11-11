@@ -554,7 +554,7 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           align-items: center;
           justify-content: flex-start;
           line-height: 1.08;
-          font-family: 'Plus Jakarta Sans', var(--font-sans, sans-serif);
+          font-family: 'Plus Jakarta Sans', var(--font-sans, system-ui, sans-serif);
           font-weight: 600;
           letter-spacing: 0.04em;
           color: transparent;

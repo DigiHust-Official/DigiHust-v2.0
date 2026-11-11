@@ -310,10 +310,10 @@ routes.forEach((route) => {
 
         <!-- Brand Title -->
         <div style="margin-top:48px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:10;">
-          <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;color:var(--loader-text);">
+          <span style="font-family:'Outfit',system-ui,sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;color:var(--loader-text);">
             Digi<span style="color:var(--loader-accent);">Hust</span>
           </span>
-          <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:var(--loader-accent);letter-spacing:0.25em;text-transform:uppercase;margin-top:4px;">
+          <p style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--loader-accent);letter-spacing:0.25em;text-transform:uppercase;margin-top:4px;">
             Loading Experience
           </p>
         </div>

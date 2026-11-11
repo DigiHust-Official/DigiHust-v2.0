@@ -31,6 +31,11 @@ html.dark {
   --orbit-ring: rgba(46, 196, 214, 0.25);
   --orbit-ring-dashed: rgba(46, 196, 214, 0.18);
 
+  /* Typography Font Stacks */
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+
   /* Legacy Backward Compatibility Mappings */
   --color-bg: var(--bg-page);
   --color-surface: var(--bg-surface);

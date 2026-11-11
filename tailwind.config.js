@@ -50,8 +50,8 @@ export default {
         'gradient-brand': 'var(--dh-gradient-brand)',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Outfit', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'system-ui', 'sans-serif'],
       }
     },
   },

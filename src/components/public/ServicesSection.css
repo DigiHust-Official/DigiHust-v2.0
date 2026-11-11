@@ -179,7 +179,7 @@ html.dark .dh-services {
 }
 
 .dh-services__title-primary {
-  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-family: var(--font-heading, 'Outfit', system-ui, sans-serif);
   font-weight: 300;
   color: var(--dh-heading-primary);
 }
@@ -304,7 +304,7 @@ html.dark .dh-services {
   width: 15cqw;
   height: 15cqw;
   border-radius: 50%;
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   font-weight: 500;
   font-size: 4.6cqw;
   line-height: 1;
@@ -330,7 +330,7 @@ html.dark .dh-services {
 }
 
 .dh-services-card__pill-label {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   font-weight: 500;
   font-size: 4.6cqw;
   line-height: 1;
@@ -371,7 +371,7 @@ html.dark .dh-services {
 
 /* ── Title (Item 1: single line, Outfit 300, clamp(1rem, 7.6cqw, 1.9rem), margin-bottom 3.5cqw) ── */
 .dh-services-card__title {
-  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-family: var(--font-heading, 'Outfit', system-ui, sans-serif);
   font-weight: 300;
   font-size: clamp(1rem, 7.6cqw, 1.9rem);
   line-height: 1.2;
@@ -388,7 +388,7 @@ html.dark .dh-services {
 
 /* ── Description (Item 1: 3 lines, line-height 1.6, clamp(12px, 4.7cqw, 15px), margin-bottom 8cqw) ── */
 .dh-services-card__desc {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   font-weight: 400;
   font-size: clamp(12px, 4.7cqw, 15px);
   line-height: 1.6;
@@ -468,7 +468,7 @@ html.dark .dh-services {
   padding-inline-end: 4px;
   border-radius: 9999px;
   text-decoration: none;
-  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;
