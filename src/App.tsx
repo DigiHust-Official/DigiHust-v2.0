@@ -18,7 +18,7 @@ import { Home } from './components/public/Home';
 // Lazy-loaded Public pages (named-export safe)
 const Services = React.lazy(() => import('./components/public/Services').then(m => ({ default: m.Services })));
 const Work = React.lazy(() => import('./components/public/Work').then(m => ({ default: m.Work })));
-const CaseStudyDetail = React.lazy(() => import('./components/public/CaseStudyDetail').then(m => ({ default: m.CaseStudyDetail })));
+const CaseStudyPage = React.lazy(() => import('./components/public/CaseStudyPage').then(m => ({ default: m.CaseStudyPage })));
 const HowItWorks = React.lazy(() => import('./components/public/HowItWorks').then(m => ({ default: m.HowItWorks })));
 const About = React.lazy(() => import('./components/public/About').then(m => ({ default: m.About })));
 const Team = React.lazy(() => import('./components/public/Team').then(m => ({ default: m.Team })));
@@ -105,9 +105,9 @@ export const App: React.FC = () => {
                   <Route path="/" element={<Home />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/portfolio" element={<Work />} />
-                  <Route path="/portfolio/:slug" element={<CaseStudyDetail />} />
+                  <Route path="/portfolio/:slug" element={<CaseStudyPage />} />
                   <Route path="/work" element={<Navigate to="/portfolio" replace />} />
-                  <Route path="/work/:slug" element={<CaseStudyDetail />} />
+                  <Route path="/work/:slug" element={<CaseStudyPage />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/team" element={<Team />} />
