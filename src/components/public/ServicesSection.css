@@ -16,7 +16,7 @@
   --dh-heading-primary: #0A1F2B;
   --dh-heading-accent: var(--brand-teal, #1F7A8C);
 
-  --dh-card-bg: rgba(255, 255, 255, 0.78);
+  --dh-card-bg: rgba(255, 255, 255, 0.84);
   --dh-card-hover-bg: rgba(248, 250, 252, 0.88);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(10, 31, 43, 0.05);
@@ -56,7 +56,7 @@ html.dark .dh-services {
   --dh-heading-primary: #F3F6FA;
   --dh-heading-accent: var(--dh-highlight, #2EC4D6);
 
-  --dh-card-bg: rgba(15, 36, 49, 0.82);
+  --dh-card-bg: rgba(15, 36, 49, 0.86);
   --dh-card-hover-bg: rgba(19, 44, 59, 0.88);
   --dh-card-border: none;
   --dh-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.30);
@@ -247,8 +247,6 @@ html.dark .dh-services {
   background-color: var(--dh-card-bg);
   border: none;
   box-shadow: var(--dh-card-shadow);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  backdrop-filter: blur(16px) saturate(140%);
   transition: transform 140ms cubic-bezier(0.2, 0.7, 0.2, 1), background-color 150ms ease-out;
 }
 
@@ -476,8 +474,6 @@ html.dark .dh-services {
   color: var(--dh-card-pill-color);
   background-color: var(--dh-card-bg);
   box-shadow: var(--dh-card-shadow);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  backdrop-filter: blur(16px) saturate(140%);
   transition: transform 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out;
 }
 
