@@ -22,7 +22,6 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
 }) => {
   return (
     <div
-      id={id}
       className={`dh-section-heading dh-section-heading--${align} ${className}`}
     >
       {eyebrow && (
@@ -30,7 +29,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
           <span>{eyebrow}</span>
         </div>
       )}
-      <h2 className="dh-section-heading__title">
+      <h2 id={id} className="dh-section-heading__title">
         {title}
         {accent && (
           <>
