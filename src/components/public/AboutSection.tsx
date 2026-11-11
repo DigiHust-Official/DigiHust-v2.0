@@ -10,7 +10,7 @@ import './AboutSection.css';
 
 // 1. Image placeholder configuration at top of file for easy swapping
 export const ABOUT_IMAGE = {
-  src: '/hero/business.webp',
+  src: '/hero/business-sm.webp',
   alt: 'DigiHust managed digital business services',
 };
 
@@ -161,8 +161,11 @@ export const AboutSection: React.FC = () => {
             <img
               src={ABOUT_IMAGE.src}
               alt={ABOUT_IMAGE.alt}
+              width={560}
+              height={700}
               className="dh-about-hero-img"
               loading="lazy"
+              decoding="async"
             />
             <div className="dh-about-hero-overlay" aria-hidden="true" />
 

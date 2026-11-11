@@ -47,6 +47,7 @@ interface FrameCardProps {
   isClone?: boolean;
   videoRefs?: React.MutableRefObject<HTMLVideoElement[]>;
   isMobile?: boolean;
+  isEager?: boolean;
 }
 
 const FrameCard: React.FC<FrameCardProps> = ({
@@ -54,6 +55,7 @@ const FrameCard: React.FC<FrameCardProps> = ({
   isClone = false,
   videoRefs,
   isMobile = false,
+  isEager = false,
 }) => {
   const { t } = useLanguage();
   const IconComponent = ICON_MAP[frame.serviceNumber] || PenTool;
@@ -146,7 +148,10 @@ const FrameCard: React.FC<FrameCardProps> = ({
             <img
               src={frame.src}
               alt={isClone ? '' : frame.alt}
+              width={560}
+              height={700}
               decoding="async"
+              loading={isEager ? 'eager' : 'lazy'}
               className="w-full h-full object-cover pointer-events-none"
             />
           )
@@ -724,12 +729,13 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           >
             {/* Set 1 (Original 4 frames) */}
             <div ref={upSetRef} className="w-full flex flex-col">
-              {upFrames.map((frame) => (
+              {upFrames.map((frame, idx) => (
                 <FrameCard
                   key={frame.id}
                   frame={frame}
                   videoRefs={videoRefs}
                   isMobile={false}
+                  isEager={idx < 2}
                 />
               ))}
             </div>
@@ -774,12 +780,13 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
           >
             {/* Set 1 (Original 4 frames) */}
             <div ref={downSetRef} className="w-full flex flex-col">
-              {downFrames.map((frame) => (
+              {downFrames.map((frame, idx) => (
                 <FrameCard
                   key={frame.id}
                   frame={frame}
                   videoRefs={videoRefs}
                   isMobile={false}
+                  isEager={idx < 2}
                 />
               ))}
             </div>
@@ -826,12 +833,13 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
             className="w-full flex flex-col will-change-transform"
           >
             <div className="w-full flex flex-col">
-              {upFrames.map((frame) => (
+              {upFrames.map((frame, idx) => (
                 <FrameCard
                   key={frame.id}
                   frame={frame}
                   videoRefs={videoRefs}
                   isMobile={true}
+                  isEager={idx < 2}
                 />
               ))}
             </div>
@@ -858,12 +866,13 @@ export const HeroMediaColumns: React.FC<HeroMediaColumnsProps> = ({
             className="w-full flex flex-col will-change-transform"
           >
             <div className="w-full flex flex-col">
-              {downFrames.map((frame) => (
+              {downFrames.map((frame, idx) => (
                 <FrameCard
                   key={frame.id}
                   frame={frame}
                   videoRefs={videoRefs}
                   isMobile={true}
+                  isEager={idx < 2}
                 />
               ))}
             </div>

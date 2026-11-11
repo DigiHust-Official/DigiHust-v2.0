@@ -18,14 +18,14 @@ export interface ServiceItem {
 
 // TODO: SERVICE_IMAGES is the single place to swap service images for custom artwork later
 export const SERVICE_IMAGES: Record<string, string> = {
-  's-web': '/hero/fullstack-poster.webp',
-  's-creative': '/hero/branding.webp',
-  's-ai': '/hero/ai.webp',
-  's-marketing': '/hero/growth.webp',
-  's-cybersecurity': '/hero/cyber.webp',
-  's-data-intelligence': '/hero/bi-poster.webp',
-  's-strategy': '/hero/business.webp',
-  's-cloud-devops': '/hero/fullstack-poster.webp',
+  's-web': '/hero/fullstack-poster-sm.webp',
+  's-creative': '/hero/branding-sm.webp',
+  's-ai': '/hero/ai-sm.webp',
+  's-marketing': '/hero/growth-sm.webp',
+  's-cybersecurity': '/hero/cyber-sm.webp',
+  's-data-intelligence': '/hero/bi-poster-sm.webp',
+  's-strategy': '/hero/business-sm.webp',
+  's-cloud-devops': '/hero/fullstack-poster-sm.webp',
 };
 
 // 8 Services: 6 existing from Step 0b + 2 candidate new services
@@ -223,7 +223,10 @@ export const ServicesSection: React.FC = () => {
                     <img
                       src={svc.image}
                       alt={t(svc.titleKey)}
+                      width={560}
+                      height={700}
                       loading="lazy"
+                      decoding="async"
                       className="dh-services-card__img"
                     />
                   </div>
