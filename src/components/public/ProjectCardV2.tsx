@@ -54,18 +54,6 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
           >
             <path d="M0 0 L18 0 A 18 18 0 0 0 0 18 Z" fill="currentColor" />
           </svg>
-
-          {/* Smooth Concave Fillet Curve (Start/Left Edge) */}
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            className="dh-card-v2__tab-fillet-bottom"
-            aria-hidden="true"
-          >
-            <path d="M0 0 L0 18 A 18 18 0 0 0 18 0 Z" fill="currentColor" />
-          </svg>
         </div>
 
         {/* ── Top-End Round Preview Icon (34px) ── */}

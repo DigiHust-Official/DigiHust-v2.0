@@ -2,13 +2,24 @@
 
 .dh-work-showcase {
   position: relative;
-  background-color: var(--bg-page);
-  border-top: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, #EEF4F7 0%, #E4ECF1 100%);
+  border: none;
   width: 100%;
   box-sizing: border-box;
   padding-block: clamp(64px, 9vh, 120px);
   padding-inline: clamp(1.25rem, 4vw, 2rem);
   overflow: hidden;
+}
+
+html[data-theme="dark"] .dh-work-showcase,
+html.dark .dh-work-showcase,
+:root .dh-work-showcase {
+  background: linear-gradient(180deg, #0A1A24 0%, #081620 100%);
+}
+
+html[data-theme="light"] .dh-work-showcase,
+html.light .dh-work-showcase {
+  background: linear-gradient(180deg, #EEF4F7 0%, #E4ECF1 100%);
 }
 
 .dh-work-showcase__container {

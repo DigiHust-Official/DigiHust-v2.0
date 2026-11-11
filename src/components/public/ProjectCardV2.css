@@ -2,15 +2,15 @@
 
 :root {
   --dh-card-surface-light: #FFFFFF;
-  --dh-card-border-light: rgba(2, 43, 58, 0.08);
-  --dh-card-shadow-light: 0 4px 16px -4px rgba(2, 43, 58, 0.06);
+  --dh-card-border-light: rgba(10, 31, 43, 0.10);
+  --dh-card-shadow-light: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 16px 40px rgba(10, 31, 43, 0.10);
   --dh-card-title-light: #0A1F2B;
   --dh-card-desc-light: #4A6070;
   --dh-card-accent-light: #1F7A8C;
 
   --dh-card-surface-dark: #0F2431;
-  --dh-card-border-dark: rgba(255, 255, 255, 0.08);
-  --dh-card-shadow-dark: 0 4px 20px -6px rgba(0, 0, 0, 0.45);
+  --dh-card-border-dark: rgba(255, 255, 255, 0.10);
+  --dh-card-shadow-dark: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 44px rgba(0, 0, 0, 0.40);
   --dh-card-title-dark: #F3F6FA;
   --dh-card-desc-dark: #A9B8C6;
   --dh-card-accent-dark: #2EC4D6;
@@ -61,13 +61,13 @@ html.light .dh-card-v2 {
 /* Constant shell background on hover; subtle elevation only */
 .dh-card-v2:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 20px 48px rgba(10, 31, 43, 0.14);
 }
 
 html[data-theme="dark"] .dh-card-v2:hover,
 html.dark .dh-card-v2:hover,
 :root .dh-card-v2:hover {
-  box-shadow: 0 18px 40px -8px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 52px rgba(0, 0, 0, 0.50);
 }
 
 /* ── Image Tile Container ────────────────────────────────────────── */
@@ -133,16 +133,17 @@ html.light .dh-card-v2__tile::after {
 /* ── Top-Start Folder Tab Notched into Image ─────────────────────── */
 .dh-card-v2__tab {
   position: absolute;
-  top: 0;
-  inset-inline-start: 0;
+  top: -1px;
+  inset-inline-start: -1px;
   z-index: 20;
-  height: 40px;
+  height: 41px;
   padding-inline: 14px 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background-color: var(--dh-card-surface);
   color: var(--dh-card-surface); /* For SVG fill="currentColor" */
+  border-start-start-radius: inherit;
   border-end-end-radius: 18px;
   box-sizing: border-box;
   pointer-events: none;
@@ -178,26 +179,9 @@ html.light .dh-card-v2__tile::after {
   pointer-events: none;
 }
 
-/* Concave Fillet Curve (Start Edge) */
-.dh-card-v2__tab-fillet-bottom {
-  position: absolute;
-  top: 40px;
-  inset-inline-start: 0;
-  width: 18px;
-  height: 18px;
-  color: inherit;
-  pointer-events: none;
-}
-
 /* RTL Fillet Mirroring */
 [dir="rtl"] .dh-card-v2__tab-fillet-top,
 html[dir="rtl"] .dh-card-v2__tab-fillet-top {
-  transform: scaleX(-1);
-  transform-origin: left top;
-}
-
-[dir="rtl"] .dh-card-v2__tab-fillet-bottom,
-html[dir="rtl"] .dh-card-v2__tab-fillet-bottom {
   transform: scaleX(-1);
   transform-origin: left top;
 }
