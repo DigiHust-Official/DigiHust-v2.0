@@ -65,14 +65,14 @@ void main(){
  float sp=pow(max(dot(Rf,normalize(vec3(-.4,.7,.6))),0.),80.)+pow(max(dot(Rf,normalize(vec3(.6,.3,.7))),0.),140.);
  vec3 col;
  if(u_dark>0.5){
-  vec3 deep=vec3(.03,.10,.30),mid=vec3(.12,.42,.82),sil=vec3(.80,.94,1.);
+  vec3 deep=vec3(.09,.24,.27),mid=vec3(.25,.41,.45),sil=vec3(.39,.65,.70);
   col=mix(deep,mid,clamp(em*1.4,0.,1.));
   col=mix(col,sil,clamp(ev*ev*1.1,0.,1.)*0.7);
-  col=mix(col,vec3(.70,.30,.92),patch*smoothstep(.2,.8,em)*0.70);
+  col=mix(col,vec3(.21,.50,.56),patch*smoothstep(.2,.8,em)*0.70);
   col*=1.-0.72*dk*(1.-fr);
-  col+=vec3(.75,.93,1.)*pow(fr,1.3)*1.0;
-  col+=vec3(.8,.95,1.)*smoothstep(.86,.98,abs(s))*0.45;
-  col+=vec3(1.)*(sp*1.4+spk*2.4*smoothstep(.15,.8,em));
+  col+=vec3(.32,.58,.64)*pow(fr,1.3)*1.0;
+  col+=vec3(.35,.62,.69)*smoothstep(.86,.98,abs(s))*0.45;
+  col+=vec3(.75,.93,.97)*(sp*1.4+spk*2.4*smoothstep(.15,.8,em));
  }else{
   vec3 deep=vec3(.16,.40,.58),mid=vec3(.46,.78,.88),sil=vec3(.98,1.,1.);
   col=mix(deep,mid,clamp(em*1.4,0.,1.));
