@@ -9,6 +9,7 @@ import { useApp } from '../../context/AppContext';
 import { TRANSLATIONS } from '../../lib/i18n';
 import logoImg from '../../assets/logo.png';
 import { PortalNavbar } from '../portal/PortalNavbar';
+import { prefetchRoute } from '../../lib/routePrefetch';
 import './Navbar.css';
 
 export const NAV_AVAILABLE = true;
@@ -299,8 +300,14 @@ export const Navbar: React.FC = () => {
                 to={link.href}
                 className={`dh-nav-link ${active ? 'dh-nav-link--active' : ''}`}
                 aria-current={active ? 'page' : undefined}
-                onMouseEnter={() => setHoveredIdx(idx)}
-                onFocus={() => setFocusedIdx(idx)}
+                onMouseEnter={() => {
+                  setHoveredIdx(idx);
+                  prefetchRoute(link.href);
+                }}
+                onFocus={() => {
+                  setFocusedIdx(idx);
+                  prefetchRoute(link.href);
+                }}
                 onBlur={() => setFocusedIdx(null)}
               >
                 <span className="dh-nav-link-label">{link.label}</span>
@@ -323,6 +330,8 @@ export const Navbar: React.FC = () => {
             <Link
               to="/contact"
               className="dh-nav-contact-btn"
+              onMouseEnter={() => prefetchRoute('/contact')}
+              onFocus={() => prefetchRoute('/contact')}
               aria-describedby={NAV_AVAILABLE ? 'nav-contact-tip' : undefined}
             >
               <span>{t('nav.contactUs')}</span>
@@ -370,6 +379,8 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.href}
                 to={link.href}
+                onMouseEnter={() => prefetchRoute(link.href)}
+                onFocus={() => prefetchRoute(link.href)}
                 onClick={() => setMobileOpen(false)}
                 className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                   isActive(link.href)
@@ -393,6 +404,8 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/contact"
+              onMouseEnter={() => prefetchRoute('/contact')}
+              onFocus={() => prefetchRoute('/contact')}
               onClick={() => setMobileOpen(false)}
               className="dh-nav-contact-btn w-full mt-2 justify-center"
             >
