@@ -5,6 +5,39 @@ interface UseHeroHardScrollOptions {
   duration?: number; // default ~800ms
 }
 
+interface SectionEndState {
+  isAtEnd: boolean;
+  returnY: number;
+  timeSinceEndReached: number;
+}
+
+/**
+ * Helper to evaluate whether a scrollable section's bottom edge is at viewport bottom,
+ * and track the deliberate gesture cooldown.
+ */
+function checkSectionEnd(
+  selector: string,
+  endReachedTimeRef: React.MutableRefObject<number>,
+  now: number
+): SectionEndState {
+  const el = document.querySelector<HTMLElement>(selector);
+  if (!el) {
+    return { isAtEnd: false, returnY: 0, timeSinceEndReached: 0 };
+  }
+  const rect = el.getBoundingClientRect();
+  const isAtEnd = rect.bottom <= window.innerHeight + 2;
+  const returnY = Math.round(rect.bottom + window.scrollY - window.innerHeight);
+
+  if (!isAtEnd) {
+    endReachedTimeRef.current = 0;
+  } else if (endReachedTimeRef.current === 0) {
+    endReachedTimeRef.current = now;
+  }
+
+  const timeSinceEndReached = endReachedTimeRef.current > 0 ? now - endReachedTimeRef.current : 0;
+  return { isAtEnd, returnY, timeSinceEndReached };
+}
+
 /**
  * useHeroHardScroll
  *
@@ -13,10 +46,12 @@ interface UseHeroHardScrollOptions {
  *   Stop 1: About section top (data-hard-stop="about")
  *   Stop 2: Core Capabilities top (data-hard-stop="capabilities")
  *   Stop 3: Why DigiHust top (data-hard-stop="why-digihust")
+ *   Stop 4: Work top (data-hard-stop="work")
+ *   Stop 5: Client Feedback top (data-hard-stop="feedback")
  *
- * Inside Core Capabilities, normal native scrolling occurs.
- * When the end of Core Capabilities is reached, a new downward gesture jumps to Stop 3.
- * Scrolling up from Stop 3 jumps back to the end of Core Capabilities.
+ * Inside Core Capabilities and Work, normal native scrolling occurs.
+ * At the end of each, a deliberate gesture advances to the next stop.
+ * Scrolling up from the following stop returns to the bottom of the section.
  */
 export function useHeroHardScroll({
   runwayRef,
@@ -27,6 +62,7 @@ export function useHeroHardScroll({
   const lastWheelTimeRef = useRef<number>(0);
   const endReachedTimeRef = useRef<number>(0);
   const whyEndReachedTimeRef = useRef<number>(0);
+  const workEndReachedTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // 1. Guard check: Reduced motion
@@ -84,7 +120,7 @@ export function useHeroHardScroll({
       return false;
     };
 
-    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities, 3: Why DigiHust)
+    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities, 3: Why DigiHust, 4: Work, 5: Feedback)
     const getStops = (): number[] => {
       const stops: number[] = [0];
 
@@ -110,6 +146,20 @@ export function useHeroHardScroll({
       const whyEl = document.querySelector<HTMLElement>('[data-hard-stop="why-digihust"]');
       if (whyEl) {
         const top = whyEl.getBoundingClientRect().top + window.scrollY;
+        stops.push(Math.round(top));
+      }
+
+      // Stop 4: Work top
+      const workEl = document.querySelector<HTMLElement>('[data-hard-stop="work"]');
+      if (workEl) {
+        const top = workEl.getBoundingClientRect().top + window.scrollY;
+        stops.push(Math.round(top));
+      }
+
+      // Stop 5: Feedback top
+      const fbEl = document.querySelector<HTMLElement>('[data-hard-stop="feedback"]');
+      if (fbEl) {
+        const top = fbEl.getBoundingClientRect().top + window.scrollY;
         stops.push(Math.round(top));
       }
 
@@ -177,6 +227,8 @@ export function useHeroHardScroll({
       const s1 = stops[1];
       const s2 = stops[2];
       const s3 = stops[3];
+      const s4 = stops[4];
+      const s5 = stops[5];
       const TOL = 40;
       const deltaY = e.deltaY;
       const THRESHOLD = 12;
@@ -187,35 +239,20 @@ export function useHeroHardScroll({
       const timeSinceLastWheel = now - lastWheelTimeRef.current;
       lastWheelTimeRef.current = now;
 
-      // Check capabilities section bounds
-      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
-      let isAtServicesEnd = false;
-      let servicesReturnY = 0;
-
-      if (capEl) {
-        const capRect = capEl.getBoundingClientRect();
-        // End reached when bottom edge is within 2px of viewport bottom
-        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
-        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
-
-        if (!isAtServicesEnd) {
-          endReachedTimeRef.current = 0;
-        } else if (endReachedTimeRef.current === 0) {
-          endReachedTimeRef.current = now;
-        }
-      }
-
-      const timeSinceEndReached = endReachedTimeRef.current > 0 ? now - endReachedTimeRef.current : 0;
+      // Check capabilities section bounds via shared helper
+      const cap = checkSectionEnd('[data-hard-stop="capabilities"]', endReachedTimeRef, now);
 
       // Check why-digihust section bounds
       const whyEl = document.querySelector<HTMLElement>('[data-hard-stop="why-digihust"]');
       let isAtWhyEnd = false;
       let isWhyTaller = false;
+      let whyReturnY = 0;
 
       if (whyEl) {
         const whyRect = whyEl.getBoundingClientRect();
         isWhyTaller = whyEl.offsetHeight > window.innerHeight;
         isAtWhyEnd = whyRect.bottom <= window.innerHeight + 2;
+        whyReturnY = Math.round(whyRect.bottom + window.scrollY - window.innerHeight);
 
         if (!isAtWhyEnd) {
           whyEndReachedTimeRef.current = 0;
@@ -226,6 +263,9 @@ export function useHeroHardScroll({
 
       const timeSinceWhyEndReached = whyEndReachedTimeRef.current > 0 ? now - whyEndReachedTimeRef.current : 0;
 
+      // Check work section bounds via shared helper
+      const work = checkSectionEnd('[data-hard-stop="work"]', workEndReachedTimeRef, now);
+
       if (deltaY > 0) {
         // ── SCROLLING DOWN ──
         if (currentY < s1 - TOL) {
@@ -234,26 +274,43 @@ export function useHeroHardScroll({
         } else if (currentY < s2 - TOL) {
           e.preventDefault();
           animateScrollTo(s2);
-        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
-          // At the end of services: require new gesture (gap >= 120ms) and >= 150ms since end reached
-          if (timeSinceLastWheel >= 120 && timeSinceEndReached >= 150) {
+        } else if (s3 && cap.isAtEnd && currentY < s3 - 2) {
+          // At end of services: require new gesture (gap >= 120ms) and >= 150ms since end reached
+          if (timeSinceLastWheel >= 120 && cap.timeSinceEndReached >= 150) {
             e.preventDefault();
             animateScrollTo(s3);
           }
-        } else if (s3 && isWhyTaller && isAtWhyEnd && currentY >= s3 - 2) {
-          // When why-digihust is taller than viewport and bottom is reached:
-          // absorb inertia until a fresh gesture is initiated
-          if (timeSinceLastWheel < 120 || timeSinceWhyEndReached < 150) {
+        } else if (s4 && isAtWhyEnd && currentY >= s3 - 2 && currentY < s4 - TOL) {
+          // At end of Why DigiHust, jump to Stop 4 (Work)
+          if (!isWhyTaller || (timeSinceLastWheel >= 120 && timeSinceWhyEndReached >= 150)) {
             e.preventDefault();
+            animateScrollTo(s4);
+          }
+        } else if (s5 && work.isAtEnd && currentY >= (s4 || s3) - 2 && currentY < s5 - 2) {
+          // At end of Work: require new gesture and >= 150ms since end reached
+          if (timeSinceLastWheel >= 120 && work.timeSinceEndReached >= 150) {
+            e.preventDefault();
+            animateScrollTo(s5);
           }
         }
-        // Inside services / why-digihust: free native scroll down
+        // Inside services / why-digihust / work: free native scroll down
       } else {
         // ── SCROLLING UP ──
-        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
-          // Scrolling UP from next section top: animate back to services end
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
+          // Scrolling UP from Feedback top: animate back to Work end
           e.preventDefault();
-          animateScrollTo(servicesReturnY);
+          animateScrollTo(work.returnY);
+        } else if (s4 && currentY > s4 + 60) {
+          // Inside Work: free native scroll up
+          return;
+        } else if (s4 && currentY <= s4 + 60 && currentY > s3 + TOL) {
+          // Scrolling UP from Work top: animate back to Why DigiHust
+          e.preventDefault();
+          animateScrollTo(isWhyTaller && whyReturnY ? whyReturnY : s3);
+        } else if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          // Scrolling UP from Why DigiHust top: animate back to services end
+          e.preventDefault();
+          animateScrollTo(cap.returnY);
         } else if (currentY > s2 + 60) {
           // Inside services: free native scroll up
           return;
@@ -296,17 +353,12 @@ export function useHeroHardScroll({
       const s1 = stops[1];
       const s2 = stops[2];
       const s3 = stops[3];
+      const s4 = stops[4];
+      const s5 = stops[5];
       const TOL = 40;
 
-      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
-      let isAtServicesEnd = false;
-      let servicesReturnY = 0;
-
-      if (capEl) {
-        const capRect = capEl.getBoundingClientRect();
-        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
-        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
-      }
+      const cap = checkSectionEnd('[data-hard-stop="capabilities"]', endReachedTimeRef, performance.now());
+      const work = checkSectionEnd('[data-hard-stop="work"]', workEndReachedTimeRef, performance.now());
 
       if (isDownKey) {
         if (currentY < s1 - TOL) {
@@ -315,17 +367,30 @@ export function useHeroHardScroll({
         } else if (currentY < s2 - TOL) {
           e.preventDefault();
           animateScrollTo(s2);
-        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
+        } else if (s3 && cap.isAtEnd && currentY < s3 - 2) {
           e.preventDefault();
           animateScrollTo(s3);
-        }
-        // Inside services: let down key scroll naturally
-      } else if (isUpKey) {
-        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+        } else if (s4 && currentY >= s3 - 2 && currentY < s4 - TOL) {
           e.preventDefault();
-          animateScrollTo(servicesReturnY);
+          animateScrollTo(s4);
+        } else if (s5 && work.isAtEnd && currentY < s5 - 2) {
+          e.preventDefault();
+          animateScrollTo(s5);
+        }
+        // Inside services / work: let down key scroll naturally
+      } else if (isUpKey) {
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
+          e.preventDefault();
+          animateScrollTo(work.returnY);
+        } else if (s4 && currentY > s4 + 60) {
+          return;
+        } else if (s4 && currentY <= s4 + 60 && currentY > s3 + TOL) {
+          e.preventDefault();
+          animateScrollTo(s3);
+        } else if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          e.preventDefault();
+          animateScrollTo(cap.returnY);
         } else if (currentY > s2 + 60) {
-          // Inside services: let up key scroll naturally
           return;
         } else if (currentY <= s2 + 60 && currentY > s1 + TOL) {
           e.preventDefault();
@@ -367,17 +432,12 @@ export function useHeroHardScroll({
       const s1 = stops[1];
       const s2 = stops[2];
       const s3 = stops[3];
+      const s4 = stops[4];
+      const s5 = stops[5];
       const TOL = 40;
 
-      const capEl = document.querySelector<HTMLElement>('[data-hard-stop="capabilities"]');
-      let isAtServicesEnd = false;
-      let servicesReturnY = 0;
-
-      if (capEl) {
-        const capRect = capEl.getBoundingClientRect();
-        isAtServicesEnd = capRect.bottom <= window.innerHeight + 2;
-        servicesReturnY = Math.round(capRect.bottom + window.scrollY - window.innerHeight);
-      }
+      const cap = checkSectionEnd('[data-hard-stop="capabilities"]', endReachedTimeRef, performance.now());
+      const work = checkSectionEnd('[data-hard-stop="work"]', workEndReachedTimeRef, performance.now());
 
       if (deltaY > 0) {
         // ── SWIPE UP = SCROLL DOWN ──
@@ -389,17 +449,35 @@ export function useHeroHardScroll({
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(s2);
-        } else if (s3 && isAtServicesEnd && currentY < s3 - 2) {
+        } else if (s3 && cap.isAtEnd && currentY < s3 - 2) {
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(s3);
+        } else if (s4 && currentY >= s3 - 2 && currentY < s4 - TOL) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s4);
+        } else if (s5 && work.isAtEnd && currentY < s5 - 2) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s5);
         }
       } else {
         // ── SWIPE DOWN = SCROLL UP ──
-        if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
           e.preventDefault();
           touchStartYRef.current = null;
-          animateScrollTo(servicesReturnY);
+          animateScrollTo(work.returnY);
+        } else if (s4 && currentY > s4 + 60) {
+          return;
+        } else if (s4 && currentY <= s4 + 60 && currentY > s3 + TOL) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(s3);
+        } else if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
+          e.preventDefault();
+          touchStartYRef.current = null;
+          animateScrollTo(cap.returnY);
         } else if (currentY > s2 + 60) {
           return;
         } else if (currentY <= s2 + 60 && currentY > s1 + TOL) {
