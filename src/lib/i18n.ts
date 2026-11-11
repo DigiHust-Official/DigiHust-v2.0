@@ -231,6 +231,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v2_next: 'Next',
     work_v2_open_image: 'Open image',
 
+    // Work v3 Showcase Redesign
+    work_v3_eyebrow: 'Case studies',
+    work_v3_heading_1: 'Selected',
+    work_v3_heading_2: 'work.',
+    work_v3_subtext: 'A few recent projects. Open any card for the full story.',
+    work_v3_view_all: 'View all work',
+
     // Testimonials
     testimonials_tag: 'Client Feedback',
     testimonials_heading: 'What Founders Say About DigiHust',
@@ -398,6 +405,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v2_previous: 'Zurück',
     work_v2_next: 'Weiter',
     work_v2_open_image: 'Bild öffnen',
+
+    // Work v3 Showcase Redesign
+    work_v3_eyebrow: 'Fallstudien',
+    work_v3_heading_1: 'Ausgewählte',
+    work_v3_heading_2: 'Arbeiten.',
+    work_v3_subtext: 'Einige aktuelle Projekte. Öffnen Sie ein Projekt für Details.',
+    work_v3_view_all: 'Alle Arbeiten',
 
     // Testimonials
     testimonials_tag: 'Kundenstimmen',
@@ -567,6 +581,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v2_next: 'التالي',
     work_v2_open_image: 'فتح الصورة',
 
+    // Work v3 Showcase Redesign
+    work_v3_eyebrow: 'دراسات الحالة',
+    work_v3_heading_1: 'مشاريع',
+    work_v3_heading_2: 'مختارة.',
+    work_v3_subtext: 'مشاريع حديثة من إنجازنا. افتح أي بطاقة لمعرفة التفاصيل كاملة.',
+    work_v3_view_all: 'عرض كل الأعمال',
+
     // Testimonials
     testimonials_tag: 'آراء العملاء',
     testimonials_heading: 'ماذا يقول رواد الأعمال عن DigiHust',
@@ -735,6 +756,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v2_next: 'Siguiente',
     work_v2_open_image: 'Abrir imagen',
 
+    // Work v3 Showcase Redesign
+    work_v3_eyebrow: 'Casos de estudio',
+    work_v3_heading_1: 'Proyectos',
+    work_v3_heading_2: 'destacados.',
+    work_v3_subtext: 'Algunos proyectos recientes. Abre una tarjeta para ver más.',
+    work_v3_view_all: 'Ver todos',
+
     // Testimonials
     testimonials_tag: 'Opiniones de Clientes',
     testimonials_heading: 'Lo que Dicen los Fundadores sobre DigiHust',
@@ -902,6 +930,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v2_previous: 'Précédent',
     work_v2_next: 'Suivant',
     work_v2_open_image: 'Ouvrir l\'image',
+
+    // Work v3 Showcase Redesign
+    work_v3_eyebrow: 'Études de cas',
+    work_v3_heading_1: 'Projets',
+    work_v3_heading_2: 'choisis.',
+    work_v3_subtext: 'Quelques projets récents. Ouvrez une carte pour en savoir plus.',
+    work_v3_view_all: 'Tous les projets',
 
     // Testimonials
     testimonials_tag: 'Avis clients',
