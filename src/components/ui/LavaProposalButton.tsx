@@ -91,7 +91,7 @@ export const LavaProposalButton: React.FC<LavaProposalButtonProps> = ({
       ref={buttonRef}
       to={to}
       onClick={onClick}
-      className={`group relative inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-[#022B3A] dark:bg-[#01222E] text-white font-extrabold text-base sm:text-lg border border-[#1F7A8C]/50 dark:border-cyan-400 shadow-xl shadow-[#022B3A]/25 hover:shadow-2xl hover:shadow-[#022B3A]/35 dark:shadow-[0_0_35px_rgba(34,211,238,0.4)] dark:hover:shadow-[0_0_50px_rgba(34,211,238,0.65)] overflow-hidden select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-[0.98] transition-all duration-200 ${className}`}
+      className={`group relative inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-[#022B3A] dark:bg-[#01222E] text-white font-extrabold text-base sm:text-lg border border-[#1F7A8C]/50 dark:border-cyan-400 shadow-xl shadow-[#022B3A]/25 hover:shadow-2xl hover:shadow-[#022B3A]/35 dark:shadow-[0_0_35px_rgba(34,211,238,0.4)] dark:hover:shadow-[0_0_50px_rgba(34,211,238,0.65)] overflow-hidden select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-[0.98] transition-[transform,opacity,border-color,background-color] duration-200 ease-out ${className}`}
     >
       {/* ── LAVA CONTAINER (ORGANIC FLUID MORPHING WITH STATIC CSS BLUR) ── */}
       <div

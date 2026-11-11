@@ -294,12 +294,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-body);
   box-shadow: 0 4px 20px rgba(2, 43, 58, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   border-radius: 1.25rem;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.25s ease-out,
-              border-color 0.25s ease-out,
-              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.25s ease-out;
-  will-change: transform, box-shadow;
+  transition: transform 200ms ease-out,
+              background-color 200ms ease-out,
+              border-color 200ms ease-out,
+              color 200ms ease-out;
+  will-change: transform;
 }
 
 .card-surface:hover,
@@ -473,9 +472,8 @@ h1, h2, h3, h4, h5, h6 {
     0 1px 2px rgba(2, 43, 58, 0.04),
     0 8px 24px -4px rgba(2, 43, 58, 0.08),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.22s ease;
+  transition: transform 200ms ease-out,
+              border-color 200ms ease-out;
   will-change: transform;
 }
 

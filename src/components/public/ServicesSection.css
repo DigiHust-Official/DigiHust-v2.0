@@ -478,7 +478,7 @@ html.dark .dh-services {
   box-shadow: var(--dh-card-shadow);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   backdrop-filter: blur(16px) saturate(140%);
-  transition: transform 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out, color 0.25s ease-out;
+  transition: transform 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out;
 }
 
 .dh-services__view-all-pill:hover,
@@ -503,7 +503,7 @@ html.dark .dh-services {
   flex-shrink: 0;
   background-color: var(--dh-card-arrow-bg);
   color: var(--dh-card-arrow-color);
-  transition: transform 0.25s ease-out, background-color 0.25s ease-out, color 0.25s ease-out;
+  transition: transform 200ms ease-out, background-color 200ms ease-out, color 200ms ease-out;
 }
 
 .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap,
@@ -515,7 +515,7 @@ html.dark .dh-services {
 .dh-services__view-all-arrow {
   width: 14px;
   height: 14px;
-  transition: transform 0.25s ease-out;
+  transition: transform 200ms ease-out;
 }
 
 .dh-services__view-all-pill:hover .dh-services__view-all-arrow,

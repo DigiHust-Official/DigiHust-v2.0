@@ -23,10 +23,9 @@
   z-index: 1;
   background: linear-gradient(135deg, #1F7A8C 0%, #104C58 100%);
   color: #FFFFFF;
-  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1),
-              box-shadow 0.22s cubic-bezier(0.2, 0.7, 0.2, 1),
-              background 0.22s ease,
-              border-color 0.22s ease;
+  transition: transform 200ms ease-out,
+              background 200ms ease-out,
+              border-color 200ms ease-out;
 }
 
 /* Subtle shine sweep pseudo-element */
@@ -215,7 +214,7 @@ html.dark .dh-hero-explore-btn {
   border-radius: inherit;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 200ms ease-out;
   z-index: 1;
 }
 
@@ -252,7 +251,7 @@ html.dark .dh-hero-explore-btn::before {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  transition: color 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: color 200ms ease-out;
 }
 
 html[data-theme="light"] .dh-hero-explore-btn:hover .dh-hero-explore-content,
@@ -271,7 +270,7 @@ html.dark .dh-hero-explore-btn:hover .dh-hero-explore-content {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 200ms ease-out;
 }
 
 .dh-hero-explore-btn:hover .dh-hero-explore-icon {
