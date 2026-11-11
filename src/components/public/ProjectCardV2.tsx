@@ -8,20 +8,22 @@ import './ProjectCardV2.css';
 
 interface ProjectCardV2Props {
   project: Project;
+  span?: '7' | '5';
   className?: string;
 }
 
-export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className = '' }) => {
+export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
+  project,
+  span = '7',
+  className = '',
+}) => {
   const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const previewUrl = project.previewUrl || project.projectUrl || getProjectLiveUrl(project);
   const hasPreview = Boolean(previewUrl && previewUrl.trim().length > 0);
-  const hasCaseStudy = Boolean(
-    project.caseStudy &&
-    project.caseStudy.summary &&
-    project.caseStudy.summary.trim().length > 0
-  );
+  const caseStudySlug = project.slug || project.id;
+  const hasCaseStudy = Boolean(caseStudySlug && caseStudySlug.trim().length > 0);
 
   const imgSrc = formatImageUrl(
     project.cardImage?.src || project.img || '',
@@ -31,16 +33,53 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className
   const shortDesc = project.shortDescription || project.description || '';
 
   return (
-    <article className={`dh-card-v2 ${className}`}>
-      {/* ── 16:9 Image Tile Container ── */}
+    <article className={`dh-card-v2 dh-card-v2--span-${span} ${className}`}>
+      {/* ── Image Tile Container ── */}
       <div className="dh-card-v2__tile">
-        {/* Outlined Category Pill with 6px Accent Dot */}
-        <div className="dh-card-v2__pill">
-          <span className="dh-card-v2__pill-dot" aria-hidden="true" />
-          <span>{project.category}</span>
+        {/* ── Top-Start Folder Tab notched into image corner ── */}
+        <div className="dh-card-v2__tab" aria-label={`Category: ${project.category}`}>
+          <span className="dh-card-v2__tab-dot" aria-hidden="true" />
+          <span className="dh-card-v2__tab-text">{project.category}</span>
+
+          {/* Smooth Concave Fillet Curve (Top Edge) */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            className="dh-card-v2__tab-fillet-top"
+            aria-hidden="true"
+          >
+            <path d="M0 0 L18 0 A 18 18 0 0 0 0 18 Z" fill="currentColor" />
+          </svg>
+
+          {/* Smooth Concave Fillet Curve (Start/Left Edge) */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            className="dh-card-v2__tab-fillet-bottom"
+            aria-hidden="true"
+          >
+            <path d="M0 0 L0 18 A 18 18 0 0 0 18 0 Z" fill="currentColor" />
+          </svg>
         </div>
 
-        {/* Media Image */}
+        {/* ── Top-End Round Preview Icon (34px) ── */}
+        {hasPreview && (
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="dh-card-v2__preview-icon"
+            aria-label={`${t('work_v2_preview') || 'Preview work'}: ${project.title}`}
+          >
+            <ExternalLink className="w-4 h-4" aria-hidden="true" />
+          </a>
+        )}
+
+        {/* ── Media Image ── */}
         <img
           src={imgSrc}
           alt={imgAlt}
@@ -56,7 +95,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className
           }`}
         />
 
-        {/* ── Sliding Hover Panel (over image tile only) ── */}
+        {/* ── Sliding Hover Panel (over image tile only, fully opaque #081620) ── */}
         <div className="dh-card-v2__panel" aria-hidden="false">
           <span className="dh-card-v2__panel-cat">{project.category}</span>
           <h3 className="dh-card-v2__panel-title">{project.title}</h3>
@@ -69,21 +108,21 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className
                   href={previewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="dh-card-btn-primary"
-                  aria-label={`${t('work_v2_preview_work') || 'Preview work'}: ${project.title}`}
+                  className="dh-card-v2__btn-minimal"
+                  aria-label={`${t('work_v2_preview') || 'Preview work'}: ${project.title}`}
                 >
-                  <span>{t('work_v2_preview_work') || 'Preview work'}</span>
+                  <span>{t('work_v2_preview') || 'Preview work'}</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 </a>
               )}
 
               {hasCaseStudy && (
                 <Link
-                  to={`/work/${project.slug}`}
-                  className="dh-card-btn-secondary"
-                  aria-label={`${t('work_v2_read_case_study') || 'Read case study'}: ${project.title}`}
+                  to={`/work/${caseStudySlug}`}
+                  className="dh-card-v2__btn-minimal"
+                  aria-label={`${t('work_v2_read_case') || 'Case study'}: ${project.title}`}
                 >
-                  <span>{t('work_v2_read_case_study') || 'Read case study'}</span>
+                  <span>{t('work_v2_read_case') || 'Case study'}</span>
                   <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
                 </Link>
               )}
@@ -101,7 +140,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className
           {shortDesc}
         </p>
 
-        {/* Fallback buttons on Touch / Small Mobile screens */}
+        {/* Minimal Buttons on Touch / Small Mobile Screens */}
         {(hasPreview || hasCaseStudy) && (
           <div className="dh-card-v2__mobile-actions">
             {hasPreview && (
@@ -109,19 +148,19 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({ project, className
                 href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="dh-card-btn-primary text-xs"
+                className="dh-card-v2__btn-minimal"
               >
-                <span>{t('work_v2_preview_work') || 'Preview work'}</span>
-                <ExternalLink className="w-3 h-3 shrink-0" aria-hidden="true" />
+                <span>{t('work_v2_preview') || 'Preview work'}</span>
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               </a>
             )}
             {hasCaseStudy && (
               <Link
-                to={`/work/${project.slug}`}
-                className="dh-card-btn-secondary text-xs"
+                to={`/work/${caseStudySlug}`}
+                className="dh-card-v2__btn-minimal"
               >
-                <span>{t('work_v2_read_case_study') || 'Read case study'}</span>
-                <ArrowRight className="w-3 h-3 shrink-0 rtl:rotate-180" aria-hidden="true" />
+                <span>{t('work_v2_read_case') || 'Case study'}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
               </Link>
             )}
           </div>

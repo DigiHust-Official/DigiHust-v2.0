@@ -1,8 +1,8 @@
-/* ── ProjectCardV2 Styles ─────────────────────────────────────────── */
+/* ── ProjectCardV2 Styles (Folder Card, Opaque Sliding Panel, Minimal Links) ── */
 
 :root {
   --dh-card-surface-light: #FFFFFF;
-  --dh-card-border-light: rgba(2, 43, 58, 0.10);
+  --dh-card-border-light: rgba(2, 43, 58, 0.08);
   --dh-card-shadow-light: 0 4px 16px -4px rgba(2, 43, 58, 0.06);
   --dh-card-title-light: #0A1F2B;
   --dh-card-desc-light: #4A6070;
@@ -16,19 +16,23 @@
   --dh-card-accent-dark: #2EC4D6;
 }
 
-/* Base Card Container */
+/* ── Base Card Shell (Folder Card) ─────────────────────────────────── */
 .dh-card-v2 {
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: clamp(24px, 2.2vw, 32px);
+  padding: 8px;
   box-sizing: border-box;
   background-color: var(--dh-card-surface-light);
   border: 1px solid var(--dh-card-border-light);
   box-shadow: var(--dh-card-shadow-light);
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dh-card-surface: var(--dh-card-surface-light);
+  --dh-card-title: var(--dh-card-title-light);
+  --dh-card-desc: var(--dh-card-desc-light);
+  --dh-card-accent: var(--dh-card-accent-light);
 }
 
 html[data-theme="dark"] .dh-card-v2,
@@ -37,6 +41,10 @@ html.dark .dh-card-v2,
   background-color: var(--dh-card-surface-dark);
   border: 1px solid var(--dh-card-border-dark);
   box-shadow: var(--dh-card-shadow-dark);
+  --dh-card-surface: var(--dh-card-surface-dark);
+  --dh-card-title: var(--dh-card-title-dark);
+  --dh-card-desc: var(--dh-card-desc-dark);
+  --dh-card-accent: var(--dh-card-accent-dark);
 }
 
 html[data-theme="light"] .dh-card-v2,
@@ -44,31 +52,63 @@ html.light .dh-card-v2 {
   background-color: var(--dh-card-surface-light);
   border: 1px solid var(--dh-card-border-light);
   box-shadow: var(--dh-card-shadow-light);
+  --dh-card-surface: var(--dh-card-surface-light);
+  --dh-card-title: var(--dh-card-title-light);
+  --dh-card-desc: var(--dh-card-desc-light);
+  --dh-card-accent: var(--dh-card-accent-light);
 }
 
+/* Constant shell background on hover; subtle elevation only */
 .dh-card-v2:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] .dh-card-v2:hover,
+html.dark .dh-card-v2:hover,
+:root .dh-card-v2:hover {
+  box-shadow: 0 18px 40px -8px rgba(0, 0, 0, 0.55);
 }
 
 /* ── Image Tile Container ────────────────────────────────────────── */
 .dh-card-v2__tile {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
   box-sizing: border-box;
   background-color: #081620;
 }
 
-/* 1px inner ring at 10% text color */
+/* 16:9 on span-7 card and single column */
+.dh-card-v2--span-7 .dh-card-v2__tile {
+  aspect-ratio: 16 / 9;
+}
+
+/* Span-5 card shares row image height set by span-7 card */
+@media (min-width: 900px) {
+  .dh-card-v2--span-5 .dh-card-v2__tile {
+    height: var(--row-img-h, calc(((100% - 24px) * 7 / 12 - 16px) * 9 / 16));
+    aspect-ratio: unset;
+  }
+}
+
+@media (max-width: 899.98px) {
+  .dh-card-v2--span-5 .dh-card-v2__tile,
+  .dh-card-v2--span-7 .dh-card-v2__tile {
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+}
+
+/* 1px Inner Ring inside Tile */
 .dh-card-v2__tile::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  z-index: 8;
+  z-index: 15;
   box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.10);
 }
 
@@ -90,63 +130,135 @@ html.light .dh-card-v2__tile::after {
   display: block;
 }
 
-/* ── Top-Start Category Pill ──────────────────────────────────────── */
-.dh-card-v2__pill {
+/* ── Top-Start Folder Tab Notched into Image ─────────────────────── */
+.dh-card-v2__tab {
   position: absolute;
-  top: 14px;
-  inset-inline-start: 14px;
-  z-index: 5;
+  top: 0;
+  inset-inline-start: 0;
+  z-index: 20;
+  height: 40px;
+  padding-inline: 14px 16px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  background: rgba(8, 22, 32, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #F3F6FA;
+  gap: 8px;
+  background-color: var(--dh-card-surface);
+  color: var(--dh-card-surface); /* For SVG fill="currentColor" */
+  border-end-end-radius: 18px;
+  box-sizing: border-box;
   pointer-events: none;
+  user-select: none;
 }
 
-html[data-theme="light"] .dh-card-v2__pill,
-html.light .dh-card-v2__pill {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(10, 31, 43, 0.14);
-  color: #0A1F2B;
-}
-
-.dh-card-v2__pill-dot {
-  width: 6px;
-  height: 6px;
+.dh-card-v2__tab-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background-color: var(--dh-card-accent-dark);
+  background-color: var(--dh-card-accent);
   flex-shrink: 0;
 }
 
-html[data-theme="light"] .dh-card-v2__pill-dot,
-html.light .dh-card-v2__pill-dot {
-  background-color: var(--dh-card-accent-light);
+.dh-card-v2__tab-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dh-card-title);
+  white-space: nowrap;
 }
 
-/* ── Sliding Hover Panel (over image tile only) ─────────────────── */
+/* Concave Fillet Curve (Top Edge) */
+.dh-card-v2__tab-fillet-top {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 100%;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  pointer-events: none;
+}
+
+/* Concave Fillet Curve (Start Edge) */
+.dh-card-v2__tab-fillet-bottom {
+  position: absolute;
+  top: 40px;
+  inset-inline-start: 0;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  pointer-events: none;
+}
+
+/* RTL Fillet Mirroring */
+[dir="rtl"] .dh-card-v2__tab-fillet-top,
+html[dir="rtl"] .dh-card-v2__tab-fillet-top {
+  transform: scaleX(-1);
+  transform-origin: left top;
+}
+
+[dir="rtl"] .dh-card-v2__tab-fillet-bottom,
+html[dir="rtl"] .dh-card-v2__tab-fillet-bottom {
+  transform: scaleX(-1);
+  transform-origin: left top;
+}
+
+/* ── Top-End Round Preview Icon (34px) ───────────────────────────── */
+.dh-card-v2__preview-icon {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  z-index: 20;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 22, 32, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #F3F6FA;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.18s ease, border-color 0.18s ease;
+}
+
+.dh-card-v2__preview-icon:hover {
+  transform: scale(1.08);
+  background: #1F7A8C;
+  border-color: #1F7A8C;
+  color: #FFFFFF;
+}
+
+html[data-theme="dark"] .dh-card-v2__preview-icon:hover,
+html.dark .dh-card-v2__preview-icon:hover,
+:root .dh-card-v2__preview-icon:hover {
+  background: #2EC4D6;
+  border-color: #2EC4D6;
+  color: #081620;
+}
+
+.dh-card-v2__preview-icon:focus-visible {
+  outline: 2px solid #2EC4D6;
+  outline-offset: 3px;
+}
+
+/* ── Sliding Hover Panel (over image tile only, fully opaque #081620) ─ */
 .dh-card-v2__panel {
   position: absolute;
   inset: 0;
   z-index: 10;
   box-sizing: border-box;
-  padding: clamp(14px, 2vw, 24px);
-  background-color: rgba(8, 22, 32, 0.94);
+  padding: clamp(16px, 2.2vw, 28px);
+  background-color: #081620; /* 100% OPAQUE */
   color: #F3F6FA;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* Sliding transform transition copying hero Work button */
+  /* Exact transition copying hero Work button */
   transform: translate3d(-101%, 0, 0);
   transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
   will-change: transform;
@@ -165,10 +277,17 @@ html[dir="rtl"] .dh-card-v2__panel {
   }
 }
 
-/* Reduced motion disables transition */
+/* Reduced motion disables sliding */
 @media (prefers-reduced-motion: reduce) {
   .dh-card-v2__panel {
     transition: none !important;
+  }
+}
+
+/* On touch devices or below 768px: no panel */
+@media (hover: none), (max-width: 767.98px) {
+  .dh-card-v2__panel {
+    display: none !important;
   }
 }
 
@@ -185,27 +304,35 @@ html[dir="rtl"] .dh-card-v2__panel {
 .dh-card-v2__panel-title {
   font-family: 'Outfit', sans-serif;
   font-weight: 300;
-  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
-  line-height: 1.25;
+  font-size: clamp(1.15rem, 1.7vw, 1.6rem);
+  line-height: 1.22;
   color: #F3F6FA;
   margin: 0 0 6px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  max-width: 95%;
 }
 
 .dh-card-v2__panel-desc {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.4;
   color: #A9B8C6;
-  margin: 0 0 14px 0;
+  margin: 0 0 16px 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 90%;
+}
+
+/* In narrow card on compact screens, hide short text rather than clip */
+@media (max-width: 1200px) {
+  .dh-card-v2--span-5 .dh-card-v2__panel-desc {
+    display: none;
+  }
 }
 
 .dh-card-v2__panel-actions {
@@ -213,168 +340,105 @@ html[dir="rtl"] .dh-card-v2__panel {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 22px;
 }
 
-/* ── Panel Buttons (Preview work & Read case study) ─────────────── */
-.dh-card-btn-primary {
-  height: 36px;
-  padding-inline: 16px;
-  border-radius: 999px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
+/* ── Minimal Text-Link Buttons (No pills, no filled backgrounds) ─── */
+.dh-card-v2__btn-minimal {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  text-decoration: none;
-  background: linear-gradient(180deg, #1B4A5C 0%, #06222D 100%);
-  color: #FFFFFF !important;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 10px rgba(0, 0, 0, 0.3);
-  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.18s ease;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.dh-card-btn-primary:hover {
-  background: linear-gradient(180deg, #245E75 0%, #0A2E3D 100%);
-  transform: translateY(-1px);
-}
-
-.dh-card-btn-primary:active {
-  transform: translateY(1px);
-}
-
-.dh-card-btn-primary:focus-visible {
-  outline: 2px solid #2EC4D6;
-  outline-offset: 3px;
-}
-
-.dh-card-btn-secondary {
-  height: 36px;
-  padding-inline: 16px;
-  border-radius: 999px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-decoration: none;
-  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  font-weight: 500;
+  height: 32px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
   color: #F3F6FA !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
-  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.18s ease, border-color 0.18s ease;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
   white-space: nowrap;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
 }
 
-.dh-card-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.75);
-  transform: translateY(-1px);
+.dh-card-v2__btn-minimal:hover {
+  text-decoration-color: #2EC4D6;
+  color: #2EC4D6 !important;
 }
 
-.dh-card-btn-secondary:active {
-  transform: translateY(1px);
-}
-
-.dh-card-btn-secondary:focus-visible {
+.dh-card-v2__btn-minimal:focus-visible {
   outline: 2px solid #2EC4D6;
   outline-offset: 3px;
+  border-radius: 4px;
+  text-decoration-color: #2EC4D6;
+  color: #2EC4D6 !important;
 }
 
-/* ── Card Body (below image tile) ────────────────────────────────── */
+/* ── Card Body (Below Image Tile) ────────────────────────────────── */
 .dh-card-v2__body {
-  padding-top: 16px;
-  padding-inline: 4px;
   display: flex;
   flex-direction: column;
+  padding: 12px 6px 4px 6px;
+  box-sizing: border-box;
 }
 
 .dh-card-v2__title {
   font-family: 'Outfit', sans-serif;
   font-weight: 400;
-  font-size: clamp(1.15rem, 1.4vw, 1.35rem);
-  line-height: 1.3;
-  color: var(--dh-card-title-light);
-  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: var(--dh-card-title);
+  margin: 0 0 4px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-html[data-theme="dark"] .dh-card-v2__title,
-html.dark .dh-card-v2__title,
-:root .dh-card-v2__title {
-  color: var(--dh-card-title-dark);
-}
-
-html[data-theme="light"] .dh-card-v2__title,
-html.light .dh-card-v2__title {
-  color: var(--dh-card-title-light);
-}
-
-/* Exactly 2 lines reserved for short description */
 .dh-card-v2__desc {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--dh-card-desc-light);
-  margin: 6px 0 0 0;
+  color: var(--dh-card-desc);
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: calc(14px * 1.5 * 2);
-  min-height: calc(14px * 1.5 * 2);
+  height: calc(0.875rem * 1.5 * 2); /* 2 lines strictly reserved */
 }
 
-html[data-theme="dark"] .dh-card-v2__desc,
-html.dark .dh-card-v2__desc,
-:root .dh-card-v2__desc {
-  color: var(--dh-card-desc-dark);
-}
-
-html[data-theme="light"] .dh-card-v2__desc,
-html.light .dh-card-v2__desc {
-  color: var(--dh-card-desc-light);
-}
-
-/* ── Mobile / Touch Actions (Visible on small screens or touch devices) ── */
+/* ── Fallback Actions on Touch / Small Mobile Screens ────────────── */
 .dh-card-v2__mobile-actions {
   display: none;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-subtle);
-  align-items: center;
-  gap: 8px;
 }
 
 @media (hover: none), (max-width: 767.98px) {
-  .dh-card-v2__panel {
-    display: none !important;
-  }
   .dh-card-v2__mobile-actions {
     display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+
+  .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal {
+    text-decoration-color: rgba(10, 31, 43, 0.35);
+    color: var(--dh-card-title) !important;
+  }
+
+  html[data-theme="dark"] .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal,
+  html.dark .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal,
+  :root .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal {
+    text-decoration-color: rgba(255, 255, 255, 0.35);
+    color: var(--dh-card-title) !important;
+  }
+
+  .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal:hover {
+    color: var(--dh-card-accent) !important;
+    text-decoration-color: var(--dh-card-accent);
   }
 }
-
-/* ── Projects Grid Layout (2 cols >= 900px, 1 col below) ──────────── */
-.dh-projects-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(16px, 2vw, 28px);
-  align-items: stretch;
-  width: 100%;
-}
-
-@media (min-width: 900px) {
-  .dh-projects-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
