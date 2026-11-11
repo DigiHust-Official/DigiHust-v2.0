@@ -19,7 +19,7 @@ export function LiquidRing({ className = '' }: { className?: string }) {
       antialias: false,
       powerPreference: 'low-power',
     });
-    if (!gl) return; // no WebGL: the ring simply isn't shown
+    if (!gl || gl.isContextLost()) return; // no WebGL: the ring simply isn't shown
     gl.getExtension('OES_standard_derivatives');
 
     const compile = (type: number, src: string) => {
@@ -143,7 +143,6 @@ export function LiquidRing({ className = '' }: { className?: string }) {
       document.removeEventListener('visibilitychange', onVis);
       canvas.removeEventListener('webglcontextlost', onLost);
       if (poll) clearInterval(poll);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, []);
 
