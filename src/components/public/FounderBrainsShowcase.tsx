@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import foundersDuoImg from '../../assets/founders_duo.png';
+import foundersDuoImg from '../../assets/founders_duo.webp';
 
 export interface FounderBrainsShowcaseProps {
   onSelectMahad?: () => void;
@@ -115,9 +115,11 @@ export const FounderBrainsShowcase: React.FC<FounderBrainsShowcaseProps> = ({
             <motion.img
               src={foundersDuoImg}
               alt="Mahad Abbas and Muhammad Haseeb - DigiHust Executive Leadership"
-              className="w-[320px] md:w-[380px] lg:w-[430px] h-auto object-contain object-bottom select-none drop-shadow-md pointer-events-none block align-bottom"
-              loading="eager"
+              width={450}
+              height={525}
+              loading="lazy"
               decoding="async"
+              className="w-[320px] md:w-[380px] lg:w-[430px] h-auto object-contain object-bottom select-none drop-shadow-md pointer-events-none block align-bottom"
               initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
               animate={isEntered || shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -202,8 +204,10 @@ export const FounderBrainsShowcase: React.FC<FounderBrainsShowcaseProps> = ({
           <img
             src={foundersDuoImg}
             alt="Mahad Abbas and Muhammad Haseeb"
+            width={450}
+            height={525}
             className="w-[260px] sm:w-[290px] h-auto object-contain object-bottom select-none drop-shadow-sm pointer-events-none z-10"
-            loading="eager"
+            loading="lazy"
             decoding="async"
           />
           {/* Click zones on mobile photo */}
