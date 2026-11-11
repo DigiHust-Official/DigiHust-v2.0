@@ -74,6 +74,8 @@ export const Navbar: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isNearTop, setIsNearTop] = useState(false);
+  const isNearTopRef = useRef(false);
+  isNearTopRef.current = isNearTop;
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   const isHiddenRef = useRef(false);
@@ -121,14 +123,29 @@ export const Navbar: React.FC = () => {
       }
     };
 
-    // Reveal navbar when pointer moves within top 60px of viewport (desktop only)
+    // Reveal navbar when pointer moves within top 60px of viewport (desktop only, rAF-throttled)
+    let pointerRafId: number | null = null;
+    let pendingY = 0;
+
     const onPointerMove = (e: PointerEvent) => {
-      if (window.innerWidth >= 1024) {
-        if (e.clientY <= 60) {
-          setIsNearTop(true);
-        } else {
-          setIsNearTop(false);
-        }
+      if (window.innerWidth < 1024) return;
+      const y = e.clientY;
+
+      // Bail out early if pointer is not near top and navbar is not currently in near-top state
+      if (!isNearTopRef.current && y > 60) {
+        return;
+      }
+
+      pendingY = y;
+      if (pointerRafId === null) {
+        pointerRafId = window.requestAnimationFrame(() => {
+          pointerRafId = null;
+          const nearTop = pendingY <= 60;
+          if (nearTop !== isNearTopRef.current) {
+            isNearTopRef.current = nearTop;
+            setIsNearTop(nearTop);
+          }
+        });
       }
     };
 
@@ -153,6 +170,9 @@ export const Navbar: React.FC = () => {
     }
 
     return () => {
+      if (pointerRafId !== null) {
+        window.cancelAnimationFrame(pointerRafId);
+      }
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('dh-show-nav', onShowNav);

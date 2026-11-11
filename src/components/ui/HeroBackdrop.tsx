@@ -135,6 +135,9 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
     let targetY = 0;
     let currentX = 0;
     let currentY = 0;
+    let pointerClientX = -9999;
+    let pointerClientY = -9999;
+    let hasPendingPointer = false;
 
     const startParallaxLoop = () => {
       if (isParallaxRunning) return;
@@ -147,6 +150,70 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
           return;
         }
 
+        // 1. Process pending pointer coordinates in rAF loop
+        if (hasPendingPointer) {
+          hasPendingPointer = false;
+
+          if (WAVE_PARALLAX) {
+            const normX = pointerClientX / window.innerWidth - 0.5;
+            const normY = pointerClientY / window.innerHeight - 0.5;
+            targetX = normX * 28; // -14px to +14px
+            targetY = normY * 28; // -14px to +14px
+          }
+
+          // Aura Hover Spread & Fade Detection
+          const heroNode = heroRef?.current || containerRef.current;
+          const containerNode = containerRef.current;
+          if (!heroNode || !containerNode) {
+            resetAuraHover();
+          } else {
+            const heroRect = heroNode.getBoundingClientRect();
+            const inHero =
+              pointerClientX >= heroRect.left &&
+              pointerClientX <= heroRect.right &&
+              pointerClientY >= heroRect.top &&
+              pointerClientY <= heroRect.bottom;
+
+            if (!inHero) {
+              resetAuraHover();
+            } else {
+              const cRect = containerNode.getBoundingClientRect();
+              const scale = Math.max(cRect.width / 1600, cRect.height / 900);
+              const offsetX = cRect.left + cRect.width / 2 - 800 * scale;
+              const offsetY = cRect.top + cRect.height / 2 - 450 * scale;
+
+              let minDistSq = Infinity;
+              const px = pointerClientX;
+              const py = pointerClientY;
+
+              for (let i = 0; i < SAMPLE_POINTS.length; i++) {
+                const [sx, sy] = SAMPLE_POINTS[i];
+                const screenX = offsetX + sx * scale;
+                const screenY = offsetY + sy * scale;
+                const dx = px - screenX;
+                const dy = py - screenY;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq) {
+                  minDistSq = distSq;
+                }
+              }
+
+              // roughly 120px threshold (120^2 = 14400)
+              const nearRibbon = minDistSq <= 14400;
+
+              if (nearRibbon !== isRibbonHovered) {
+                isRibbonHovered = nearRibbon;
+                if (nearRibbon) {
+                  auraLayerRef.current?.classList.add('dh-wave-aura-layer--hovered');
+                } else {
+                  auraLayerRef.current?.classList.remove('dh-wave-aura-layer--hovered');
+                }
+              }
+            }
+          }
+        }
+
+        // 2. Parallax Lerp Step
         const dx = targetX - currentX;
         const dy = targetY - currentY;
 
@@ -167,8 +234,12 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
               2
             )}px, ${currentY.toFixed(2)}px, 0)`;
           }
-          isParallaxRunning = false;
-          rafId = null;
+          if (hasPendingPointer) {
+            rafId = requestAnimationFrame(loop);
+          } else {
+            isParallaxRunning = false;
+            rafId = null;
+          }
         }
       };
 
@@ -177,72 +248,11 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
 
     const onPointerMove = (e: PointerEvent) => {
       if (prefersReducedMotion || !hasFinePointer) return;
-
-      // 1. Mouse Parallax
-      if (WAVE_PARALLAX) {
-        const normX = e.clientX / window.innerWidth - 0.5;
-        const normY = e.clientY / window.innerHeight - 0.5;
-        targetX = normX * 28; // -14px to +14px
-        targetY = normY * 28; // -14px to +14px
+      pointerClientX = e.clientX;
+      pointerClientY = e.clientY;
+      hasPendingPointer = true;
+      if (isIntersecting && isVisible) {
         startParallaxLoop();
-      }
-
-      // 2. Aura Hover Spread & Fade Detection
-      if (!isIntersecting || !isVisible) {
-        resetAuraHover();
-        return;
-      }
-
-      const heroNode = heroRef?.current || containerRef.current;
-      const containerNode = containerRef.current;
-      if (!heroNode || !containerNode) {
-        resetAuraHover();
-        return;
-      }
-
-      const heroRect = heroNode.getBoundingClientRect();
-      const inHero =
-        e.clientX >= heroRect.left &&
-        e.clientX <= heroRect.right &&
-        e.clientY >= heroRect.top &&
-        e.clientY <= heroRect.bottom;
-
-      if (!inHero) {
-        resetAuraHover();
-        return;
-      }
-
-      const cRect = containerNode.getBoundingClientRect();
-      const scale = Math.max(cRect.width / 1600, cRect.height / 900);
-      const offsetX = cRect.left + cRect.width / 2 - 800 * scale;
-      const offsetY = cRect.top + cRect.height / 2 - 450 * scale;
-
-      let minDistSq = Infinity;
-      const px = e.clientX;
-      const py = e.clientY;
-
-      for (let i = 0; i < SAMPLE_POINTS.length; i++) {
-        const [sx, sy] = SAMPLE_POINTS[i];
-        const screenX = offsetX + sx * scale;
-        const screenY = offsetY + sy * scale;
-        const dx = px - screenX;
-        const dy = py - screenY;
-        const distSq = dx * dx + dy * dy;
-        if (distSq < minDistSq) {
-          minDistSq = distSq;
-        }
-      }
-
-      // roughly 120px threshold (120^2 = 14400)
-      const nearRibbon = minDistSq <= 14400;
-
-      if (nearRibbon !== isRibbonHovered) {
-        isRibbonHovered = nearRibbon;
-        if (nearRibbon) {
-          auraLayerRef.current?.classList.add('dh-wave-aura-layer--hovered');
-        } else {
-          auraLayerRef.current?.classList.remove('dh-wave-aura-layer--hovered');
-        }
       }
     };
 

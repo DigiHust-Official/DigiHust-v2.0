@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import {
   User, Group, Lead, Project, Payout, Applicant, GlobalAdminSettings, PipelineStage,
   Deliverable, Comment, ProjectAssignment, GroupId, UserRole, UserRoleTier, UserStatus,
@@ -557,12 +557,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
 
-  // Auto-logout after 30 minutes of inactivity
+  // Auto-logout after 30 minutes of inactivity (throttled ref, passive listeners)
+  const lastActiveRef = useRef<number>(Date.now());
   useEffect(() => {
     if (!currentUser) return;
 
     let timeoutId: any;
     const resetTimer = () => {
+      const now = Date.now();
+      if (now - lastActiveRef.current < 1000) return;
+      lastActiveRef.current = now;
+
       clearTimeout(timeoutId);
       // 30 minutes = 30 * 60 * 1000 = 1800000 ms
       timeoutId = setTimeout(() => {
@@ -571,14 +576,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }, 1800000);
     };
 
-    // Attach listeners
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('keypress', resetTimer);
-    window.addEventListener('scroll', resetTimer);
-    window.addEventListener('click', resetTimer);
+    // Attach passive listeners
+    const opts = { passive: true };
+    window.addEventListener('mousemove', resetTimer, opts);
+    window.addEventListener('keypress', resetTimer, opts);
+    window.addEventListener('scroll', resetTimer, opts);
+    window.addEventListener('click', resetTimer, opts);
 
     // Initial set
-    resetTimer();
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      logout();
+      showToast('You have been logged out due to inactivity.', 'info', 'Session Expired');
+    }, 1800000);
 
     return () => {
       clearTimeout(timeoutId);
@@ -591,7 +601,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 
 
-  // Inactivity Timeout Logout (30 minutes)
+  // Inactivity Timeout Logout (30 minutes - throttled ref, passive listeners)
+  const lastAuthActiveRef = useRef<number>(Date.now());
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -599,6 +610,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
     const resetTimer = () => {
+      const now = Date.now();
+      if (now - lastAuthActiveRef.current < 1000) return;
+      lastAuthActiveRef.current = now;
+
       window.clearTimeout(timeoutId);
       timeoutId = window.setTimeout(() => {
         // Log out on timeout
@@ -609,7 +624,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }, TIMEOUT_MS);
     };
 
-    resetTimer();
+    // Initial set
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      setIsAuthenticated(false);
+      localStorage.setItem('digihust_portal_is_authenticated', JSON.stringify(false));
+      alert('You have been logged out due to 30 minutes of inactivity.');
+      window.location.href = '/portal/login';
+    }, TIMEOUT_MS);
 
     const events = ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove', 'scroll'];
     events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }));
