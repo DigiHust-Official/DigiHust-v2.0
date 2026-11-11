@@ -1,0 +1,13 @@
+/* Transparent-background ring video. Size comes from --ring-size set by the parent.
+   Recolor with --ring-video-filter on the parent (e.g. "none" keeps the original purple). */
+.dh-ring-video {
+  display: block;
+  width: var(--ring-size, 720px);
+  height: var(--ring-size, 720px);
+  max-width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  background: transparent;
+  filter: var(--ring-video-filter, none);
+}
