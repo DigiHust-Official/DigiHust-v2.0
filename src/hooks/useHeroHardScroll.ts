@@ -26,6 +26,7 @@ export function useHeroHardScroll({
   const touchStartYRef = useRef<number | null>(null);
   const lastWheelTimeRef = useRef<number>(0);
   const endReachedTimeRef = useRef<number>(0);
+  const whyEndReachedTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // 1. Guard check: Reduced motion
@@ -206,6 +207,25 @@ export function useHeroHardScroll({
 
       const timeSinceEndReached = endReachedTimeRef.current > 0 ? now - endReachedTimeRef.current : 0;
 
+      // Check why-digihust section bounds
+      const whyEl = document.querySelector<HTMLElement>('[data-hard-stop="why-digihust"]');
+      let isAtWhyEnd = false;
+      let isWhyTaller = false;
+
+      if (whyEl) {
+        const whyRect = whyEl.getBoundingClientRect();
+        isWhyTaller = whyEl.offsetHeight > window.innerHeight;
+        isAtWhyEnd = whyRect.bottom <= window.innerHeight + 2;
+
+        if (!isAtWhyEnd) {
+          whyEndReachedTimeRef.current = 0;
+        } else if (whyEndReachedTimeRef.current === 0) {
+          whyEndReachedTimeRef.current = now;
+        }
+      }
+
+      const timeSinceWhyEndReached = whyEndReachedTimeRef.current > 0 ? now - whyEndReachedTimeRef.current : 0;
+
       if (deltaY > 0) {
         // ── SCROLLING DOWN ──
         if (currentY < s1 - TOL) {
@@ -220,8 +240,14 @@ export function useHeroHardScroll({
             e.preventDefault();
             animateScrollTo(s3);
           }
+        } else if (s3 && isWhyTaller && isAtWhyEnd && currentY >= s3 - 2) {
+          // When why-digihust is taller than viewport and bottom is reached:
+          // absorb inertia until a fresh gesture is initiated
+          if (timeSinceLastWheel < 120 || timeSinceWhyEndReached < 150) {
+            e.preventDefault();
+          }
         }
-        // Inside services: free native scroll down
+        // Inside services / why-digihust: free native scroll down
       } else {
         // ── SCROLLING UP ──
         if (s3 && currentY >= s3 - 2 && currentY <= s3 + 60) {
