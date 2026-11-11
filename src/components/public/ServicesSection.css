@@ -109,6 +109,9 @@ html.dark .dh-services {
   flex-direction: column;
   overflow: clip;
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+  /* Recolors the purple ring to our brand teal (both themes). Set to "none" to keep original purple */
+  --ring-video-filter: hue-rotate(-60deg) saturate(1.1);
 }
 
 /* ── Decorative Ring Background Layer (Item 1 & 2) ── */
