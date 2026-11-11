@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { VERT, FRAG } from './liquidRingShader';
 import './LiquidRing.css';
+import { VERT, FRAG } from './liquidRingShader';
+
 
 const FPS = 30;
 const MAX_PX = 900; // backing-store cap, keeps the GPU cost tiny

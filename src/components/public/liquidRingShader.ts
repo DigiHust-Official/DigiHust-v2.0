@@ -1,6 +1,5 @@
-// Fragment shader for the decorative liquid-glass ring (transparent background, theme via u_dark).
+// Liquid-glass ring shader v2: silver-rimmed glass with violet patches, dark pools and fine sparkle. Transparent background; theme via u_dark.
 export const VERT = `attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
-
 export const FRAG = `#extension GL_OES_standard_derivatives : enable
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -9,25 +8,30 @@ precision mediump float;
 #endif
 uniform vec2 u_res; uniform float u_t; uniform float u_dark;
 float hash(vec3 p){p=fract(p*0.3183099+.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
-float noise(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.-2.*f);
+float noise(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*f*(f*(f*6.-15.)+10.);
  return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
             mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float S(vec2 p,float t){
  float r=length(p); vec2 d=p/max(r,1e-4);
- vec3 q=vec3(d*1.25,t*0.16);
- float R=0.60+0.26*(noise(q)-0.5)+0.14*(noise(q*2.3+7.)-0.5)+0.06*(noise(q*5.1+3.)-0.5);
- float w=0.07+0.11*noise(vec3(d*1.4+3.,t*0.13+9.))+0.03*noise(q*3.);
+ vec3 q=vec3(d*1.3,t*0.15);
+ float R=0.58+0.24*(noise(q)-0.5)+0.12*(noise(q*2.1+7.)-0.5)+0.04*(noise(q*4.3+3.)-0.5);
+ float wn=noise(vec3(d*1.3+3.,t*0.12+9.));
+ float w=0.055+0.19*wn*wn+0.02*noise(q*3.);
  return (r-R)/w;
+}
+float envm(vec3 R){
+ float e=0.10+0.45*smoothstep(-0.3,0.9,R.y);
+ e+=0.50*pow(0.5+0.5*sin(R.y*5.0+R.x*2.0+1.0),3.0);
+ e+=0.35*smoothstep(0.6,0.95,R.x*0.6-R.y*0.4);
+ return e;
 }
 void main(){
  vec2 p=(gl_FragCoord.xy/u_res)*2.-1.;
  float t=u_t;
  float s=S(p,t);
- float aw=1.0;
+ float aw=0.03;
  #ifdef GL_OES_standard_derivatives
- aw=fwidth(s)*1.1;
- #else
- aw=0.03;
+ aw=fwidth(s)*1.0;
  #endif
  float a=1.-smoothstep(1.-aw,1.+aw,abs(s));
  if(a<=0.001){gl_FragColor=vec4(0.);return;}
@@ -36,29 +40,49 @@ void main(){
  g=normalize(g+1e-6);
  float sc=clamp(s,-0.985,0.985);
  vec3 N=vec3(g*sc,sqrt(1.-sc*sc));
- vec3 cp=vec3(p*7.,t*0.22);N.xy+=0.34*(vec2(noise(cp),noise(cp+vec3(5.,3.,1.)))-.5)+0.18*(vec2(noise(cp*2.3+2.),noise(cp*2.3+9.))-.5);
+ float ang=atan(p.y,p.x);
+ float tw=sin(ang*2.+t*0.35+noise(vec3(p*1.5,t*0.1))*4.)*0.5;
+ float cs=cos(tw),sn=sin(tw);
+ N.xy=mat2(cs,-sn,sn,cs)*N.xy;
+ vec3 wp=vec3(p*6.+vec2(noise(vec3(p*3.,t*0.2)),noise(vec3(p*3.+4.,t*0.2)))*3.,t*0.25);
+ N.xy+=0.26*(vec2(noise(wp),noise(wp+vec3(5.,3.,1.)))-.5);
+ vec3 gp=vec3(p*38.,t*0.1);
+ N.xy+=0.13*(vec2(noise(gp),noise(gp+9.))-.5);
+ vec3 cq=vec3(p*17.,t*0.2);
+ N.xy+=0.10*(vec2(noise(cq),noise(cq+7.))-.5);
  N=normalize(N);
  vec3 Rf=2.*N.z*N-vec3(0.,0.,1.);
- float streak=pow(0.5+0.5*sin(Rf.y*11.+Rf.x*4.+noise(vec3(p*3.,t*0.2))*5.),4.);
- float env=0.22+0.55*pow(smoothstep(0.0,1.0,Rf.y*0.75+Rf.x*0.45),1.6);
- env+=0.30*smoothstep(0.0,0.7,-Rf.y-0.15)*0.6+0.28*streak;
- float vein=pow(1.-abs(noise(vec3(p*8.,t*0.18))*2.-1.),10.);
- float spec=smoothstep(0.80,0.93,Rf.x*0.55+Rf.y*0.83);
- float spec2=smoothstep(0.88,0.97,-Rf.x*0.7-Rf.y*0.5)*0.6;
- float fr=pow(1.-N.z,2.2);
- float irid=noise(vec3(p*2.2,t*0.2));
+ float eR=envm(normalize(Rf+vec3(0.07,0.,0.)));
+ float eG=envm(Rf);
+ float eB=envm(normalize(Rf-vec3(0.07,0.,0.)));
+ vec3 ev=vec3(eR,eG,eB);
+ float em=eG;
+ float fr=pow(1.-N.z,1.7);
+ vec2 pp=mat2(.8,-.6,.6,.8)*p;pp+=0.22*vec2(noise(vec3(pp*2.3,t*0.1)),noise(vec3(pp*2.3+5.,t*0.1)));
+ float patch=smoothstep(0.45,0.65,noise(vec3(pp*2.0,t*0.18)));
+ float dk=smoothstep(0.52,0.68,noise(vec3(pp*2.2+11.,t*0.15)));
+ float spk=pow(noise(vec3(p*130.,t*0.6)),14.);
+ float sp=pow(max(dot(Rf,normalize(vec3(-.4,.7,.6))),0.),80.)+pow(max(dot(Rf,normalize(vec3(.6,.3,.7))),0.),140.);
  vec3 col;
  if(u_dark>0.5){
-  col=mix(vec3(.03,.20,.26),vec3(.20,.66,.74),env);
-  col=mix(col,vec3(.30,.40,.95),0.22*irid*(0.4+fr));
-  col+=vec3(.18,.77,.84)*fr*0.7;
-  col+=vec3(.85,.97,1.)*(spec+spec2)+vec3(.45,.85,.95)*vein*0.55;
+  vec3 deep=vec3(.03,.10,.30),mid=vec3(.12,.42,.82),sil=vec3(.80,.94,1.);
+  col=mix(deep,mid,clamp(em*1.4,0.,1.));
+  col=mix(col,sil,clamp(ev*ev*1.1,0.,1.)*0.7);
+  col=mix(col,vec3(.70,.30,.92),patch*smoothstep(.2,.8,em)*0.70);
+  col*=1.-0.72*dk*(1.-fr);
+  col+=vec3(.75,.93,1.)*pow(fr,1.3)*1.0;
+  col+=vec3(.8,.95,1.)*smoothstep(.86,.98,abs(s))*0.45;
+  col+=vec3(1.)*(sp*1.4+spk*2.4*smoothstep(.15,.8,em));
  }else{
-  col=mix(vec3(.12,.42,.50),vec3(.80,.94,.96),env);
-  col=mix(col,vec3(.45,.55,.95),0.16*irid*(0.4+fr));
-  col=mix(col,vec3(.12,.48,.55),fr*0.65);
-  col+=vec3(1.)*(spec+spec2)*0.9+vec3(.9,1.,1.)*vein*0.4;
+  vec3 deep=vec3(.16,.40,.58),mid=vec3(.46,.78,.88),sil=vec3(.98,1.,1.);
+  col=mix(deep,mid,clamp(em*1.4,0.,1.));
+  col=mix(col,sil,clamp(ev*ev*1.1,0.,1.)*0.9);
+  col=mix(col,vec3(.60,.42,.92),patch*smoothstep(.25,.9,em)*0.40);
+  col*=1.-0.50*dk*(1.-fr);
+  col=mix(col,vec3(.10,.42,.52),pow(fr,2.)*0.55);
+  col+=vec3(1.)*(sp*1.1+spk*1.6*smoothstep(.15,.8,em));
+  col+=vec3(.9,1.,1.)*smoothstep(.86,.98,abs(s))*0.3;
  }
- float al=a*mix(0.62,1.0,clamp(fr*1.4+spec+env*0.4,0.,1.));
+ float al=a*mix(0.9,1.0,fr);
  gl_FragColor=vec4(col*al,al);
 }`;
