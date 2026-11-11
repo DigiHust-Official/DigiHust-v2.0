@@ -71,6 +71,16 @@
 
 .dh-wave-svg--motion {
   pointer-events: none;
+  will-change: transform;
+}
+
+/* Off-screen pause for all hero animations */
+.is-offscreen .dh-wave-svg--static,
+.is-offscreen .dh-wave-svg--motion,
+.is-offscreen .animate-hero-wave-slow,
+.is-offscreen .animate-hero-wave-mid,
+.is-offscreen .animate-hero-wave-fast {
+  animation-play-state: paused !important;
 }
 
 /* Reduced Motion Mode */

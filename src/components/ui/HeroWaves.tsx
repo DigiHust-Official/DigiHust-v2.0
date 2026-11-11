@@ -112,12 +112,20 @@ export const HeroWaves: React.FC<HeroWavesProps> = ({ className = '' }) => {
         }
         .animate-hero-wave-slow {
           animation: heroWaveSlow 18s ease-in-out infinite;
+          will-change: transform;
         }
         .animate-hero-wave-mid {
           animation: heroWaveMid 14s ease-in-out infinite;
+          will-change: transform;
         }
         .animate-hero-wave-fast {
           animation: heroWaveFast 10s ease-in-out infinite;
+          will-change: transform;
+        }
+        .is-offscreen .animate-hero-wave-slow,
+        .is-offscreen .animate-hero-wave-mid,
+        .is-offscreen .animate-hero-wave-fast {
+          animation-play-state: paused !important;
         }
       `}</style>
     </div>

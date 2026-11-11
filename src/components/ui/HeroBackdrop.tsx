@@ -82,10 +82,36 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
       }
     };
 
+    let rafId: number | null = null;
+    let isParallaxRunning = false;
+
+    const stopParallax = () => {
+      isParallaxRunning = false;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const updateOffscreenClass = (offscreen: boolean) => {
+      if (offscreen) {
+        heroEl?.classList.add('is-offscreen');
+        containerRef.current?.classList.add('is-offscreen');
+      } else {
+        heroEl?.classList.remove('is-offscreen');
+        containerRef.current?.classList.remove('is-offscreen');
+      }
+    };
+
     const io = new IntersectionObserver(
       ([entry]) => {
         isIntersecting = entry.isIntersecting;
-        if (!isIntersecting) resetAuraHover();
+        const offscreen = !isIntersecting || !isVisible;
+        updateOffscreenClass(offscreen);
+        if (offscreen) {
+          resetAuraHover();
+          stopParallax();
+        }
         updateSvg2State();
       },
       { threshold: 0.05 }
@@ -94,18 +120,21 @@ export const HeroBackdrop: React.FC<HeroBackdropProps> = ({
 
     const onVisibilityChange = () => {
       isVisible = !document.hidden;
-      if (!isVisible) resetAuraHover();
+      const offscreen = !isIntersecting || !isVisible;
+      updateOffscreenClass(offscreen);
+      if (offscreen) {
+        resetAuraHover();
+        stopParallax();
+      }
       updateSvg2State();
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     // ── 2. Parallax (up to 14px, lerp 0.08, rAF, refs only) & Aura Hover ──
-    let rafId: number | null = null;
     let targetX = 0;
     let targetY = 0;
     let currentX = 0;
     let currentY = 0;
-    let isParallaxRunning = false;
 
     const startParallaxLoop = () => {
       if (isParallaxRunning) return;
