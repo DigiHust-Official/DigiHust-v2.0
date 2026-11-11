@@ -239,6 +239,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v3_heading_2: 'work.',
     work_v3_subtext: 'A few recent projects. Open any card for the full story.',
     work_v3_view_all: 'View all work',
+    work_v3_rated_out_of: 'Rated {rating} out of 5 stars',
 
     // Testimonials
     testimonials_tag: 'Client Feedback',
@@ -416,6 +417,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v3_heading_2: 'Arbeiten.',
     work_v3_subtext: 'Einige aktuelle Projekte. Öffnen Sie ein Projekt für Details.',
     work_v3_view_all: 'Alle Arbeiten',
+    work_v3_rated_out_of: 'Mit {rating} von 5 Sternen bewertet',
 
     // Testimonials
     testimonials_tag: 'Kundenstimmen',
@@ -593,6 +595,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v3_heading_2: 'مختارة.',
     work_v3_subtext: 'مشاريع حديثة من إنجازنا. افتح أي بطاقة لمعرفة التفاصيل كاملة.',
     work_v3_view_all: 'عرض كل الأعمال',
+    work_v3_rated_out_of: 'تقييم {rating} من 5 نجوم',
 
     // Testimonials
     testimonials_tag: 'آراء العملاء',
@@ -770,6 +773,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v3_heading_2: 'destacados.',
     work_v3_subtext: 'Algunos proyectos recientes. Abre una tarjeta para ver más.',
     work_v3_view_all: 'Ver todos',
+    work_v3_rated_out_of: 'Calificado con {rating} de 5 estrellas',
 
     // Testimonials
     testimonials_tag: 'Opiniones de Clientes',
@@ -947,6 +951,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_v3_heading_2: 'choisis.',
     work_v3_subtext: 'Quelques projets récents. Ouvrez une carte pour en savoir plus.',
     work_v3_view_all: 'Tous les projets',
+    work_v3_rated_out_of: 'Noté {rating} sur 5 étoiles',
 
     // Testimonials
     testimonials_tag: 'Avis clients',

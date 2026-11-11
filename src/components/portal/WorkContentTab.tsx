@@ -258,6 +258,18 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
       return;
     }
 
+    // 4b. Client Rating validation (0.5 to 5, step 0.5)
+    if (
+      editingProject.clientRating !== undefined &&
+      editingProject.clientRating !== null &&
+      !isNaN(editingProject.clientRating)
+    ) {
+      if (editingProject.clientRating < 0.5 || editingProject.clientRating > 5) {
+        showToast('Client rating must be between 0.5 and 5.', 'error');
+        return;
+      }
+    }
+
     // 5. Card Image validation
     const cardImg = editingProject.cardImage?.src?.trim();
     if (!cardImg) {
@@ -500,6 +512,51 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
                 {urlValidationError && (
                   <p className="text-xs text-red-500 mt-1">{urlValidationError}</p>
                 )}
+              </div>
+            </div>
+
+            {/* Client Name & Client Rating */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-[var(--text-muted)] mb-1">
+                  Client Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={editingProject.client || ''}
+                  onChange={(e) =>
+                    setEditingProject((prev) =>
+                      prev ? { ...prev, client: e.target.value } : null
+                    )
+                  }
+                  placeholder="e.g. Apex FinTech"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--brand-teal)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-[var(--text-muted)] mb-1">
+                  Client Rating (0.5 to 5, step 0.5)
+                </label>
+                <input
+                  type="number"
+                  min="0.5"
+                  max="5"
+                  step="0.5"
+                  value={
+                    editingProject.clientRating !== undefined && editingProject.clientRating !== null
+                      ? editingProject.clientRating
+                      : ''
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                    setEditingProject((prev) =>
+                      prev ? { ...prev, clientRating: val } : null
+                    );
+                  }}
+                  placeholder="e.g. 5.0"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--brand-teal)]"
+                />
               </div>
             </div>
 

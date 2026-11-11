@@ -228,14 +228,16 @@ html.dark .dh-card-v2__preview-icon:hover,
   outline-offset: 3px;
 }
 
-/* ── Sliding Hover Panel (over image tile only, fully opaque #081620) ─ */
+/* ── Sliding Hover Panel (over image tile only, premium 5 items) ── */
 .dh-card-v2__panel {
   position: absolute;
   inset: 0;
   z-index: 10;
   box-sizing: border-box;
-  padding: clamp(16px, 2.2vw, 28px);
-  background-color: #081620; /* 100% OPAQUE */
+  padding: clamp(18px, 2.4vw, 32px);
+  background: linear-gradient(165deg, #0C202D 0%, #071420 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: inherit;
   color: #F3F6FA;
   display: flex;
   flex-direction: column;
@@ -275,23 +277,43 @@ html[dir="rtl"] .dh-card-v2__panel {
   }
 }
 
-.dh-card-v2__panel-cat {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #2EC4D6;
-  margin-bottom: 6px;
+/* 1. Client Line with 28px Accent Bar */
+.dh-card-v2__panel-client {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
+.dh-card-v2__panel-client-bar {
+  width: 28px;
+  height: 2px;
+  background-color: #2EC4D6;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.dh-card-v2__panel-client-name {
+  font-family: var(--font-text, 'Inter', sans-serif);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2EC4D6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+/* 2. Project Title */
 .dh-card-v2__panel-title {
   font-family: var(--font-display, 'Montserrat', sans-serif);
-  font-weight: 300;
-  font-size: clamp(1.15rem, 1.7vw, 1.6rem);
-  line-height: 1.22;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+  line-height: 1.25;
   color: #F3F6FA;
-  margin: 0 0 6px 0;
+  margin: 0 0 10px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -299,26 +321,60 @@ html[dir="rtl"] .dh-card-v2__panel {
   max-width: 95%;
 }
 
-.dh-card-v2__panel-desc {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: #A9B8C6;
-  margin: 0 0 16px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+/* 3. Star Rating */
+.dh-card-v2__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.dh-star-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dh-star-filled {
+  color: #2EC4D6;
+  fill: #2EC4D6;
+}
+
+.dh-star-empty {
+  color: rgba(255, 255, 255, 0.30);
+  fill: none;
+}
+
+.dh-star-half-container {
+  position: relative;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+.dh-star-half-clip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
   overflow: hidden;
-  max-width: 90%;
 }
 
-/* In narrow card on compact screens, hide short text rather than clip */
-@media (max-width: 1200px) {
-  .dh-card-v2--span-5 .dh-card-v2__panel-desc {
-    display: none;
-  }
+[dir="rtl"] .dh-star-half-clip {
+  left: auto;
+  right: 0;
 }
 
+.dh-card-v2__stars-val {
+  font-family: var(--font-text, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: #F3F6FA;
+  margin-inline-start: 4px;
+}
+
+/* 4 & 5. Actions */
 .dh-card-v2__panel-actions {
   display: flex;
   flex-wrap: wrap;
@@ -399,12 +455,57 @@ html[dir="rtl"] .dh-card-v2__panel {
   height: calc(clamp(13.5px, 1vw, 14.5px) * 1.6 * 2);
 }
 
-/* ── Fallback Actions on Touch / Small Mobile Screens ────────────── */
+/* ── Fallback Actions & Meta on Touch / Small Mobile Screens ────── */
+.dh-card-v2__mobile-meta {
+  display: none;
+}
+
 .dh-card-v2__mobile-actions {
   display: none;
 }
 
 @media (hover: none), (max-width: 767.98px) {
+  .dh-card-v2__mobile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .dh-card-v2__mobile-client {
+    font-family: var(--font-text, 'Inter', sans-serif);
+    font-weight: 600;
+    color: var(--dh-card-accent);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .dh-card-v2__mobile-meta-dot {
+    opacity: 0.4;
+    color: var(--dh-card-desc);
+  }
+
+  .dh-card-v2__mobile-rating {
+    margin-bottom: 0 !important;
+  }
+
+  .dh-card-v2__mobile-rating .dh-star-filled {
+    color: var(--dh-card-accent);
+    fill: var(--dh-card-accent);
+  }
+
+  .dh-card-v2__mobile-rating .dh-star-empty {
+    color: var(--dh-card-desc);
+    opacity: 0.35;
+  }
+
+  .dh-card-v2__mobile-rating .dh-card-v2__stars-val {
+    color: var(--dh-card-title);
+  }
+
   .dh-card-v2__mobile-actions {
     display: flex;
     align-items: center;

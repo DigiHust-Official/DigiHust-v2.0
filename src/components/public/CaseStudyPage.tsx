@@ -6,6 +6,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
 import { NotFoundPage } from '../utility/NotFoundPage';
@@ -102,10 +103,40 @@ export const CaseStudyPage: React.FC = () => {
 
         {/* ── Header Section ── */}
         <header className="dh-cs-header">
-          {/* Eyebrow Pill */}
-          <div className="dh-cs-pill">
-            <span className="dh-cs-pill-dot" aria-hidden="true" />
-            <span>{project.category}</span>
+          {/* Eyebrow Pill, Client & Rating Row */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="dh-cs-pill">
+              <span className="dh-cs-pill-dot" aria-hidden="true" />
+              <span>{project.category}</span>
+            </div>
+
+            {project.client && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)]">
+                <span>Client:</span>
+                <span className="font-semibold text-[var(--text-heading)]">{project.client}</span>
+              </div>
+            )}
+
+            {project.clientRating !== undefined && project.clientRating !== null && (
+              <div
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--brand-teal)] dark:text-[#2EC4D6]"
+                role="img"
+                aria-label={`Rated ${project.clientRating} out of 5 stars`}
+              >
+                {[1, 2, 3, 4, 5].map((s) => {
+                  const isFull = (project.clientRating ?? 0) >= s;
+                  const isHalf = !isFull && (project.clientRating ?? 0) >= s - 0.5;
+                  return (
+                    <Star
+                      key={s}
+                      size={13}
+                      className={isFull ? 'fill-current' : isHalf ? 'fill-current opacity-70' : 'text-slate-400 opacity-30'}
+                    />
+                  );
+                })}
+                <span className="font-semibold text-[var(--text-heading)] ml-1">{project.clientRating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
 
           {/* Heading */}

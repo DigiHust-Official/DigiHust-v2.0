@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, Star } from 'lucide-react';
 import { Project, getProjectLiveUrl } from '../../data/workProjects';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
@@ -11,6 +11,43 @@ interface ProjectCardV2Props {
   span?: '7' | '5';
   className?: string;
 }
+
+const StarRating: React.FC<{ rating: number; ariaLabel?: string; className?: string }> = ({
+  rating,
+  ariaLabel,
+  className = '',
+}) => {
+  const clamped = Math.max(0.5, Math.min(5, Math.round(rating * 2) / 2));
+  return (
+    <div
+      className={`dh-card-v2__stars ${className}`}
+      role="img"
+      aria-label={ariaLabel || `Rated ${clamped} out of 5 stars`}
+    >
+      {[1, 2, 3, 4, 5].map((starIdx) => {
+        const isFull = clamped >= starIdx;
+        const isHalf = !isFull && clamped >= starIdx - 0.5;
+        return (
+          <span key={starIdx} className="dh-star-wrap">
+            {isHalf ? (
+              <span className="dh-star-half-container">
+                <Star size={16} className="dh-star-empty" />
+                <span className="dh-star-half-clip">
+                  <Star size={16} className="dh-star-filled" />
+                </span>
+              </span>
+            ) : isFull ? (
+              <Star size={16} className="dh-star-filled" />
+            ) : (
+              <Star size={16} className="dh-star-empty" />
+            )}
+          </span>
+        );
+      })}
+      <span className="dh-card-v2__stars-val">{clamped.toFixed(1)}</span>
+    </div>
+  );
+};
 
 export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   project,
@@ -26,6 +63,11 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   const hasPreview = Boolean(previewUrl && previewUrl.trim().length > 0);
   const caseStudySlug = project.slug || project.id;
   const hasCaseStudy = Boolean(caseStudySlug && caseStudySlug.trim().length > 0);
+
+  const rawRatingAriaTemplate = t('work_v3_rated_out_of') || 'Rated {rating} out of 5 stars';
+  const ratingAria = project.clientRating !== undefined
+    ? rawRatingAriaTemplate.replace('{rating}', String(project.clientRating))
+    : undefined;
 
   const imgSrc = formatImageUrl(
     project.cardImage?.src || project.img || '',
@@ -85,12 +127,29 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
           }`}
         />
 
-        {/* ── Sliding Hover Panel (over image tile only, fully opaque #081620) ── */}
+        {/* ── Sliding Hover Panel (over image tile only, premium 5 items) ── */}
         <div className="dh-card-v2__panel" aria-hidden="false">
-          <span className="dh-card-v2__panel-cat">{project.category}</span>
-          <h3 className="dh-card-v2__panel-title">{project.title}</h3>
-          {shortDesc && <p className="dh-card-v2__panel-desc">{shortDesc}</p>}
+          {/* 1. Client Name with 28px Accent Bar */}
+          {project.client && (
+            <div className="dh-card-v2__panel-client">
+              <span className="dh-card-v2__panel-client-bar" aria-hidden="true" />
+              <span className="dh-card-v2__panel-client-name">{project.client}</span>
+            </div>
+          )}
 
+          {/* 2. Project Title */}
+          <h3 className="dh-card-v2__panel-title">{project.title}</h3>
+
+          {/* 3. Star Rating */}
+          {project.clientRating !== undefined && project.clientRating !== null && (
+            <StarRating
+              rating={project.clientRating}
+              ariaLabel={ratingAria}
+              className="dh-card-v2__panel-rating"
+            />
+          )}
+
+          {/* 4 & 5. Minimal Text-Link Actions */}
           {(hasPreview || hasCaseStudy) && (
             <div className="dh-card-v2__panel-actions">
               {hasPreview && (
@@ -129,6 +188,25 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
         <p className="dh-card-v2__desc" title={shortDesc}>
           {shortDesc}
         </p>
+
+        {/* Compact client / rating row on mobile / touch */}
+        {(project.client || project.clientRating !== undefined) && (
+          <div className="dh-card-v2__mobile-meta">
+            {project.client && (
+              <span className="dh-card-v2__mobile-client">{project.client}</span>
+            )}
+            {project.client && project.clientRating !== undefined && (
+              <span className="dh-card-v2__mobile-meta-dot" aria-hidden="true">•</span>
+            )}
+            {project.clientRating !== undefined && (
+              <StarRating
+                rating={project.clientRating}
+                ariaLabel={ratingAria}
+                className="dh-card-v2__mobile-rating"
+              />
+            )}
+          </div>
+        )}
 
         {/* Minimal Buttons on Touch / Small Mobile Screens */}
         {(hasPreview || hasCaseStudy) && (

@@ -29,6 +29,7 @@ export interface Project {
 
   // Compatibility fields for existing views & modal inspectors
   client: string;
+  clientRating?: number;
   description: string;
   filterCat: string;
   challenge: string;
@@ -100,6 +101,13 @@ export const normalizeProject = (raw: any, index: number = 0): Project => {
         ? [caseStudy.results]
         : [];
 
+  const rawRating = typeof raw.clientRating === 'number'
+    ? raw.clientRating
+    : (raw.clientRating ? parseFloat(String(raw.clientRating)) : undefined);
+  const clientRating = typeof rawRating === 'number' && !isNaN(rawRating) && rawRating >= 0.5 && rawRating <= 5
+    ? Math.round(rawRating * 2) / 2
+    : undefined;
+
   return {
     id: String(raw.id || slug),
     slug,
@@ -107,6 +115,7 @@ export const normalizeProject = (raw: any, index: number = 0): Project => {
     filterCat: raw.filterCat || (category.includes('Design') || category.includes('Brand') ? 'Creative' : category.includes('AI') ? 'AI & Data' : 'Development'),
     title,
     client: raw.client || 'Enterprise Client',
+    clientRating,
     shortDescription,
     description: raw.description || shortDescription,
     cardImage: {
