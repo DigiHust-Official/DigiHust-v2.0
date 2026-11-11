@@ -7,7 +7,8 @@ import { ThemeSwitch } from '../ui/ThemeSwitch';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { TRANSLATIONS } from '../../lib/i18n';
-import logoImg from '../../assets/logo.png';
+import logo96 from '../../assets/logo-96.webp';
+import logo192 from '../../assets/logo-192.webp';
 import { PortalNavbar } from '../portal/PortalNavbar';
 import { prefetchRoute } from '../../lib/routePrefetch';
 import './Navbar.css';
@@ -265,7 +266,17 @@ export const Navbar: React.FC = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2.5 group select-none">
           <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-0.5">
-            <img src={logoImg} alt="DigiHust Logo" className="w-full h-full object-contain" />
+            <img
+              src={logo96}
+              srcSet={`${logo96} 1x, ${logo192} 2x`}
+              alt="DigiHust Logo"
+              width={28}
+              height={28}
+              decoding="async"
+              loading="eager"
+              fetchPriority="high"
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="dh-nav-logo-text font-display font-bold text-lg tracking-tight transition-colors">
             DigiHust

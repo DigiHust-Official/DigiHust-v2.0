@@ -4,6 +4,8 @@ import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight, Star } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { INITIAL_USERS } from '../../services/mockData';
+import logo96 from '../../assets/logo-96.webp';
+import logo192 from '../../assets/logo-192.webp';
 import './AboutSection.css';
 
 // 1. Image placeholder configuration at top of file for easy swapping
@@ -166,7 +168,15 @@ export const AboutSection: React.FC = () => {
 
             {/* Top-Left Brand Logo & Wordmark */}
             <div className="dh-about-hero-logo" aria-hidden="true">
-              <img src="/logo.png" alt="DigiHust Logo" />
+              <img
+                src={logo96}
+                srcSet={`${logo96} 1x, ${logo192} 2x`}
+                alt="DigiHust Logo"
+                width={24}
+                height={24}
+                decoding="async"
+                loading="lazy"
+              />
               <span className="dh-about-hero-wordmark">DigiHust</span>
             </div>
 

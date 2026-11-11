@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Linkedin, Github, Facebook, Instagram, Twitter, Mail, AtSign, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { SiGmail } from 'react-icons/si';
-import logoImg from '../../assets/logo.png';
+import logo96 from '../../assets/logo-96.webp';
+import logo192 from '../../assets/logo-192.webp';
 import { LAST_UPDATED, LAST_UPDATED_DISPLAY } from '../../config/siteConfig';
 import { dbService } from '../../lib/dbService';
 
@@ -193,10 +194,12 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-3 flex-wrap">
               <Link to="/" className="inline-flex items-center space-x-2.5 group">
                 <img 
-                  src={logoImg} 
+                  src={logo96}
+                  srcSet={`${logo96} 1x, ${logo192} 2x`}
                   alt="DigiHust Logo" 
                   width={32}
                   height={32}
+                  decoding="async"
                   className="h-8 w-auto max-w-[36px] object-contain group-hover:scale-105 transition-transform duration-200 ease-out" 
                 />
                 <span className="font-display font-extrabold text-xl text-[var(--text-heading)] group-hover:text-[var(--brand-teal)] transition-colors duration-200">
