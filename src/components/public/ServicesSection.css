@@ -249,7 +249,7 @@ html.dark .dh-services {
   box-shadow: var(--dh-card-shadow);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   backdrop-filter: blur(16px) saturate(140%);
-  transition: transform 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: transform 140ms cubic-bezier(0.2, 0.7, 0.2, 1), background-color 150ms ease-out;
 }
 
 @media (max-width: 767px) {
@@ -259,11 +259,13 @@ html.dark .dh-services {
   }
 }
 
-/* ── Interactive Hover & Motion (Item 3: translateY -4px, teal arrow, 1.04 image scale) ── */
+/* ── Interactive Hover & Motion (Item 1: translateY -4px, teal arrow, 150ms transitions) ── */
 .dh-services-card:hover,
 .dh-services-card:focus-visible {
   transform: translateY(-4px);
   background-color: var(--dh-card-hover-bg, rgba(255, 255, 255, 0.075));
+  will-change: transform;
+  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1), background-color 150ms ease-out;
 }
 
 .dh-services-card:focus-visible {
@@ -285,11 +287,6 @@ html.dark .dh-services {
 .dh-services-card:hover .dh-services-card__pill-arrow,
 .dh-services-card:focus-visible .dh-services-card__pill-arrow {
   transform: rotate(-45deg);
-}
-
-.dh-services-card:hover .dh-services-card__img,
-.dh-services-card:focus-visible .dh-services-card__img {
-  transform: scale(1.04);
 }
 
 /* ── Top Row (Item 1: number circle + more-info pill) ── */
@@ -329,7 +326,7 @@ html.dark .dh-services {
   border: 1px solid var(--dh-card-pill-border);
   color: var(--dh-card-pill-color);
   box-sizing: border-box;
-  transition: all 0.25s ease-out;
+  transition: border-color 150ms ease-out;
 }
 
 .dh-services-card__pill-label {
@@ -350,13 +347,13 @@ html.dark .dh-services {
   flex-shrink: 0;
   background-color: var(--dh-card-arrow-bg);
   color: var(--dh-card-arrow-color);
-  transition: transform 0.25s ease-out, background-color 0.25s ease-out, color 0.25s ease-out;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
 }
 
 .dh-services-card__pill-arrow {
   width: 14px;
   height: 14px;
-  transition: transform 0.25s ease-out;
+  transition: transform 150ms ease-out;
 }
 
 /* ── Flexible Spacer (Item 1: ~27% of card height, shrinks to 24px on mobile) ── */
@@ -426,7 +423,6 @@ html.dark .dh-services {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.25s ease-out;
 }
 
 /* Per-image object-position so the subject is visible */
@@ -561,6 +557,9 @@ html[dir="rtl"] .dh-services__view-all-pill:focus-visible .dh-services__view-all
   .dh-services-card__img,
   .dh-services-card:hover .dh-services-card__img,
   .dh-services-card:focus-visible .dh-services-card__img,
+  .dh-services-card__pill,
+  .dh-services-card:hover .dh-services-card__pill,
+  .dh-services-card:focus-visible .dh-services-card__pill,
   .dh-services-card__pill-arrow,
   .dh-services-card:hover .dh-services-card__pill-arrow,
   .dh-services-card:focus-visible .dh-services-card__pill-arrow,
@@ -573,6 +572,7 @@ html[dir="rtl"] .dh-services__view-all-pill:focus-visible .dh-services__view-all
   .dh-services__view-all-pill:hover .dh-services__view-all-arrow-wrap {
     transform: none !important;
     transition: none !important;
+    will-change: auto !important;
   }
 }
 
