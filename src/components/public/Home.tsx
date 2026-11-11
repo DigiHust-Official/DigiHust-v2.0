@@ -13,18 +13,13 @@ import {
   ChevronRight,
   ChevronDown,
   CheckCircle2,
-  Zap,
   Layers,
   Users2,
   Star,
   Quote,
-  Building,
   Check,
   Briefcase,
   ExternalLink,
-  ShieldCheck,
-  Code2,
-  Search,
   X,
 } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
@@ -39,6 +34,7 @@ import { OrbitRing } from '../ui/OrbitRing';
 import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { AboutSection } from './AboutSection';
 import { ServicesSection } from './ServicesSection';
+import { ModelAdvantageSection } from './ModelAdvantageSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
@@ -231,48 +227,10 @@ export const Home: React.FC = () => {
 
   const heroRef = useRef<HTMLElement>(null);
   const runwayRef = useRef<HTMLDivElement>(null);
-  const modelDiagramRef = useRef<HTMLDivElement>(null);
-  const isModelInView = useInView(modelDiagramRef, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' });
   const shouldReduceMotion = useReducedMotion();
 
   // Scoped hard scroll on Home hero runway (desktop >= 1024px only)
   useHeroHardScroll({ runwayRef });
-
-  const diagramContainerVariants: Variants = {
-    hidden: { opacity: shouldReduceMotion ? 1 : 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.025,
-        delayChildren: 0,
-      },
-    },
-  };
-
-  const diagramNodeVariants: Variants = {
-    hidden: {
-      opacity: shouldReduceMotion ? 1 : 0,
-      y: shouldReduceMotion ? 0 : 6,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: shouldReduceMotion ? 0 : 0.22,
-        ease: 'easeOut',
-      },
-    },
-  };
-
-  const squadGroupVariants: Variants = {
-    hidden: { opacity: shouldReduceMotion ? 1 : 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.02,
-      },
-    },
-  };
 
   const hero = siteContent?.hero;
   const rawCaseStudies = siteContent?.caseStudies || [];
@@ -567,195 +525,8 @@ export const Home: React.FC = () => {
       {/* ── SECTION 2: SERVICES OVERVIEW (2x2 CHECKERBOARD BENTO) ── */}
       <ServicesSection />
 
-      {/* ── SECTION 3: WHY DIGIHUST ── */}
-      <section data-hard-stop="why-digihust" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('model_tag')}</p>
-              <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-6 leading-tight">
-                {t('model_heading')}
-              </h2>
-              <p className="text-base text-[var(--text-body)] leading-relaxed mb-6">
-                {t('model_p1')}
-              </p>
-              <p className="text-base text-[var(--text-body)] leading-relaxed mb-8">
-                {t('model_p2')}
-              </p>
-              <div className="space-y-3.5">
-                {[
-                  t('model_bullet_1'),
-                  t('model_bullet_2'),
-                  t('model_bullet_3'),
-                  t('model_bullet_4'),
-                ].map((point) => (
-                  <div key={point} className="flex items-start space-x-3">
-                    <CheckCircle2 className="w-5 h-5 text-[var(--brand-teal)] flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-[var(--text-heading)] font-medium">{point}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Interactive Model Architecture Flow */}
-            <motion.div
-              ref={modelDiagramRef}
-              initial="hidden"
-              animate={isModelInView ? 'visible' : 'hidden'}
-              variants={diagramContainerVariants}
-              className="relative flex flex-col items-center select-none bg-[var(--bg-surface)] p-5 sm:p-6 w-full max-w-md mx-auto h-auto rounded-3xl border border-[var(--border-subtle)] shadow-2xl overflow-hidden group"
-            >
-              {/* Ambient radial glow inside container */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[var(--brand-teal)]/10 rounded-full blur-3xl pointer-events-none" />
-
-              {/* Status Header Pill */}
-              <motion.div
-                variants={diagramNodeVariants}
-                className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/30 text-[10px] font-bold text-[var(--brand-teal-text)] uppercase tracking-wider mb-3 relative z-10"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-teal)] animate-ping" />
-                <span>Coordinated Delivery Architecture</span>
-              </motion.div>
-
-              {/* Client Box */}
-              <motion.div
-                variants={diagramNodeVariants}
-                whileHover={{ scale: 1.03, y: -2 }}
-                className="w-48 sm:w-52 py-2 px-4 rounded-xl bg-[var(--bg-page)] text-[var(--text-heading)] border border-[var(--border-subtle)] hover:border-[var(--brand-teal)] shadow-sm text-center font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors relative z-10"
-              >
-                <Building className="w-4 h-4 text-[var(--brand-teal)]" />
-                <span>Client Organization</span>
-              </motion.div>
-
-              {/* Animated Vertical Flow Connector 1 */}
-              <motion.div
-                variants={diagramNodeVariants}
-                className="relative w-0.5 h-5 bg-[var(--border-subtle)] my-0.5 overflow-hidden"
-              >
-                <motion.div
-                  animate={shouldReduceMotion ? {} : { y: [-10, 22] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-full h-2.5 bg-gradient-to-b from-transparent via-[var(--brand-teal)] to-transparent"
-                />
-              </motion.div>
-
-              {/* DigiHust Core Management Hub */}
-              <motion.div
-                variants={diagramNodeVariants}
-                whileHover={{ scale: 1.03, y: -2 }}
-                className="relative w-64 sm:w-72 py-2.5 px-4 rounded-xl bg-gradient-to-br from-[#022B3A] to-[#1F7A8C] text-white text-center font-extrabold text-sm sm:text-base shadow-lg shadow-[#1F7A8C]/20 border border-[#1F7A8C]/60 cursor-pointer overflow-hidden group z-10"
-              >
-                {/* Shimmer sweep effect */}
-                {!shouldReduceMotion && (
-                  <motion.div
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
-                    className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12 pointer-events-none"
-                  />
-                )}
-                <div className="relative z-10 flex items-center justify-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>DigiHust Management</span>
-                </div>
-                <p className="text-[10px] font-medium text-[#E1E5F2] mt-0.5 tracking-wider uppercase relative z-10">
-                  Single Accountable Entity · SLA Guaranteed
-                </p>
-              </motion.div>
-
-              {/* Animated Vertical Flow Connector 2 */}
-              <motion.div
-                variants={diagramNodeVariants}
-                className="relative w-0.5 h-5 bg-[var(--border-subtle)] my-0.5 overflow-hidden"
-              >
-                <motion.div
-                  animate={shouldReduceMotion ? {} : { y: [-10, 22] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-full h-2.5 bg-gradient-to-b from-transparent via-cyan-400 to-transparent"
-                />
-              </motion.div>
-
-              {/* Specialized Squads Grid */}
-              <motion.div variants={squadGroupVariants} className="w-full flex flex-col items-center relative z-10">
-                <div className="grid grid-cols-3 gap-2 w-full">
-                  {[
-                    { label: 'Engineering', icon: <Code2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />, border: 'hover:border-cyan-500/60' },
-                    { label: 'Design & UX', icon: <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />, border: 'hover:border-purple-500/60' },
-                    { label: 'AI & Data', icon: <Zap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />, border: 'hover:border-amber-500/60' },
-                  ].map((squad) => (
-                    <motion.div
-                      key={squad.label}
-                      variants={diagramNodeVariants}
-                      whileHover={{ scale: 1.04, y: -1 }}
-                      className={`py-1.5 px-1 sm:px-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-heading)] text-center text-[11px] sm:text-xs font-bold shadow-sm cursor-pointer flex flex-col items-center justify-center gap-1 transition-all ${squad.border} hover:bg-[var(--bg-subtle)]`}
-                    >
-                      {squad.icon}
-                      <span className="truncate max-w-full">{squad.label}</span>
-                    </motion.div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-2 w-3/4 sm:w-2/3 mt-2">
-                  {[
-                    { label: 'Growth / SEO', icon: <Search className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />, border: 'hover:border-emerald-500/60' },
-                    { label: 'Cybersecurity', icon: <Shield className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />, border: 'hover:border-rose-500/60' },
-                  ].map((squad) => (
-                    <motion.div
-                      key={squad.label}
-                      variants={diagramNodeVariants}
-                      whileHover={{ scale: 1.04, y: -1 }}
-                      className={`py-1.5 px-1 sm:px-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-heading)] text-center text-[11px] sm:text-xs font-bold shadow-sm cursor-pointer flex flex-col items-center justify-center gap-1 transition-all ${squad.border} hover:bg-[var(--bg-subtle)]`}
-                    >
-                      {squad.icon}
-                      <span className="truncate max-w-full">{squad.label}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Animated Vertical Flow Connector 3 */}
-              <motion.div
-                variants={diagramNodeVariants}
-                className="relative w-0.5 h-5 bg-[var(--border-subtle)] my-0.5 overflow-hidden"
-              >
-                <motion.div
-                  animate={shouldReduceMotion ? {} : { y: [-10, 22] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-full h-2.5 bg-gradient-to-b from-transparent via-emerald-400 to-transparent"
-                />
-              </motion.div>
-
-              {/* Final Delivered Output */}
-              <motion.div
-                variants={diagramNodeVariants}
-                whileHover={{ scale: 1.03, y: -2 }}
-                className="relative w-56 sm:w-64 py-2 px-4 rounded-xl bg-[var(--bg-page)] border-2 border-[var(--brand-teal)] text-[var(--brand-teal)] dark:text-cyan-300 text-center font-bold text-xs sm:text-sm shadow-md cursor-pointer flex items-center justify-center gap-2 z-10 group"
-              >
-                {!shouldReduceMotion && (
-                  <motion.div
-                    animate={{
-                      boxShadow: [
-                        '0 2px 10px -2px rgba(31, 122, 140, 0.15)',
-                        '0 4px 18px -2px rgba(31, 122, 140, 0.35)',
-                        '0 2px 10px -2px rgba(31, 122, 140, 0.15)',
-                      ],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0 rounded-xl pointer-events-none"
-                  />
-                )}
-                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[var(--brand-teal)] text-white flex items-center justify-center text-[10px] sm:text-xs font-bold flex-shrink-0">
-                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                </div>
-                <span>Unified Delivered Solution</span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* ── SECTION 3: THE MODEL ADVANTAGE / WHY DIGIHUST ── */}
+      <ModelAdvantageSection />
 
       {/* ── SECTION 4: SELECTED WORK ── */}
       <section className="py-24 px-6 lg:px-8 bg-[var(--bg-page)] border-t border-[var(--border-subtle)]">
