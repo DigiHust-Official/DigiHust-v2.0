@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { LiquidRing } from './LiquidRing';
+import { RingVideo } from './RingVideo';
 import './ServicesSection.css';
 
 export interface ServiceItem {
@@ -152,7 +152,7 @@ export const ServicesSection: React.FC = () => {
         <div className="dh-services__frame">
           {/* Decorative Ring Background Layer (Item 1 & 2) */}
           <div className="dh-services__bg" aria-hidden="true">
-            <LiquidRing className="dh-services__ring" />
+            <RingVideo className="dh-services__ring" />
           </div>
 
           {/* Centered Heading */}
