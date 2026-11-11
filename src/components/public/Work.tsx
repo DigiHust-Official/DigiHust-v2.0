@@ -5,7 +5,7 @@ import { ArrowRight, X, CheckCircle2, Layers, ExternalLink } from 'lucide-react'
 import { SEOHead } from '../seo/SEOHead';
 import { useApp } from '../../context/AppContext';
 import { handleCardSpotlightMove, handleCardSpotlightLeave } from '../../lib/cardSpotlight';
-import { ProjectCard } from '../ui/ProjectCard';
+import { ProjectCardV2 } from './ProjectCardV2';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
 import { Project, getProjectLiveUrl, PROJECTS, getValidProjects, normalizeProject } from '../../data/workProjects';
 
@@ -111,22 +111,19 @@ export const Work: React.FC = () => {
       <section className="bg-[var(--bg-page)] py-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {filtered.length > 0 ? (
-            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+            <motion.div layout className="dh-projects-grid">
               <AnimatePresence>
                 {filtered.map((project) => (
                   <motion.div
                     key={project.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.2 }}
                     className="h-full"
                   >
-                    <ProjectCard
-                      project={project}
-                      onInspect={(p) => setSelectedProject(p as any)}
-                    />
+                    <ProjectCardV2 project={project} />
                   </motion.div>
                 ))}
               </AnimatePresence>

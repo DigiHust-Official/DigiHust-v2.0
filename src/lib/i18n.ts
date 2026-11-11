@@ -217,6 +217,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_view_all: 'View all portfolio projects',
     work_read_case: 'Read Full Case Study',
 
+    // Work v2 Redesign
+    work_v2_preview_work: 'Preview work',
+    work_v2_read_case_study: 'Read case study',
+    work_v2_all_work: 'All work',
+    work_v2_challenge: 'Challenge',
+    work_v2_solution: 'Solution',
+    work_v2_results: 'Results',
+    work_v2_gallery: 'Gallery',
+    work_v2_summary: 'Summary',
+    work_v2_close: 'Close',
+    work_v2_previous: 'Previous',
+    work_v2_next: 'Next',
+    work_v2_open_image: 'Open image',
+
     // Testimonials
     testimonials_tag: 'Client Feedback',
     testimonials_heading: 'What Founders Say About DigiHust',
@@ -370,6 +384,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_heading: 'Ausgewählte Projekte',
     work_view_all: 'Alle Projekte ansehen',
     work_read_case: 'Fallstudie lesen',
+
+    // Work v2 Redesign
+    work_v2_preview_work: 'Projekt ansehen',
+    work_v2_read_case_study: 'Fallstudie lesen',
+    work_v2_all_work: 'Alle Projekte',
+    work_v2_challenge: 'Herausforderung',
+    work_v2_solution: 'Lösung',
+    work_v2_results: 'Ergebnisse',
+    work_v2_gallery: 'Galerie',
+    work_v2_summary: 'Zusammenfassung',
+    work_v2_close: 'Schließen',
+    work_v2_previous: 'Zurück',
+    work_v2_next: 'Weiter',
+    work_v2_open_image: 'Bild öffnen',
 
     // Testimonials
     testimonials_tag: 'Kundenstimmen',
@@ -525,6 +553,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_view_all: 'عرض كافة المشاريع',
     work_read_case: 'قراءة دراسة الحالة',
 
+    // Work v2 Redesign
+    work_v2_preview_work: 'معاينة العمل',
+    work_v2_read_case_study: 'دراسة الحالة',
+    work_v2_all_work: 'كافة الأعمال',
+    work_v2_challenge: 'التحدي',
+    work_v2_solution: 'الحل المطبق',
+    work_v2_results: 'النتائج المحققة',
+    work_v2_gallery: 'معرض الصور',
+    work_v2_summary: 'ملخص المشروع',
+    work_v2_close: 'إغلاق',
+    work_v2_previous: 'السابق',
+    work_v2_next: 'التالي',
+    work_v2_open_image: 'فتح الصورة',
+
     // Testimonials
     testimonials_tag: 'آراء العملاء',
     testimonials_heading: 'ماذا يقول رواد الأعمال عن DigiHust',
@@ -679,6 +721,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_view_all: 'Ver todos los proyectos',
     work_read_case: 'Ver Caso de Estudio',
 
+    // Work v2 Redesign
+    work_v2_preview_work: 'Ver proyecto',
+    work_v2_read_case_study: 'Caso de estudio',
+    work_v2_all_work: 'Todos los proyectos',
+    work_v2_challenge: 'Desafío',
+    work_v2_solution: 'Solución',
+    work_v2_results: 'Resultados',
+    work_v2_gallery: 'Galería',
+    work_v2_summary: 'Resumen',
+    work_v2_close: 'Cerrar',
+    work_v2_previous: 'Anterior',
+    work_v2_next: 'Siguiente',
+    work_v2_open_image: 'Abrir imagen',
+
     // Testimonials
     testimonials_tag: 'Opiniones de Clientes',
     testimonials_heading: 'Lo que Dicen los Fundadores sobre DigiHust',
@@ -832,6 +888,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     work_heading: 'Projets sélectionnés',
     work_view_all: 'Voir tous les projets',
     work_read_case: 'Lire l’étude de cas',
+
+    // Work v2 Redesign
+    work_v2_preview_work: 'Voir le projet',
+    work_v2_read_case_study: 'Étude de cas',
+    work_v2_all_work: 'Tous les projets',
+    work_v2_challenge: 'Défi',
+    work_v2_solution: 'Solution',
+    work_v2_results: 'Résultats',
+    work_v2_gallery: 'Galerie',
+    work_v2_summary: 'Résumé',
+    work_v2_close: 'Fermer',
+    work_v2_previous: 'Précédent',
+    work_v2_next: 'Suivant',
+    work_v2_open_image: 'Ouvrir l\'image',
 
     // Testimonials
     testimonials_tag: 'Avis clients',

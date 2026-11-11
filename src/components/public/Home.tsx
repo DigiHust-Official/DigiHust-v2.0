@@ -25,7 +25,7 @@ import {
 import { SEOHead } from '../seo/SEOHead';
 import { HeroBackdrop } from '../ui/HeroBackdrop';
 import { ServiceCard } from '../ui/ServiceCard';
-import { ProjectCard } from '../ui/ProjectCard';
+import { ProjectCardV2 } from './ProjectCardV2';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
 import { GlowCtaButton } from '../ui/GlowCtaButton';
 import { GlassCtaButton } from '../ui/GlassCtaButton';
@@ -561,10 +561,7 @@ export const Home: React.FC = () => {
                 viewport={{ once: true }}
                 className="h-full"
               >
-                <ProjectCard
-                  project={project}
-                  onInspect={(p) => setSelectedProject(p as any)}
-                />
+                <ProjectCardV2 project={project} />
               </motion.div>
             ))}
           </div>
