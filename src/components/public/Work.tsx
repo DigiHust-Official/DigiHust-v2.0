@@ -51,7 +51,7 @@ export const Work: React.FC = () => {
     : projectsList.filter((p) => p.filterCat === activeFilter || p.category === activeFilter);
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-hidden">
       <SEOHead
         title="Our Work & Case Studies | DigiHust"
         description="Explore DigiHust's portfolio of delivered projects across full-stack development, brand identity systems, AI automation, and business intelligence."
