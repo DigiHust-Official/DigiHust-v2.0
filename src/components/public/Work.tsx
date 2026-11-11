@@ -7,149 +7,10 @@ import { useApp } from '../../context/AppContext';
 import { handleCardSpotlightMove, handleCardSpotlightLeave } from '../../lib/cardSpotlight';
 import { ProjectCard } from '../ui/ProjectCard';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
+import { Project, getProjectLiveUrl, PROJECTS, getValidProjects, normalizeProject } from '../../data/workProjects';
 
-export interface Project {
-  id: string;
-  category: string;
-  filterCat: string;
-  title: string;
-  client: string;
-  description: string;
-  challenge: string;
-  solution: string;
-  results: string[];
-  tags: string[];
-  img: string;
-  projectUrl?: string;
-}
-
-export const getProjectLiveUrl = (project: { projectUrl?: string; title?: string }) => {
-  if (project.projectUrl && project.projectUrl.trim() !== '') {
-    return project.projectUrl;
-  }
-  const t = (project.title || '').toLowerCase();
-  if (t.includes('mashaallah')) return 'https://mashaallahbangles.com';
-  if (t.includes('nawaz')) return 'https://alnawazindustries.com';
-  if (t.includes('spoon')) return 'https://therusticspoon.com';
-  if (t.includes('real-estate') || t.includes('estate')) return 'https://estatesdirect.demo';
-  if (t.includes('automotive') || t.includes('veloce')) return 'https://veloce-motors.demo';
-  if (t.includes('hospital') || t.includes('titan')) return 'https://titan-bi.demo';
-  if (t.includes('fintech') || t.includes('apex')) return 'https://apex-trading.demo';
-  if (t.includes('logistics') || t.includes('logixpress')) return 'https://logixpress-ai.demo';
-  if (t.includes('ecommerce') || t.includes('nexus')) return 'https://nexus-goods.demo';
-  return 'https://github.com/DigiHust-Official';
-};
-
-export const PROJECTS: Project[] = [
-  {
-    id: 'real-estate-portal',
-    category: 'Web Development',
-    filterCat: 'Development',
-    title: 'Real-Estate Marketplace Portal',
-    client: 'Estates Direct UK',
-    description: 'High-performance property listing and agent management platform with interactive geospatial search and instant inquiry routing.',
-    challenge: 'Legacy WordPress backend suffering from 5+ second load times and unscalable database indexing across 40,000+ UK property listings.',
-    solution: 'Re-engineered from scratch with Next.js, Node.js, PostgreSQL with PostGIS for sub-second spatial queries, and real-time agent leads.',
-    results: [
-      'Sub-800ms page load speeds across all search filters',
-      '+140% organic inbound lead conversion rate in 90 days',
-      'Zero downtime migration of 40,000+ active listings',
-    ],
-    tags: ['React', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'PostGIS', 'AWS'],
-    img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://estatesdirect.demo',
-  },
-  {
-    id: 'automotive-brand',
-    category: 'Creative & Branding',
-    filterCat: 'Creative',
-    title: 'Automotive Brand Identity & 3D Motion Ads',
-    client: 'Veloce Motors DE',
-    description: 'Complete brand redesign, comprehensive design system, and a suite of 3D motion advertisement teasers for digital launch.',
-    challenge: 'A modern electric performance startup needed a visual identity that felt aggressive, premium, and distinct from legacy competitors.',
-    solution: 'Engineered a modern typographic identity system, Figma design system, and three 30-second 4K 3D motion trailers in Cinema 4D & After Effects.',
-    results: [
-      'Generated 2.4M organic impressions across initial social launch',
-      'Complete 120-page brand guidelines and vector assets delivered',
-      'Adopted across digital, print, and in-vehicle UI touchpoints',
-    ],
-    tags: ['Brand Identity', 'Figma', 'After Effects', '3D Animation', 'Motion Design'],
-    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://veloce-motors.demo',
-  },
-  {
-    id: 'hospital-bi-dashboard',
-    category: 'AI & Data Solutions',
-    filterCat: 'AI & Data',
-    title: 'Executive Sales BI & Analytics Suite',
-    client: 'Titan Healthcare Systems',
-    description: 'Integrated fragmented hospital SQL data stores into a unified executive PowerBI dashboard with automated weekly KPI reports.',
-    challenge: 'Executive leadership spent 12+ manual hours weekly compiling disparate spreadsheets with inconsistent financial figures.',
-    solution: 'Engineered automated Python ETL pipelines syncing multiple SQL databases directly into an interactive PowerBI executive console.',
-    results: [
-      'Saved 12+ administrative hours every single week',
-      'Real-time automated alerting for revenue metric anomalies',
-      'Adopted by 35+ regional hospital department heads',
-    ],
-    tags: ['PowerBI', 'SQL', 'Python', 'ETL Pipelines', 'Data Automation'],
-    img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://titan-bi.demo',
-  },
-  {
-    id: 'saas-fintech-redesign',
-    category: 'Web Development',
-    filterCat: 'Development',
-    title: 'Enterprise FinTech Trading Console',
-    client: 'Apex FinTech US',
-    description: 'Complete architectural redesign of a high-throughput financial trading console for enterprise institutional traders.',
-    challenge: 'Dense financial data tables causing heavy browser lag and frame drops during live market volatility spikes.',
-    solution: 'Rebuilt using virtualized React tables, WebSocket state managers, and dark-mode high-contrast UI components.',
-    results: [
-      'Maintained steady 60 FPS even under 1,000+ live tick events/sec',
-      '40% reduction in user operational execution errors',
-      'Successfully deployed across 200+ enterprise broker accounts',
-    ],
-    tags: ['React', 'TypeScript', 'WebSockets', 'Tailwind', 'High Throughput'],
-    img: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://apex-trading.demo',
-  },
-  {
-    id: 'ai-logistics-bot',
-    category: 'AI Solutions & Automation',
-    filterCat: 'AI & Data',
-    title: 'Autonomous Logistics Customer Support AI',
-    client: 'LogiXpress Logistics',
-    description: 'Custom OpenAI & Python automation system resolving tracking inquiries over WhatsApp and email without human staff.',
-    challenge: 'Customer service department overwhelmed with 800+ repetitive tracking status inquiries every day.',
-    solution: 'Deployed an autonomous OpenAI agent integrated with WhatsApp Business API and the central ERP database.',
-    results: [
-      '78% of incoming inquiries resolved instantly without human intervention',
-      'Average response time dropped from 4 hours to under 6 seconds',
-      'Customer satisfaction rating increased to 4.8 / 5.0',
-    ],
-    tags: ['OpenAI', 'Python', 'WhatsApp API', 'Automation', 'FastAPI'],
-    img: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://logixpress-ai.demo',
-  },
-  {
-    id: 'ecommerce-brand-kit',
-    category: 'Creative & UI/UX',
-    filterCat: 'Creative',
-    title: 'E-Commerce Brand & Mobile UI Kit',
-    client: 'Nexus Global Goods',
-    description: 'Comprehensive branding system, responsive Shopify theme design, and iOS application UI mockups.',
-    challenge: 'Expanding brand needed a coherent, luxury identity across mobile, packaging, and web storefront.',
-    solution: 'Designed comprehensive visual design system, custom Shopify liquid templates, and Figma mobile app prototype.',
-    results: [
-      'Shopify storefront launch generated $280K in first 30 days',
-      'Mobile checkout drop-off decreased by 28%',
-      'Complete vector asset and packaging design package delivered',
-    ],
-    tags: ['UI/UX', 'Figma', 'Brand Identity', 'Shopify', 'Mobile Design'],
-    img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-    projectUrl: 'https://nexus-goods.demo',
-  },
-];
+export type { Project };
+export { getProjectLiveUrl, PROJECTS, getValidProjects, normalizeProject };
 
 const FILTER_CATS = ['All', 'Development', 'Creative', 'AI & Data'];
 
@@ -162,21 +23,28 @@ export const Work: React.FC = () => {
   const rawCaseStudies = siteContent?.caseStudies || [];
 
   const projectsList: Project[] = (rawCaseStudies && rawCaseStudies.length > 0)
-    ? rawCaseStudies.map((cs) => ({
+    ? rawCaseStudies.map((cs, idx) => normalizeProject({
         id: cs.slug || cs.id,
         category: cs.category || 'Web Development',
         filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
         title: cs.title,
         client: cs.client,
         description: cs.summary,
+        shortDescription: cs.summary,
+        cardImage: {
+          src: formatImageUrl(cs.imageUrl, cs.category),
+          alt: cs.title,
+        },
         challenge: cs.challenge || 'Client required modernized architecture and streamlined conversion funnels.',
         solution: cs.solution || 'Engineered customized full-stack solution with enterprise performance guarantees.',
         results: [cs.impactMetric ? `${cs.impactMetric} ${cs.impactLabel}` : '100% On-Time Delivery'],
         tags: cs.tags || ['React', 'Full Stack'],
         img: formatImageUrl(cs.imageUrl, cs.category),
         projectUrl: getProjectLiveUrl(cs),
-      }))
-    : PROJECTS;
+        published: true,
+        order: idx,
+      }, idx))
+    : getValidProjects(siteContent);
 
   const filtered = activeFilter === 'All'
     ? projectsList

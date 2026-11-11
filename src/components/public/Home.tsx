@@ -38,7 +38,7 @@ import { ModelAdvantageSection } from './ModelAdvantageSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
-import { Project, getProjectLiveUrl, PROJECTS } from './Work';
+import { Project, getProjectLiveUrl, PROJECTS, getValidProjects, normalizeProject } from '../../data/workProjects';
 import { getServiceIcon } from '../../lib/serviceIcons';
 import { handleCardSpotlightMove, handleCardSpotlightLeave } from '../../lib/cardSpotlight';
 import { GenerativePattern } from '../ui/ServiceBentoCard';
@@ -235,21 +235,28 @@ export const Home: React.FC = () => {
   const hero = siteContent?.hero;
   const rawCaseStudies = siteContent?.caseStudies || [];
   const featuredProjects: Project[] = (rawCaseStudies && rawCaseStudies.length > 0)
-    ? rawCaseStudies.slice(0, 3).map((cs) => ({
+    ? rawCaseStudies.slice(0, 3).map((cs, idx) => normalizeProject({
         id: cs.slug || cs.id,
         category: cs.category || 'Web Development',
         filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
         title: cs.title,
         client: cs.client || 'Enterprise Client',
         description: cs.summary || 'Custom engineered digital solution delivered by DigiHust specialized squads.',
+        shortDescription: cs.summary || 'Custom engineered digital solution delivered by DigiHust specialized squads.',
+        cardImage: {
+          src: formatImageUrl(cs.imageUrl, cs.category),
+          alt: cs.title,
+        },
         challenge: cs.challenge || 'Client required modernized architecture, scalable infrastructure, and optimized acquisition funnels.',
         solution: cs.solution || 'DigiHust assembled a dedicated cross-functional squad to engineer an end-to-end custom application with enterprise SLA guarantees.',
         results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || 'Uplift'}`] : ['+140% Conversion Rate', 'Sub-800ms Latency', '100% On-Time Delivery'],
         tags: cs.tags && cs.tags.length > 0 ? cs.tags : ['React', 'Full Stack', 'Cloud'],
         img: formatImageUrl(cs.imageUrl, cs.category),
         projectUrl: getProjectLiveUrl(cs),
-      }))
-    : PROJECTS.slice(0, 3);
+        published: true,
+        order: idx,
+      }, idx))
+    : getValidProjects(siteContent).slice(0, 3);
 
   const testimonials = (siteContent?.testimonials && siteContent.testimonials.length > 0)
     ? siteContent.testimonials
