@@ -6,6 +6,7 @@ import { SEOHead } from '../seo/SEOHead';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { WorkGrid } from './WorkGrid';
+import { SectionHeading } from '../common/SectionHeading';
 import { formatImageUrl } from '../../lib/imageUrlHelper';
 import { Project, getProjectLiveUrl, PROJECTS, getValidProjects, normalizeProject } from '../../data/workProjects';
 
@@ -59,27 +60,20 @@ export const Work: React.FC = () => {
 
       {/* Header */}
       <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
+            className="w-full flex justify-center"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(31,122,140,0.25)] dark:border-[rgba(46,196,214,0.3)] bg-[rgba(31,122,140,0.06)] dark:bg-[rgba(46,196,214,0.08)] text-[var(--brand-teal)] dark:text-[#2EC4D6] text-xs font-semibold uppercase tracking-widest mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
-              <span>{t('work_v3_eyebrow') || 'Case studies'}</span>
-            </div>
-
-            <h1 className="font-display font-semibold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-4">
-              <span>{t('work_v3_heading_1') || 'Selected'}</span>{' '}
-              <span className="text-[#1F7A8C] dark:text-[#2EC4D6]">
-                {t('work_v3_heading_2') || 'work.'}
-              </span>
-            </h1>
-
-            <p className="text-lg text-[var(--text-body)] max-w-2xl leading-relaxed">
-              {t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
-            </p>
+            <SectionHeading
+              eyebrow={t('work_v3_eyebrow') || 'Case studies'}
+              title={t('work_v3_heading_1') || 'Selected'}
+              accent={t('work_v3_heading_2') || 'work.'}
+              subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
+              align="center"
+            />
           </motion.div>
         </div>
       </section>

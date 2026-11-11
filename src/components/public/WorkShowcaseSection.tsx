@@ -5,6 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { getValidProjects, normalizeProject, Project } from '../../data/workProjects';
 import { formatImageUrl } from '../../lib/imageUrlHelper';
+import { SectionHeading } from '../common/SectionHeading';
 import { WorkGrid } from './WorkGrid';
 import './WorkShowcaseSection.css';
 
@@ -57,43 +58,37 @@ export const WorkShowcaseSection: React.FC = () => {
       aria-labelledby="dh-work-showcase-heading"
     >
       <div className="dh-work-showcase__container">
-        {/* ── Section Header ── */}
+        {/* ── Centered Shared Section Heading ── */}
         <div className="dh-work-showcase__header">
-          <div className="dh-work-showcase__header-left">
-            <div className="dh-work-showcase__eyebrow">
-              <span className="dh-work-showcase__eyebrow-dot" aria-hidden="true" />
-              <span>{t('work_v3_eyebrow') || 'Case studies'}</span>
-            </div>
-
-            <h2 id="dh-work-showcase-heading" className="dh-work-showcase__heading">
-              <span className="dh-work-showcase__heading-main">
-                {t('work_v3_heading_1') || 'Selected'}
-              </span>{' '}
-              <span className="dh-work-showcase__heading-accent">
-                {t('work_v3_heading_2') || 'work.'}
-              </span>
-            </h2>
-
-            <p className="dh-work-showcase__subtext">
-              {t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
-            </p>
-          </div>
-
-          <div className="dh-work-showcase__header-right">
-            <Link
-              to="/work"
-              className="dh-work-showcase__view-all"
-              aria-label={t('work_v3_view_all') || 'View all work'}
-            >
-              <span>{t('work_v3_view_all') || 'View all work'}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
-            </Link>
-          </div>
+          <SectionHeading
+            id="dh-work-showcase-heading"
+            eyebrow={t('work_v3_eyebrow') || 'Case studies'}
+            title={t('work_v3_heading_1') || 'Selected'}
+            accent={t('work_v3_heading_2') || 'work.'}
+            subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
+            align="center"
+          />
         </div>
 
         {/* ── Project Grid ── */}
         <div className="dh-work-showcase__grid">
           <WorkGrid projects={displayProjects} />
+        </div>
+
+        {/* ── Centered Bottom View-All Pill Button (Matches Services Style) ── */}
+        <div className="dh-work-showcase__footer">
+          <Link
+            to="/portfolio"
+            className="dh-work-showcase__view-all-pill"
+            aria-label={t('work_v3_view_all') || 'View all work'}
+          >
+            <span className="dh-work-showcase__view-all-label">
+              {t('work_v3_view_all') || 'View all work'}
+            </span>
+            <span className="dh-work-showcase__view-all-arrow-wrap">
+              <ArrowRight className="dh-work-showcase__view-all-arrow" size={14} />
+            </span>
+          </Link>
         </div>
       </div>
     </section>
