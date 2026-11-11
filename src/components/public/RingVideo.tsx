@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LiquidRing } from './LiquidRing';
 import './RingVideo.css';
 
-const SRC = '/media/services-ring-alpha.webm'; // VP9 with a real alpha channel (transparent background)
+const SRC = '/media/services-ring-alpha-teal.webm'; // VP9 with a real alpha channel and baked teal tint
 const STILL_TIME = 12; // seconds: the frame shown when reduced motion is on
 
 /** Chrome, Edge and Firefox play VP9 alpha. Safari and iOS do not, so they get the WebGL ring. */
@@ -78,7 +78,7 @@ export function RingVideo({ className = '' }: { className?: string }) {
       muted
       loop
       playsInline
-      preload="auto"
+      preload="metadata"
       disablePictureInPicture
       aria-hidden="true"
       tabIndex={-1}
