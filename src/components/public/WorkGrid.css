@@ -3,7 +3,7 @@
 .dh-work-grid {
   display: flex;
   flex-direction: column;
-  gap: clamp(20px, 2.5vw, 36px);
+  gap: clamp(16px, 2vw, 28px);
   width: 100%;
   box-sizing: border-box;
 }
@@ -29,6 +29,6 @@
   .dh-work-row,
   .dh-work-row--5-7 {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: clamp(16px, 2vw, 28px);
   }
 }
