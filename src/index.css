@@ -636,6 +636,11 @@ h1, h2, h3, h4, h5, h6 {
   animation: founderFloatHaseeb 5.8s ease-in-out 1.2s infinite alternate;
 }
 
+.is-offscreen .founder-float-mahad,
+.is-offscreen .founder-float-haseeb {
+  animation-play-state: paused !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .founder-float-mahad,
   .founder-float-haseeb {

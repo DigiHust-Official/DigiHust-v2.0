@@ -28,10 +28,12 @@ export const FounderBrainsShowcase: React.FC<FounderBrainsShowcaseProps> = ({
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsEntered(true);
-          observer.disconnect();
+          containerRef.current?.classList.remove('is-offscreen');
+        } else {
+          containerRef.current?.classList.add('is-offscreen');
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.05 }
     );
 
     if (containerRef.current) {

@@ -21,7 +21,8 @@ export const BeaconVisual: React.FC<BeaconVisualProps> = ({ isPaused = false }) 
         viewBox="0 0 100 100"
         className="w-full h-full pointer-events-none"
         style={{
-          animation: isPaused ? 'none' : 'beaconSpin 18s linear infinite',
+          animation: 'beaconSpin 18s linear infinite',
+          animationPlayState: isPaused ? 'paused' : 'running',
           willChange: 'transform',
         }}
         aria-hidden="true"
