@@ -20,6 +20,8 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const previewLabel = t('work_v2_preview_work') || t('work_v2_preview') || 'Preview work';
+  const caseStudyLabel = t('work_v2_read_case_study') || t('work_v2_read_case') || 'Case study';
   const previewUrl = project.previewUrl || project.projectUrl || getProjectLiveUrl(project);
   const hasPreview = Boolean(previewUrl && previewUrl.trim().length > 0);
   const caseStudySlug = project.slug || project.id;
@@ -73,7 +75,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="dh-card-v2__preview-icon"
-            aria-label={`${t('work_v2_preview') || 'Preview work'}: ${project.title}`}
+            aria-label={`${previewLabel}: ${project.title}`}
           >
             <ExternalLink className="w-4 h-4" aria-hidden="true" />
           </a>
@@ -109,9 +111,9 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="dh-card-v2__btn-minimal"
-                  aria-label={`${t('work_v2_preview') || 'Preview work'}: ${project.title}`}
+                  aria-label={`${previewLabel}: ${project.title}`}
                 >
-                  <span>{t('work_v2_preview') || 'Preview work'}</span>
+                  <span>{previewLabel}</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 </a>
               )}
@@ -120,9 +122,9 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
                 <Link
                   to={`/work/${caseStudySlug}`}
                   className="dh-card-v2__btn-minimal"
-                  aria-label={`${t('work_v2_read_case') || 'Case study'}: ${project.title}`}
+                  aria-label={`${caseStudyLabel}: ${project.title}`}
                 >
-                  <span>{t('work_v2_read_case') || 'Case study'}</span>
+                  <span>{caseStudyLabel}</span>
                   <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
                 </Link>
               )}
@@ -150,7 +152,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
                 rel="noopener noreferrer"
                 className="dh-card-v2__btn-minimal"
               >
-                <span>{t('work_v2_preview') || 'Preview work'}</span>
+                <span>{previewLabel}</span>
                 <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               </a>
             )}
@@ -159,7 +161,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
                 to={`/work/${caseStudySlug}`}
                 className="dh-card-v2__btn-minimal"
               >
-                <span>{t('work_v2_read_case') || 'Case study'}</span>
+                <span>{caseStudyLabel}</span>
                 <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
               </Link>
             )}

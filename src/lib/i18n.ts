@@ -219,7 +219,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v2 Redesign
     work_v2_preview_work: 'Preview work',
+    work_v2_preview: 'Preview work',
     work_v2_read_case_study: 'Read case study',
+    work_v2_read_case: 'Case study',
     work_v2_all_work: 'All work',
     work_v2_challenge: 'Challenge',
     work_v2_solution: 'Solution',
@@ -394,7 +396,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v2 Redesign
     work_v2_preview_work: 'Projekt ansehen',
+    work_v2_preview: 'Projekt ansehen',
     work_v2_read_case_study: 'Fallstudie lesen',
+    work_v2_read_case: 'Fallstudie',
     work_v2_all_work: 'Alle Projekte',
     work_v2_challenge: 'Herausforderung',
     work_v2_solution: 'Lösung',
@@ -569,7 +573,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v2 Redesign
     work_v2_preview_work: 'معاينة العمل',
+    work_v2_preview: 'معاينة العمل',
     work_v2_read_case_study: 'دراسة الحالة',
+    work_v2_read_case: 'دراسة الحالة',
     work_v2_all_work: 'كافة الأعمال',
     work_v2_challenge: 'التحدي',
     work_v2_solution: 'الحل المطبق',
@@ -744,7 +750,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v2 Redesign
     work_v2_preview_work: 'Ver proyecto',
+    work_v2_preview: 'Ver proyecto',
     work_v2_read_case_study: 'Caso de estudio',
+    work_v2_read_case: 'Caso de estudio',
     work_v2_all_work: 'Todos los proyectos',
     work_v2_challenge: 'Desafío',
     work_v2_solution: 'Solución',
@@ -919,7 +927,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v2 Redesign
     work_v2_preview_work: 'Voir le projet',
+    work_v2_preview: 'Voir le projet',
     work_v2_read_case_study: 'Étude de cas',
+    work_v2_read_case: 'Étude de cas',
     work_v2_all_work: 'Tous les projets',
     work_v2_challenge: 'Défi',
     work_v2_solution: 'Solution',
