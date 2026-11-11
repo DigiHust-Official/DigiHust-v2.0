@@ -48,9 +48,9 @@
   border: 1px solid rgba(31, 122, 140, 0.25);
   background: rgba(31, 122, 140, 0.06);
   color: var(--brand-teal);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-text, 'Inter', sans-serif);
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -80,23 +80,23 @@ html.light .dh-work-showcase__eyebrow {
 
 /* Heading */
 .dh-work-showcase__heading {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 300;
-  font-size: clamp(2.2rem, 4.4vw, 4rem);
-  line-height: 1.08;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 600;
+  font-size: clamp(2rem, 3.8vw, 3.25rem);
+  line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--text-heading);
   margin: 0 0 12px 0;
 }
 
 .dh-work-showcase__heading-main {
-  font-weight: 300;
+  font-weight: 600;
 }
 
 .dh-work-showcase__heading-accent {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-style: normal;
+  font-weight: 600;
   color: #1F7A8C;
 }
 
@@ -113,7 +113,7 @@ html.light .dh-work-showcase__heading-accent {
 
 /* Subtext */
 .dh-work-showcase__subtext {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-text, 'Inter', sans-serif);
   font-size: clamp(0.95rem, 1.2vw, 1.05rem);
   line-height: 1.55;
   color: var(--text-body);
@@ -126,7 +126,7 @@ html.light .dh-work-showcase__heading-accent {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-text, 'Inter', sans-serif);
   font-size: 13.5px;
   font-weight: 600;
   height: 36px;

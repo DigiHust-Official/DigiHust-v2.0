@@ -34,7 +34,8 @@ html.dark {
   /* Typography Font Stacks */
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-heading: 'Outfit', system-ui, sans-serif;
-  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-display: 'Montserrat', system-ui, sans-serif;
+  --font-text: 'Inter', system-ui, sans-serif;
 
   /* Legacy Backward Compatibility Mappings */
   --color-bg: var(--bg-page);
@@ -287,6 +288,50 @@ body {
 /* Headings auto-inherit heading color */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-heading);
+}
+
+/* ── STRICT HERO FONT PINNING ── */
+[data-hero="true"],
+.hero-runway {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+.dh-rot__h1 {
+  font-family: 'Outfit', system-ui, sans-serif !important;
+  font-weight: 800 !important;
+}
+.dh-rot__sub {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+}
+.dh-hero-explore-btn,
+.dh-glass-btn,
+.dh-hero-trust-row {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+/* ── NON-HERO SECTION TYPOGRAPHY UNIFICATION ── */
+.dh-about-section,
+.dh-services,
+.dh-model-v2,
+.dh-work-showcase,
+.dh-work-page,
+.dh-case-study-page,
+#feedback,
+#home-faq,
+#home-cta {
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
+}
+
+.dh-about-section h1, .dh-about-section h2, .dh-about-section h3,
+.dh-services h1, .dh-services h2, .dh-services h3,
+.dh-model-v2 h1, .dh-model-v2 h2, .dh-model-v2 h3,
+.dh-work-showcase h1, .dh-work-showcase h2, .dh-work-showcase h3,
+.dh-work-page h1, .dh-work-page h2, .dh-work-page h3,
+.dh-case-study-page h1, .dh-case-study-page h2, .dh-case-study-page h3,
+#feedback h2, #feedback h3,
+#home-faq h2, #home-faq summary,
+#home-cta h2 {
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
 }
 
 /* Universal Card Class - Buttery Spring Physics */

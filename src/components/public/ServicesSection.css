@@ -156,9 +156,9 @@ html.dark .dh-services {
 }
 
 .dh-services__title {
-  font-size: clamp(2rem, 4.4vw, 4.1rem);
+  font-size: clamp(2rem, 3.8vw, 3.25rem);
   letter-spacing: -0.02em;
-  line-height: 1.08;
+  line-height: 1.15;
   margin: 0;
   text-align: center;
   display: flex;
@@ -176,15 +176,15 @@ html.dark .dh-services {
 }
 
 .dh-services__title-primary {
-  font-family: var(--font-heading, 'Outfit', system-ui, sans-serif);
-  font-weight: 300;
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
+  font-weight: 600;
   color: var(--dh-heading-primary);
 }
 
 .dh-services__title-accent {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 400;
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
+  font-style: normal;
+  font-weight: 600;
   color: var(--dh-heading-accent);
 }
 
@@ -299,7 +299,7 @@ html.dark .dh-services {
   width: 15cqw;
   height: 15cqw;
   border-radius: 50%;
-  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
   font-weight: 500;
   font-size: 4.6cqw;
   line-height: 1;
@@ -325,7 +325,7 @@ html.dark .dh-services {
 }
 
 .dh-services-card__pill-label {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
   font-weight: 500;
   font-size: 4.6cqw;
   line-height: 1;
@@ -364,11 +364,11 @@ html.dark .dh-services {
   }
 }
 
-/* ── Title (Item 1: single line, Outfit 300, clamp(1rem, 7.6cqw, 1.9rem), margin-bottom 3.5cqw) ── */
+/* ── Title (Item 1: single line, Montserrat 600, clamp(0.92rem, 6.8cqw, 1.65rem), margin-bottom 3.5cqw) ── */
 .dh-services-card__title {
-  font-family: var(--font-heading, 'Outfit', system-ui, sans-serif);
-  font-weight: 300;
-  font-size: clamp(1rem, 7.6cqw, 1.9rem);
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
+  font-weight: 600;
+  font-size: clamp(0.92rem, 6.8cqw, 1.65rem);
   line-height: 1.2;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -383,7 +383,7 @@ html.dark .dh-services {
 
 /* ── Description (Item 1: 3 lines, line-height 1.6, clamp(12px, 4.7cqw, 15px), margin-bottom 8cqw) ── */
 .dh-services-card__desc {
-  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
   font-weight: 400;
   font-size: clamp(12px, 4.7cqw, 15px);
   line-height: 1.6;
@@ -463,7 +463,7 @@ html.dark .dh-services {
   padding-inline-end: 4px;
   border-radius: 9999px;
   text-decoration: none;
-  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;

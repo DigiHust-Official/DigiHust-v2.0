@@ -51,28 +51,28 @@ export const Work: React.FC = () => {
     : projectsList.filter((p) => p.filterCat === activeFilter || p.category === activeFilter);
 
   return (
-    <div className="pt-16 overflow-x-hidden">
+    <div className="dh-work-page pt-16 overflow-x-hidden">
       <SEOHead
         title="Our Work & Case Studies | DigiHust"
         description="Explore DigiHust's portfolio of delivered projects across full-stack development, brand identity systems, AI automation, and business intelligence."
       />
 
       {/* Header */}
-      <section data-hero="true" className="bg-[var(--bg-page)] py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
+      <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(31,122,140,0.25)] dark:border-[rgba(46,196,214,0.3)] bg-[rgba(31,122,140,0.06)] dark:bg-[rgba(46,196,214,0.08)] text-[var(--brand-teal)] dark:text-[#2EC4D6] text-xs font-bold uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(31,122,140,0.25)] dark:border-[rgba(46,196,214,0.3)] bg-[rgba(31,122,140,0.06)] dark:bg-[rgba(46,196,214,0.08)] text-[var(--brand-teal)] dark:text-[#2EC4D6] text-xs font-semibold uppercase tracking-widest mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
               <span>{t('work_v3_eyebrow') || 'Case studies'}</span>
             </div>
 
-            <h1 className="font-display font-light text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-4">
+            <h1 className="font-display font-semibold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-4">
               <span>{t('work_v3_heading_1') || 'Selected'}</span>{' '}
-              <span className="font-serif italic font-normal text-[#1F7A8C] dark:text-[#2EC4D6]">
+              <span className="text-[#1F7A8C] dark:text-[#2EC4D6]">
                 {t('work_v3_heading_2') || 'work.'}
               </span>
             </h1>

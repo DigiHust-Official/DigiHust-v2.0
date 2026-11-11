@@ -621,7 +621,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* ── SECTION 6: FREQUENTLY ASKED QUESTIONS ── */}
-      <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
+      <section id="home-faq" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
@@ -655,7 +655,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* ── SECTION 7: CALL TO ACTION ── */}
-      <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-center relative overflow-hidden">
+      <section id="home-cta" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-center relative overflow-hidden">
         <div className="max-w-3xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
