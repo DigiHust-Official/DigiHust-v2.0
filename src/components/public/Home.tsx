@@ -25,7 +25,7 @@ import {
 import { SEOHead } from '../seo/SEOHead';
 import { HeroBackdrop } from '../ui/HeroBackdrop';
 import { ServiceCard } from '../ui/ServiceCard';
-import { ProjectCardV2 } from './ProjectCardV2';
+import { WorkShowcaseSection } from './WorkShowcaseSection';
 import { LavaProposalButton } from '../ui/LavaProposalButton';
 import { GlowCtaButton } from '../ui/GlowCtaButton';
 import { GlassCtaButton } from '../ui/GlassCtaButton';
@@ -222,7 +222,6 @@ const itemVariants: Variants = {
 export const Home: React.FC = () => {
   const { t } = useLanguage();
   const { siteContent } = useApp();
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [buttonsHovered, setButtonsHovered] = useState(false);
 
   const heroRef = useRef<HTMLElement>(null);
@@ -233,30 +232,6 @@ export const Home: React.FC = () => {
   useHeroHardScroll({ runwayRef });
 
   const hero = siteContent?.hero;
-  const rawCaseStudies = siteContent?.caseStudies || [];
-  const featuredProjects: Project[] = (rawCaseStudies && rawCaseStudies.length > 0)
-    ? rawCaseStudies.slice(0, 3).map((cs, idx) => normalizeProject({
-        id: cs.slug || cs.id,
-        category: cs.category || 'Web Development',
-        filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
-        title: cs.title,
-        client: cs.client || 'Enterprise Client',
-        description: cs.summary || 'Custom engineered digital solution delivered by DigiHust specialized squads.',
-        shortDescription: cs.summary || 'Custom engineered digital solution delivered by DigiHust specialized squads.',
-        cardImage: {
-          src: formatImageUrl(cs.imageUrl, cs.category),
-          alt: cs.title,
-        },
-        challenge: cs.challenge || 'Client required modernized architecture, scalable infrastructure, and optimized acquisition funnels.',
-        solution: cs.solution || 'DigiHust assembled a dedicated cross-functional squad to engineer an end-to-end custom application with enterprise SLA guarantees.',
-        results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || 'Uplift'}`] : ['+140% Conversion Rate', 'Sub-800ms Latency', '100% On-Time Delivery'],
-        tags: cs.tags && cs.tags.length > 0 ? cs.tags : ['React', 'Full Stack', 'Cloud'],
-        img: formatImageUrl(cs.imageUrl, cs.category),
-        projectUrl: getProjectLiveUrl(cs),
-        published: true,
-        order: idx,
-      }, idx))
-    : getValidProjects(siteContent).slice(0, 3);
 
   const testimonials = (siteContent?.testimonials && siteContent.testimonials.length > 0)
     ? siteContent.testimonials
@@ -535,41 +510,11 @@ export const Home: React.FC = () => {
       {/* ── SECTION 3: THE MODEL ADVANTAGE / WHY DIGIHUST ── */}
       <ModelAdvantageSection />
 
-      {/* ── SECTION 4: SELECTED WORK ── */}
-      <section className="py-24 px-6 lg:px-8 bg-[var(--bg-page)] border-t border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12 gap-4">
-            <div>
-              <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">{t('work_tag')}</p>
-              <h2 className="font-display font-extrabold text-4xl text-[var(--text-heading)]">{t('work_heading')}</h2>
-            </div>
-            <Link
-              to="/portfolio"
-              className="inline-flex items-center space-x-2 text-sm font-bold text-[var(--brand-teal-text)] hover:underline"
-            >
-              <span>{t('work_view_all')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+      {/* ── SECTION 4: SELECTED WORK (Extracted Showcase) ── */}
+      <WorkShowcaseSection />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
-            {featuredProjects.map((project) => (
-              <motion.div
-                key={project.id || project.title}
-                initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="h-full"
-              >
-                <ProjectCardV2 project={project} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 5: CLIENT FEEDBACK (Item 4 Redesign) ── */}
-      <section className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
+      {/* ── SECTION 5: CLIENT FEEDBACK ── */}
+      <section id="feedback" data-hard-stop="feedback" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20 max-w-2xl mx-auto">
             <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
@@ -731,124 +676,6 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Case Study Detail Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <div
-            className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm overflow-y-auto"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setSelectedProject(null);
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl max-w-3xl w-full p-6 sm:p-8 text-[var(--text-body)] relative shadow-2xl my-8"
-            >
-              <button
-                onClick={() => setSelectedProject(null)}
-                className="absolute top-6 right-6 p-2 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] hover:border-[var(--brand-teal)] text-[var(--text-body)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
-                aria-label="Close Case Study Modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="pr-12 mb-6">
-                <span className="text-xs font-bold text-[var(--brand-teal-text)] uppercase tracking-wider">
-                  {selectedProject.category} · {selectedProject.client}
-                </span>
-                <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] mt-1">
-                  {selectedProject.title}
-                </h3>
-              </div>
-
-              <div className="aspect-video rounded-2xl overflow-hidden mb-6 border border-[var(--border-subtle)] bg-slate-100 dark:bg-slate-800">
-                <img
-                  src={formatImageUrl(selectedProject.img, selectedProject.category)}
-                  alt={selectedProject.title}
-                  width={800}
-                  height={450}
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => handleImageError(e, undefined, selectedProject.category)}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="space-y-6 text-sm">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-heading)] mb-2 flex items-center space-x-1.5">
-                    <Layers className="w-4 h-4" />
-                    <span>The Challenge</span>
-                  </h4>
-                  <p className="text-[var(--text-body)] leading-relaxed bg-[var(--bg-page)] p-4 rounded-xl border border-[var(--border-subtle)]">
-                    {selectedProject.challenge}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--brand-teal-text)] mb-2 flex items-center space-x-1.5">
-                    <span>The DigiHust Solution</span>
-                  </h4>
-                  <p className="text-[var(--text-body)] leading-relaxed bg-[var(--bg-page)] p-4 rounded-xl border border-[var(--border-subtle)]">
-                    {selectedProject.solution}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
-                    Key Outcomes & Metrics
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {selectedProject.results.map((res) => (
-                      <div
-                        key={res}
-                        className="p-3.5 rounded-xl bg-[var(--bg-page)] border border-emerald-500/30 text-xs font-semibold text-[var(--text-body)] flex items-start space-x-2"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                        <span>{res}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedProject.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="text-[10px] px-2.5 py-1 rounded-md bg-[var(--bg-page)] text-[var(--text-body)] border border-[var(--border-subtle)]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-                  <a
-                    href={getProjectLiveUrl(selectedProject)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-[#1F7A8C] hover:bg-[#1A6877] dark:bg-[var(--brand-teal)] dark:hover:bg-[#198090] text-white font-bold text-xs shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Live Demo</span>
-                  </a>
-                  <Link
-                    to={`/contact?project=${encodeURIComponent(selectedProject.title)}&service=${encodeURIComponent(selectedProject.category)}`}
-                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal-hover)] text-white font-bold text-xs shadow transition-all hover:scale-105 active:scale-95"
-                  >
-                    <span>Build a Similar Project</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

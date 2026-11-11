@@ -1,0 +1,34 @@
+/* ── Shared Work Grid Styles (Alternating 7/5 & 5/7 columns) ── */
+
+.dh-work-grid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 2.5vw, 36px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dh-work-row {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: clamp(16px, 2vw, 28px);
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dh-work-row--5-7 {
+  grid-template-columns: 5fr 7fr;
+}
+
+.dh-work-row--single {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 899.98px) {
+  .dh-work-row,
+  .dh-work-row--5-7 {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
