@@ -39,6 +39,8 @@ export interface Project {
   projectUrl?: string;
 }
 
+export type WorkProject = Project;
+
 export const toSlug = (text: string): string => {
   return text
     .toLowerCase()

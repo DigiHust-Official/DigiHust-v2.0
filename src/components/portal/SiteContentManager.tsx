@@ -17,6 +17,7 @@ import { AVAILABLE_SERVICE_ICONS, getServiceIcon } from '../../lib/serviceIcons'
 import { dbService } from '../../lib/dbService';
 import { compressAvatarFile } from '../../lib/utils';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
+import { WorkContentTab } from './WorkContentTab';
 
 const SERVICE_PATTERN_OPTIONS = [
   { id: 'dotted-grid', label: 'Dotted Grid' },
@@ -67,7 +68,7 @@ export const SiteContentManager: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<
-    'hero' | 'valueProps' | 'caseStudies' | 'testimonials' | 'services' | 'packages' | 'team' | 'blog' | 'faqs' | 'about' | 'contact' | 'images' | 'careers' | 'newsletter'
+    'hero' | 'valueProps' | 'caseStudies' | 'work' | 'testimonials' | 'services' | 'packages' | 'team' | 'blog' | 'faqs' | 'about' | 'contact' | 'images' | 'careers' | 'newsletter'
   >('hero');
 
   const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
@@ -652,7 +653,8 @@ export const SiteContentManager: React.FC = () => {
           { id: 'hero' as const,        label: '1. Hero Section',     icon: null,                                     status: 'live',     tip: 'Controls the main headline, subtext, badge, and stat tokens on the homepage' },
           { id: 'valueProps' as const,  label: '2. Value Props',      icon: <Award className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Key value propositions and advantages on the homepage' },
           { id: 'services' as const,    label: '3. Services',         icon: <Layers className="w-3.5 h-3.5" />,       status: 'live',     tip: 'The capability cards shown on homepage and /services page' },
-          { id: 'caseStudies' as const, label: '4. Case Studies',     icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'live',     tip: 'Work/Portfolio section on homepage and /work page' },
+          { id: 'work' as const,        label: '4. Work (Portfolio)', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'live',     tip: 'Manage 16:9 cards, sliding hover panels, and case study detail pages' },
+          { id: 'caseStudies' as const, label: 'Legacy Case Studies', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'fallback', tip: 'Legacy portfolio items' },
           { id: 'testimonials' as const,label: '5. Testimonials',     icon: <Star className="w-3.5 h-3.5" />,         status: 'live',     tip: 'Client reviews shown on homepage' },
           { id: 'team' as const,        label: '6. Team Profiles',    icon: <Users className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Team members shown on the /team page' },
           { id: 'blog' as const,        label: '7. Blog & Insights',  icon: <FileText className="w-3.5 h-3.5" />,     status: 'live',     tip: 'Manage articles and technical guides on /blog and /blog/:slug' },
@@ -1578,6 +1580,16 @@ export const SiteContentManager: React.FC = () => {
           </div>
         )}
 
+
+        {/* ── TAB: WORK PROJECTS & CASE STUDIES (V2) ── */}
+        {activeTab === 'work' && (
+          <WorkContentTab
+            siteContent={safeContent}
+            updateSiteContent={updateSiteContent}
+            showToast={showToast}
+            uploadAssetSafely={uploadAssetSafely}
+          />
+        )}
 
         {/* ── TAB 3: CASE STUDIES & PROJECTS ── */}
       {activeTab === 'caseStudies' && (

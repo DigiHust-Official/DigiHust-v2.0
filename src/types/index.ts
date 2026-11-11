@@ -1,3 +1,5 @@
+import type { Project as WorkProject } from '../data/workProjects';
+
 export type UserRole = 'management' | 'group_leader' | 'freelancer' | 'intern' | 'member';
 
 export type UserRoleTier = 'ceo' | 'manager' | 'group_leader' | 'member' | 'intern' | 'specialist';
@@ -561,6 +563,7 @@ export interface SiteContent {
   // WhatsApp Notification Gateway Configuration
   whatsappWebhookUrl?: string;
   callmebotApiKey?: string;
+  workProjects?: WorkProject[];
 }
 
 // ── SECURITY & PERMISSION AUDIT LOG TYPES ────────────────────────────────────
