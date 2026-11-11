@@ -168,8 +168,11 @@ export const Services: React.FC = () => {
                 <img
                   src={currentSlide.image}
                   alt={currentSlide.title}
+                  width={1200}
+                  height={500}
                   className="w-full h-full object-cover object-center"
                   loading={currentSlideIndex === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
@@ -403,6 +406,8 @@ export const Services: React.FC = () => {
                   <img
                     src={step.img}
                     alt={step.title}
+                    width={220}
+                    height={220}
                     loading="lazy"
                     decoding="async"
                     className="w-full max-w-[220px] sm:max-w-none h-auto object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"

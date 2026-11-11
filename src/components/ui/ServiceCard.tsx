@@ -74,6 +74,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           <img
             src={imageSrc}
             alt={service.title}
+            width={480}
+            height={300}
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover"
