@@ -857,7 +857,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       company: 'MashaAllah Bangles Store',
       rating: 5,
       quote: 'DigiHust delivered an exceptional e-commerce website that gave our brand a much stronger presence online. We truly appreciate their attention to detail and overall design.',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+      avatarUrl: ''
     },
     {
       id: 't-1790332202555',
@@ -866,7 +866,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       company: 'Al Nawaz Industries',
       rating: 5,
       quote: 'DigiHust built a sleek and responsive website for our aluminium business, giving our brand the recognition he promised. We really appreciated their timely execution, attention to detail, and dedication towards satisfaction and quality of service.',
-      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'
+      avatarUrl: ''
     },
     {
       id: 't-1790334886104',
@@ -875,7 +875,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       company: 'The Rustic Spoon',
       rating: 5,
       quote: 'DigiHust transformed our online presence with a modern, responsive, and user-friendly restaurant website. The design beautifully represents the rustic dynamics of our culinary experience, making it easy for customers to explore our menu and connect with us online. We are very pleased with their professionalism and expertise in modern web design.',
-      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80'
+      avatarUrl: ''
     }
   ],
   services: [
@@ -1175,7 +1175,7 @@ By implementing static HTML generation and pre-rendering at build time, every te
       readTime: '6 min read',
       publishedAt: '2026-08-24',
       author: 'Haris Asad',
-      authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150',
+      authorAvatar: '',
       imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
       isPublished: true,
       tags: ['Architecture', 'SEO', 'AI Crawlers']
@@ -1198,7 +1198,7 @@ By implementing static HTML generation and pre-rendering at build time, every te
       readTime: '8 min read',
       publishedAt: '2026-08-18',
       author: 'AI Engineering Lead',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+      authorAvatar: '',
       imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
       isPublished: true,
       tags: ['n8n', 'Python', 'Automation']
@@ -1218,7 +1218,7 @@ By implementing static HTML generation and pre-rendering at build time, every te
       readTime: '7 min read',
       publishedAt: '2026-08-10',
       author: 'Cybersecurity Lead',
-      authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+      authorAvatar: '',
       imageUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
       isPublished: true,
       tags: ['Security', 'OWASP', 'Compliance']

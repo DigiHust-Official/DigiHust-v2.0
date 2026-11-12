@@ -1,11 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
-import { ArrowUpRight, Star } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { INITIAL_USERS } from '../../services/mockData';
 import logo96 from '../../assets/logo-96.webp';
 import logo192 from '../../assets/logo-192.webp';
+import { Avatar } from '../common/Avatar';
+import { StarRating } from '../common/StarRating';
 import './AboutSection.css';
 
 // 1. Image placeholder configuration at top of file for easy swapping
@@ -220,15 +222,12 @@ export const AboutSection: React.FC = () => {
               <div className="dh-about-avatars-row">
                 <div className="dh-about-avatar-cluster" aria-hidden="true">
                   {displayAvatars.map((member) => (
-                    <img
+                    <Avatar
                       key={member.id}
+                      name={member.name}
                       src={member.avatarUrl}
-                      alt={member.name}
-                      className="dh-about-avatar-img"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
+                      size={44}
+                      className="dh-about-avatar-item"
                     />
                   ))}
                 </div>
@@ -239,9 +238,43 @@ export const AboutSection: React.FC = () => {
             </div>
           </motion.article>
 
-          {/* CARD 3: Customer Satisfaction */}
+          {/* CARD 3: Our Approach (Orange Card) */}
           <motion.article
             className="dh-about-card dh-about-card-turnaround"
+            variants={cardVariants}
+          >
+            {/* TOP Cluster */}
+            <div className="dh-about-card-top">
+              <div className="dh-about-card-label">
+                {t('about_card4_label') || 'Our approach'}
+              </div>
+
+              {/* Action Button at TOP-RIGHT, avoiding bottom-right floating CTA */}
+              <Link
+                to="/contact"
+                className="dh-about-square-btn dh-about-card-turnaround-btn"
+                aria-label={t('about_card4_link') || 'Start a project with DigiHust'}
+              >
+                <ArrowUpRight className="w-4 h-4" strokeWidth={2.4} />
+              </Link>
+            </div>
+
+            {/* Statement directly under label */}
+            <p className="dh-about-approach-text">
+              {t('about_card4_heading') || 'We find the real business problems, then build the solution.'}
+            </p>
+
+            {/* BOTTOM Cluster: Caption */}
+            <div className="dh-about-card-bottom">
+              <p className="dh-about-approach-caption">
+                {t('about_card4_caption') || 'Problem first, tools second.'}
+              </p>
+            </div>
+          </motion.article>
+
+          {/* CARD 4: Customer Satisfaction (White Card) */}
+          <motion.article
+            className="dh-about-card dh-about-card-contact"
             variants={cardVariants}
           >
             {/* TOP Cluster */}
@@ -257,76 +290,19 @@ export const AboutSection: React.FC = () => {
 
             {/* BOTTOM Cluster */}
             <div className="dh-about-card-bottom">
-              <div
-                className="dh-about-stars-row"
-                dir="ltr"
-                role="img"
-                aria-label="Rated 4.8 out of 5"
-              >
-                {[1, 2, 3, 4].map((i) => (
-                  <Star
-                    key={i}
-                    className="dh-about-star dh-about-star-fill"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                ))}
-                <div className="dh-about-star-partial" aria-hidden="true">
-                  <Star
-                    className="dh-about-star dh-about-star-outline"
-                    strokeWidth={1.5}
-                    aria-hidden="true"
-                  />
-                  <div
-                    className="dh-about-star-fill-clip"
-                    style={{ clipPath: 'inset(0 20% 0 0)' }}
-                    aria-hidden="true"
-                  >
-                    <Star
-                      className="dh-about-star dh-about-star-fill"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
+              <div className="dh-about-stars-row">
+                <StarRating
+                  value={4.8}
+                  max={5}
+                  size={18}
+                  color="#1F7A8C"
+                  emptyColor="rgba(10,31,43,0.25)"
+                  ariaLabel={t('about_card3_stars_aria') || 'Rated 4.8 out of 5'}
+                />
               </div>
 
               <p className="dh-about-caption">
-                {t('about_card3_caption') || 'Overall rating from our clients'}
-              </p>
-            </div>
-          </motion.article>
-
-          {/* CARD 4: Our Approach */}
-          <motion.article
-            className="dh-about-card dh-about-card-contact"
-            variants={cardVariants}
-          >
-            {/* TOP Cluster */}
-            <div className="dh-about-card-top">
-              <div className="dh-about-card-label">
-                {t('about_card4_label') || 'Our approach'}
-              </div>
-
-              {/* Action Button at TOP-RIGHT, avoiding bottom-right floating CTA */}
-              <Link
-                to="/contact"
-                className="dh-about-square-btn dh-about-card4-btn"
-                aria-label={t('about_card4_link') || 'Start a project with DigiHust'}
-              >
-                <ArrowUpRight className="w-4 h-4" strokeWidth={2.4} />
-              </Link>
-            </div>
-
-            {/* Statement directly under label */}
-            <p className="dh-about-approach-text">
-              {t('about_card4_heading') || 'We find the real business problems, then build the solution.'}
-            </p>
-
-            {/* BOTTOM Cluster: Caption bottom-left, keeping bottom-right 128px clear */}
-            <div className="dh-about-card-bottom dh-about-contact-bottom">
-              <p className="dh-about-approach-caption">
-                {t('about_card4_caption') || 'Problem first, tools second.'}
+                {t('about_card3_caption') || 'Based on 40+ client reviews'}
               </p>
             </div>
           </motion.article>

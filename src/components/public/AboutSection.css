@@ -122,7 +122,12 @@
 
 .dh-about-title-muted {
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--brand-teal);
+}
+
+html[data-theme="dark"] .dh-about-title-muted,
+html.dark .dh-about-title-muted {
+  color: #2EC4D6;
 }
 
 /* ── Common Card Styles & Container Query ── */
@@ -418,25 +423,24 @@ html.dark .dh-about-card-delivery .dh-about-statement {
   align-items: center;
 }
 
-.dh-about-avatar-img {
-  width: 36px;
-  height: 36px;
+.dh-about-avatar-item {
+  width: 44px;
+  height: 44px;
   border-radius: 9999px;
-  object-fit: cover;
   border: 2px solid var(--bg-surface);
-  margin-inline-start: -10px;
+  margin-inline-start: -12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
-html[data-theme="dark"] .dh-about-avatar-img,
-html.dark .dh-about-avatar-img {
+html[data-theme="dark"] .dh-about-avatar-item,
+html.dark .dh-about-avatar-item {
   border-color: var(--dh-surface-alt);
   background-color: var(--dh-surface-alt);
 }
 
-.dh-about-avatar-img:first-child {
+.dh-about-avatar-item:first-child {
   margin-inline-start: 0;
 }
 
@@ -495,81 +499,39 @@ html.dark .dh-about-avatar-img {
 }
 
 .dh-about-card-turnaround .dh-about-card-label {
-  color: rgba(10, 31, 43, 0.75);
+  color: rgba(10, 31, 43, 0.8);
 }
 
-.dh-about-card-turnaround .dh-about-stat {
-  color: #0A1F2B;
+.dh-about-card-turnaround-btn {
+  background-color: #0A1F2B;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(10, 31, 43, 0.2);
 }
 
-.dh-about-stat-unit {
-  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: 0.32em;
+.dh-about-card-turnaround-btn:hover {
+  background-color: #050D14;
+  transform: scale(1.06);
+}
+
+.dh-about-card-turnaround .dh-about-approach-text {
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
   font-weight: 400;
-  letter-spacing: -0.02em;
-  color: rgba(10, 31, 43, 0.75);
-  margin-inline-start: 0.15em;
-  align-self: baseline;
-}
-
-.dh-about-stars-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  margin-top: 0.25rem;
-  color: #0A1F2B; /* card's ink */
-}
-
-.dh-about-star {
-  width: clamp(16px, 5.6cqw, 26px);
-  height: clamp(16px, 5.6cqw, 26px);
-  flex-shrink: 0;
-}
-
-.dh-about-star-fill {
-  fill: currentColor;
-  stroke: currentColor;
-}
-
-.dh-about-star-outline {
-  fill: none;
-  stroke: currentColor;
-  opacity: 0.35;
-}
-
-.dh-about-star-partial {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(16px, 5.6cqw, 26px);
-  height: clamp(16px, 5.6cqw, 26px);
-  flex-shrink: 0;
-}
-
-.dh-about-star-partial .dh-about-star {
-  width: 100%;
-  height: 100%;
-}
-
-.dh-about-star-fill-clip {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.dh-about-star-fill-clip .dh-about-star {
-  position: absolute;
-  inset: 0;
-}
-
-.dh-about-card-turnaround .dh-about-caption {
-  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: clamp(12.5px, 3.3cqw, 15px);
-  line-height: 1.4;
+  font-size: clamp(1rem, 4.4cqw, 1.4rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
   color: #0A1F2B;
-  font-weight: 600;
-  margin-top: clamp(4px, 1.5cqw, 8px);
+  margin-top: clamp(8px, 2.5cqw, 14px);
+  margin-bottom: auto;
+  text-wrap: pretty;
+}
+
+.dh-about-card-turnaround .dh-about-approach-caption {
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
+  font-size: clamp(12px, 3.2cqw, 14.5px);
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(10, 31, 43, 0.85);
+  margin: 0;
 }
 
 html[data-theme="dark"] .dh-about-card-turnaround,
@@ -585,44 +547,29 @@ html.dark .dh-about-card-turnaround {
 
 html[data-theme="dark"] .dh-about-card-turnaround .dh-about-card-label,
 html.dark .dh-about-card-turnaround .dh-about-card-label {
-  color: rgba(5, 13, 20, 0.75);
+  color: rgba(5, 13, 20, 0.8);
 }
 
-html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stat,
-html.dark .dh-about-card-turnaround .dh-about-stat {
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-approach-text,
+html.dark .dh-about-card-turnaround .dh-about-approach-text {
   color: #050D14;
 }
 
-html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stat-unit,
-html.dark .dh-about-card-turnaround .dh-about-stat-unit {
-  color: rgba(5, 13, 20, 0.75);
+html[data-theme="dark"] .dh-about-card-turnaround .dh-about-approach-caption,
+html.dark .dh-about-card-turnaround .dh-about-approach-caption {
+  color: rgba(5, 13, 20, 0.85);
 }
 
-html[data-theme="dark"] .dh-about-card-turnaround .dh-about-stars-row,
-html.dark .dh-about-card-turnaround .dh-about-stars-row {
-  color: #050D14;
-}
-
-html[data-theme="dark"] .dh-about-card-turnaround .dh-about-caption,
-html.dark .dh-about-card-turnaround .dh-about-caption {
-  color: #050D14;
-}
-
-@container (max-height: 190px) {
-  .dh-about-stars-row {
-    display: none;
-  }
-}
-
-/* ── CARD 4: Our Approach (High-Contrast Monochrome Card) ── */
+/* ── CARD 4: Customer Satisfaction (White Card) ── */
 .dh-about-card-contact {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(16px, 5.2cqw, 26px);
-  background-color: #050D14;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #F3F6FA;
+  padding: clamp(14px, 4.2cqw, 22px);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 20px rgba(10, 31, 43, 0.04);
+  color: #0A1F2B;
 }
 
 /* Dark theme: off-white #F3F6FA with dark text #050D14 */
@@ -648,7 +595,7 @@ html.dark .dh-about-card-contact {
 }
 
 .dh-about-card-contact .dh-about-card-label {
-  color: rgba(243, 246, 250, 0.7);
+  color: rgba(10, 31, 43, 0.7);
 }
 
 html[data-theme="dark"] .dh-about-card-contact .dh-about-card-label,
@@ -656,81 +603,54 @@ html.dark .dh-about-card-contact .dh-about-card-label {
   color: rgba(5, 13, 20, 0.7);
 }
 
-/* Top-Right 36px Rounded-Square Action Button */
-.dh-about-card4-btn {
-  background-color: #FFFFFF;
-  color: #050D14;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-}
-
-.dh-about-card4-btn:hover {
-  background-color: #F3F6FA;
-  transform: scale(1.06);
-}
-
-html[data-theme="dark"] .dh-about-card4-btn,
-html.dark .dh-about-card4-btn {
-  background-color: #050D14;
-  color: #F3F6FA;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-html[data-theme="dark"] .dh-about-card4-btn:hover,
-html.dark .dh-about-card4-btn:hover {
-  background-color: #0B1924;
-}
-
-@media (min-width: 1024px) {
-  .dh-about-contact-bottom {
-    padding-inline-end: 128px;
-  }
-}
-
-.dh-about-approach-text {
+.dh-about-card-contact .dh-about-stat {
   font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
-  font-weight: 300;
-  font-size: clamp(1.15rem, 6.2cqw, 1.9rem);
-  line-height: 1.18;
-  letter-spacing: -0.02em;
-  color: #F3F6FA;
-  margin-top: clamp(10px, 3.5cqw, 18px);
+  font-size: clamp(1.85rem, 5.2cqw, 2.5rem);
+  font-weight: 600;
+  color: #0A1F2B;
+  line-height: 1;
+  margin-top: clamp(2px, 1cqw, 6px);
 }
 
-html[data-theme="dark"] .dh-about-approach-text,
-html.dark .dh-about-approach-text {
+html[data-theme="dark"] .dh-about-card-contact .dh-about-stat,
+html.dark .dh-about-card-contact .dh-about-stat {
   color: #050D14;
 }
 
-.dh-about-approach-caption {
+.dh-about-card-contact .dh-about-stat-unit {
   font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: clamp(12.5px, 3.3cqw, 15px);
-  font-weight: 400;
-  line-height: 1.4;
-  color: #F3F6FA;
-  opacity: 0.85;
-  margin-top: clamp(4px, 1.5cqw, 8px);
+  font-size: 0.38em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: rgba(10, 31, 43, 0.65);
+  margin-inline-start: 0.15em;
+  align-self: baseline;
 }
 
-html[data-theme="dark"] .dh-about-approach-caption,
-html.dark .dh-about-approach-caption {
+html[data-theme="dark"] .dh-about-card-contact .dh-about-stat-unit,
+html.dark .dh-about-card-contact .dh-about-stat-unit {
+  color: rgba(5, 13, 20, 0.65);
+}
+
+.dh-about-stars-row {
+  display: flex;
+  align-items: center;
+  margin-top: clamp(4px, 1.2cqw, 8px);
+  margin-bottom: clamp(2px, 0.8cqw, 6px);
+}
+
+.dh-about-card-contact .dh-about-caption {
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
+  font-size: clamp(12px, 3.2cqw, 14.5px);
+  line-height: 1.35;
+  color: #0A1F2B;
+  font-weight: 600;
+  margin: 0;
+}
+
+html[data-theme="dark"] .dh-about-card-contact .dh-about-caption,
+html.dark .dh-about-card-contact .dh-about-caption {
   color: #050D14;
-  opacity: 0.85;
-}
-
-@container (max-height: 180px) {
-  .dh-about-approach-text {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
-@container (max-height: 140px) {
-  .dh-about-approach-caption {
-    display: none;
-  }
 }
 
 /* ── Prefers-reduced-motion: disable transitions and transforms ── */

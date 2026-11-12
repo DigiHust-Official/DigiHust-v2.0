@@ -170,7 +170,7 @@ export const PeopleDirectoryView: React.FC = () => {
       roleTier: newAccRoleTier,
       groupId: newAccSquad,
       title: newAccTitle || 'Specialist',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+      avatarUrl: '',
       specialties: ['Digital Services'],
       status: 'active',
       joinYear: new Date().getFullYear(),

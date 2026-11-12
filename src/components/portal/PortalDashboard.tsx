@@ -835,7 +835,7 @@ export const PortalDashboard: React.FC = () => {
                   {myLeader ? (
                     <div className="p-4 rounded-2xl bg-[var(--bg-page)] border border-[var(--border-subtle)] flex items-center space-x-3.5">
                       <img
-                        src={myLeader.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
+                        src={myLeader.avatarUrl}
                         alt={myLeader.name}
                         className="w-11 h-11 rounded-full object-cover border border-[var(--border-subtle)]"
                       />

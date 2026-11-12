@@ -143,7 +143,7 @@ const TESTIMONIALS = [
     name: 'David Sterling',
     role: 'Managing Director',
     company: 'Estates Direct UK',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    avatar: '',
     rating: 5,
   },
   {
@@ -151,7 +151,7 @@ const TESTIMONIALS = [
     name: 'Markus Vogel',
     role: 'Chief Brand Officer',
     company: 'Veloce Motors DE',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
+    avatar: '',
     rating: 5,
   },
   {
@@ -159,7 +159,7 @@ const TESTIMONIALS = [
     name: 'Sarah Chen',
     role: 'Head of Operations',
     company: 'LogiXpress Global',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+    avatar: '',
     rating: 5,
   },
 ];

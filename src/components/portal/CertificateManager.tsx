@@ -523,7 +523,7 @@ export const CertificateManager: React.FC = () => {
                         <td className="py-4 px-4 sm:px-6">
                           <div className="flex items-center space-x-3">
                             <img
-                              src={member.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
+                              src={member.avatarUrl}
                               alt={member.name}
                               className="w-10 h-10 rounded-full object-cover border border-[var(--border-subtle)]"
                             />
@@ -753,7 +753,7 @@ export const CertificateManager: React.FC = () => {
             <div className="p-3 sm:p-4 rounded-2xl bg-[var(--bg-page)] border border-[var(--border-subtle)] flex items-center justify-between flex-shrink-0">
               <div className="flex items-center space-x-3">
                 <img
-                  src={selectedMemberForAttach.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
+                  src={selectedMemberForAttach.avatarUrl}
                   alt={selectedMemberForAttach.name}
                   className="w-9 h-9 rounded-full object-cover border border-[var(--border-subtle)]"
                 />
