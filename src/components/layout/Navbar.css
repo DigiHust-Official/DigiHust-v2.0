@@ -149,19 +149,6 @@ html.dark .dh-nav-glide {
   display: inline-block;
 }
 
-/* Active Route Dot (4px teal dot centered under link label) */
-.dh-nav-active-dot {
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: var(--brand-teal-text);
-  pointer-events: none;
-}
-
 /* Light Theme Links */
 html[data-theme="light"] .dh-nav-link,
 html.light .dh-nav-link {

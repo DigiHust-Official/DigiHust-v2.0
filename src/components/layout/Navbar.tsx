@@ -342,7 +342,6 @@ export const Navbar: React.FC = () => {
                 onBlur={() => setFocusedIdx(null)}
               >
                 <span className="dh-nav-link-label">{link.label}</span>
-                {active && <span className="dh-nav-active-dot" aria-hidden="true" />}
               </Link>
             );
           })}
