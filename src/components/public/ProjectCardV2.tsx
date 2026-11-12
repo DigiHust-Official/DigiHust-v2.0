@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, ArrowRight, Star } from 'lucide-react';
+import { ExternalLink, ArrowRight } from 'lucide-react';
 import { Project, getProjectLiveUrl } from '../../data/workProjects';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
+import { StarRating } from '../common/StarRating';
 import './ProjectCardV2.css';
 
 interface ProjectCardV2Props {
@@ -11,43 +12,6 @@ interface ProjectCardV2Props {
   span?: '7' | '5';
   className?: string;
 }
-
-const StarRating: React.FC<{ rating: number; ariaLabel?: string; className?: string }> = ({
-  rating,
-  ariaLabel,
-  className = '',
-}) => {
-  const clamped = Math.max(0.5, Math.min(5, Math.round(rating * 2) / 2));
-  return (
-    <div
-      className={`dh-card-v2__stars ${className}`}
-      role="img"
-      aria-label={ariaLabel || `Rated ${clamped} out of 5 stars`}
-    >
-      {[1, 2, 3, 4, 5].map((starIdx) => {
-        const isFull = clamped >= starIdx;
-        const isHalf = !isFull && clamped >= starIdx - 0.5;
-        return (
-          <span key={starIdx} className="dh-star-wrap">
-            {isHalf ? (
-              <span className="dh-star-half-container">
-                <Star size={16} className="dh-star-empty" />
-                <span className="dh-star-half-clip">
-                  <Star size={16} className="dh-star-filled" />
-                </span>
-              </span>
-            ) : isFull ? (
-              <Star size={16} className="dh-star-filled" />
-            ) : (
-              <Star size={16} className="dh-star-empty" />
-            )}
-          </span>
-        );
-      })}
-      <span className="dh-card-v2__stars-val">{clamped.toFixed(1)}</span>
-    </div>
-  );
-};
 
 export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   project,
@@ -58,7 +22,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const previewLabel = t('work_v2_preview_work') || t('work_v2_preview') || 'Preview work';
-  const caseStudyLabel = t('work_v2_read_case_study') || t('work_v2_read_case') || 'Case study';
+  const caseStudyLabel = t('work_v2_read_case_study') || t('work_v2_read_case') || 'Read case study';
   const previewUrl = project.previewUrl || project.projectUrl || getProjectLiveUrl(project);
   const hasPreview = Boolean(previewUrl && previewUrl.trim().length > 0);
   const caseStudySlug = project.slug || project.id;
@@ -75,14 +39,15 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   );
   const imgAlt = project.cardImage?.alt || project.title;
   const shortDesc = project.shortDescription || project.description || '';
+  const clientName = (project.client || '').trim();
+  const hasClient = clientName.length > 0;
 
   return (
     <article className={`dh-card-v2 dh-card-v2--span-${span} ${className}`}>
       {/* ── Image Tile Container ── */}
       <div className="dh-card-v2__tile">
-        {/* ── Top-Start Folder Tab notched into image corner ── */}
+        {/* ── Top-Start Folder Tab notched into image corner (No dot, no outline) ── */}
         <div className="dh-card-v2__tab" aria-label={`Category: ${project.category}`}>
-          <span className="dh-card-v2__tab-dot" aria-hidden="true" />
           <span className="dh-card-v2__tab-text">{project.category}</span>
 
           {/* Smooth Concave Fillet Curve (Top Edge) */}
@@ -98,7 +63,7 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
           </svg>
         </div>
 
-        {/* ── Top-End Round Preview Icon (34px) ── */}
+        {/* ── Top-End Round Preview Icon (34px, neutral chip) ── */}
         {hasPreview && (
           <a
             href={previewUrl}
@@ -111,7 +76,10 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
           </a>
         )}
 
-        {/* ── Media Image ── */}
+        {/* ── Soft Bottom Gradient Overlay for Visual Consistency ── */}
+        <div className="dh-card-v2__tile-gradient" aria-hidden="true" />
+
+        {/* ── Media Image (No filters) ── */}
         <img
           src={imgSrc}
           alt={imgAlt}
@@ -129,24 +97,29 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
 
         {/* ── Sliding Hover Panel (over image tile only, premium 5 items) ── */}
         <div className="dh-card-v2__panel" aria-hidden="false">
-          {/* 1. Client Name with 28px Accent Bar */}
-          {project.client && (
+          {/* 1. Client Name with 28px Accent Bar (Hidden if empty) */}
+          {hasClient && (
             <div className="dh-card-v2__panel-client">
               <span className="dh-card-v2__panel-client-bar" aria-hidden="true" />
-              <span className="dh-card-v2__panel-client-name">{project.client}</span>
+              <span className="dh-card-v2__panel-client-name">{clientName}</span>
             </div>
           )}
 
           {/* 2. Project Title */}
-          <h3 className="dh-card-v2__panel-title">{project.title}</h3>
+          <h4 className="dh-card-v2__panel-title">{project.title}</h4>
 
-          {/* 3. Star Rating */}
+          {/* 3. Star Rating (Shared StarRating component with #2EC4D6 stars) */}
           {project.clientRating !== undefined && project.clientRating !== null && (
-            <StarRating
-              rating={project.clientRating}
-              ariaLabel={ratingAria}
-              className="dh-card-v2__panel-rating"
-            />
+            <div className="dh-card-v2__panel-rating-wrap">
+              <StarRating
+                value={project.clientRating}
+                max={5}
+                size={15}
+                color="#2EC4D6"
+                emptyColor="rgba(255, 255, 255, 0.25)"
+                ariaLabel={ratingAria}
+              />
+            </div>
           )}
 
           {/* 4 & 5. Minimal Text-Link Actions */}
@@ -180,27 +153,31 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
         </div>
       </div>
 
-      {/* ── Card Body (below image tile) ── */}
+      {/* ── Card Body (Below Image Tile) ── */}
       <div className="dh-card-v2__body">
-        <h2 className="dh-card-v2__title" title={project.title}>
+        <h3 className="dh-card-v2__title" title={project.title}>
           {project.title}
-        </h2>
+        </h3>
         <p className="dh-card-v2__desc" title={shortDesc}>
           {shortDesc}
         </p>
 
         {/* Compact client / rating row on mobile / touch */}
-        {(project.client || project.clientRating !== undefined) && (
+        {(hasClient || project.clientRating !== undefined) && (
           <div className="dh-card-v2__mobile-meta">
-            {project.client && (
-              <span className="dh-card-v2__mobile-client">{project.client}</span>
+            {hasClient && (
+              <span className="dh-card-v2__mobile-client">{clientName}</span>
             )}
-            {project.client && project.clientRating !== undefined && (
+            {hasClient && project.clientRating !== undefined && (
               <span className="dh-card-v2__mobile-meta-dot" aria-hidden="true">•</span>
             )}
             {project.clientRating !== undefined && (
               <StarRating
-                rating={project.clientRating}
+                value={project.clientRating}
+                max={5}
+                size={14}
+                color="var(--brand-teal)"
+                emptyColor="rgba(10, 31, 43, 0.22)"
                 ariaLabel={ratingAria}
                 className="dh-card-v2__mobile-rating"
               />
@@ -237,3 +214,5 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
     </article>
   );
 };
+
+export default ProjectCardV2;

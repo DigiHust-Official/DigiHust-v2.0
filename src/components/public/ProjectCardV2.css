@@ -2,14 +2,14 @@
 
 :root {
   --dh-card-surface-light: #FFFFFF;
-  --dh-card-border-light: rgba(10, 31, 43, 0.10);
+  --dh-card-border-light: rgba(10, 31, 43, 0.08);
   --dh-card-shadow-light: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 16px 40px rgba(10, 31, 43, 0.10);
   --dh-card-title-light: #0A1F2B;
   --dh-card-desc-light: #4A6070;
   --dh-card-accent-light: #1F7A8C;
 
   --dh-card-surface-dark: #0F2431;
-  --dh-card-border-dark: rgba(255, 255, 255, 0.10);
+  --dh-card-border-dark: rgba(255, 255, 255, 0.08);
   --dh-card-shadow-dark: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 44px rgba(0, 0, 0, 0.40);
   --dh-card-title-dark: #F3F6FA;
   --dh-card-desc-dark: #A9B8C6;
@@ -58,7 +58,7 @@ html.light .dh-card-v2 {
   --dh-card-accent: var(--dh-card-accent-light);
 }
 
-/* Constant shell background on hover; subtle elevation only */
+/* Subtle elevation on hover with no accent border */
 .dh-card-v2:hover {
   transform: translateY(-4px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 20px 48px rgba(10, 31, 43, 0.14);
@@ -101,7 +101,7 @@ html.dark .dh-card-v2:hover,
   }
 }
 
-/* 1px Inner Ring inside Tile */
+/* 1px Neutral Inner Ring inside Tile */
 .dh-card-v2__tile::after {
   content: "";
   position: absolute;
@@ -109,18 +109,28 @@ html.dark .dh-card-v2:hover,
   border-radius: inherit;
   pointer-events: none;
   z-index: 15;
-  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.08);
 }
 
 html[data-theme="dark"] .dh-card-v2__tile::after,
 html.dark .dh-card-v2__tile::after,
 :root .dh-card-v2__tile::after {
-  box-shadow: inset 0 0 0 1px rgba(243, 246, 250, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 html[data-theme="light"] .dh-card-v2__tile::after,
 html.light .dh-card-v2__tile::after {
-  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.08);
+}
+
+/* Soft bottom gradient overlay for unified photo collection appearance */
+.dh-card-v2__tile-gradient {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(180deg, transparent 60%, rgba(5, 13, 20, 0.28) 100%);
 }
 
 .dh-card-v2__img {
@@ -130,32 +140,26 @@ html.light .dh-card-v2__tile::after {
   display: block;
 }
 
-/* ── Top-Start Folder Tab Notched into Image ─────────────────────── */
+/* ── Top-Start Folder Tab Notched into Image (No dot, no outline stroke) ── */
 .dh-card-v2__tab {
   position: absolute;
-  top: -1px;
-  inset-inline-start: -1px;
+  top: 0;
+  inset-inline-start: 0;
   z-index: 20;
-  height: 41px;
+  height: 40px;
   padding-inline: 14px 16px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   background-color: var(--dh-card-surface);
   color: var(--dh-card-surface); /* For SVG fill="currentColor" */
+  border: none;
+  outline: none;
   border-start-start-radius: inherit;
   border-end-end-radius: 18px;
   box-sizing: border-box;
   pointer-events: none;
   user-select: none;
-}
-
-.dh-card-v2__tab-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--dh-card-accent);
-  flex-shrink: 0;
 }
 
 .dh-card-v2__tab-text {
@@ -164,7 +168,7 @@ html.light .dh-card-v2__tile::after {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--dh-card-title);
+  color: var(--dh-card-desc);
   white-space: nowrap;
 }
 
@@ -186,7 +190,7 @@ html[dir="rtl"] .dh-card-v2__tab-fillet-top {
   transform-origin: left top;
 }
 
-/* ── Top-End Round Preview Icon (34px) ───────────────────────────── */
+/* ── Top-End Round Preview Icon (34px, neutral chip) ───────────── */
 .dh-card-v2__preview-icon {
   position: absolute;
   top: 12px;
@@ -201,26 +205,18 @@ html[dir="rtl"] .dh-card-v2__tab-fillet-top {
   background: rgba(8, 22, 32, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #F3F6FA;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: #FFFFFF;
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.18s ease, border-color 0.18s ease;
 }
 
 .dh-card-v2__preview-icon:hover {
-  transform: scale(1.08);
-  background: #1F7A8C;
-  border-color: #1F7A8C;
+  transform: scale(1.06);
+  background: rgba(8, 22, 32, 0.92);
+  border-color: rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
-}
-
-html[data-theme="dark"] .dh-card-v2__preview-icon:hover,
-html.dark .dh-card-v2__preview-icon:hover,
-:root .dh-card-v2__preview-icon:hover {
-  background: #2EC4D6;
-  border-color: #2EC4D6;
-  color: #081620;
 }
 
 .dh-card-v2__preview-icon:focus-visible {
@@ -234,10 +230,11 @@ html.dark .dh-card-v2__preview-icon:hover,
   inset: 0;
   z-index: 10;
   box-sizing: border-box;
-  padding: clamp(18px, 2.4vw, 32px);
-  background: linear-gradient(165deg, #0C202D 0%, #071420 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  padding: clamp(16px, 2.2vw, 28px);
+  background-color: #081620;
   border-radius: inherit;
+  border: none;
+  box-shadow: none;
   color: #F3F6FA;
   display: flex;
   flex-direction: column;
@@ -310,71 +307,23 @@ html[dir="rtl"] .dh-card-v2__panel {
 .dh-card-v2__panel-title {
   font-family: var(--font-display, 'Montserrat', sans-serif);
   font-weight: 600;
-  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
   line-height: 1.25;
   color: #F3F6FA;
   margin: 0 0 10px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   max-width: 95%;
+  word-break: break-word;
 }
 
 /* 3. Star Rating */
-.dh-card-v2__stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 16px;
-}
-
-.dh-star-wrap {
+.dh-card-v2__panel-rating-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 16px;
 }
 
-.dh-star-filled {
-  color: #2EC4D6;
-  fill: #2EC4D6;
-}
-
-.dh-star-empty {
-  color: rgba(255, 255, 255, 0.30);
-  fill: none;
-}
-
-.dh-star-half-container {
-  position: relative;
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-}
-
-.dh-star-half-clip {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-}
-
-[dir="rtl"] .dh-star-half-clip {
-  left: auto;
-  right: 0;
-}
-
-.dh-card-v2__stars-val {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 12px;
-  font-weight: 600;
-  color: #F3F6FA;
-  margin-inline-start: 4px;
-}
-
-/* 4 & 5. Actions */
+/* 4 & 5. Minimal Text-Link Actions */
 .dh-card-v2__panel-actions {
   display: flex;
   flex-wrap: wrap;
@@ -383,7 +332,6 @@ html[dir="rtl"] .dh-card-v2__panel {
   gap: 22px;
 }
 
-/* ── Minimal Text-Link Buttons (No pills, no filled backgrounds) ─── */
 .dh-card-v2__btn-minimal {
   display: inline-flex;
   align-items: center;
@@ -431,7 +379,7 @@ html[dir="rtl"] .dh-card-v2__panel {
 .dh-card-v2__title {
   font-family: var(--font-display, 'Montserrat', sans-serif);
   font-weight: 600;
-  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-size: clamp(1.05rem, 1.3vw, 1.25rem);
   line-height: 1.3;
   color: var(--dh-card-title);
   margin: 0 0 8px 0;
@@ -443,7 +391,7 @@ html[dir="rtl"] .dh-card-v2__panel {
 .dh-card-v2__desc {
   font-family: var(--font-text, 'Inter', sans-serif);
   font-weight: 400;
-  font-size: clamp(13.5px, 1vw, 14.5px);
+  font-size: 14px;
   line-height: 1.6;
   color: var(--dh-card-desc);
   margin: 0;
@@ -451,8 +399,8 @@ html[dir="rtl"] .dh-card-v2__panel {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(clamp(13.5px, 1vw, 14.5px) * 1.6 * 2);
-  height: calc(clamp(13.5px, 1vw, 14.5px) * 1.6 * 2);
+  min-height: calc(14px * 1.6 * 2);
+  height: calc(14px * 1.6 * 2);
 }
 
 /* ── Fallback Actions & Meta on Touch / Small Mobile Screens ────── */
@@ -490,20 +438,6 @@ html[dir="rtl"] .dh-card-v2__panel {
 
   .dh-card-v2__mobile-rating {
     margin-bottom: 0 !important;
-  }
-
-  .dh-card-v2__mobile-rating .dh-star-filled {
-    color: var(--dh-card-accent);
-    fill: var(--dh-card-accent);
-  }
-
-  .dh-card-v2__mobile-rating .dh-star-empty {
-    color: var(--dh-card-desc);
-    opacity: 0.35;
-  }
-
-  .dh-card-v2__mobile-rating .dh-card-v2__stars-val {
-    color: var(--dh-card-title);
   }
 
   .dh-card-v2__mobile-actions {

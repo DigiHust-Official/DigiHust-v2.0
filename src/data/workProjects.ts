@@ -114,7 +114,7 @@ export const normalizeProject = (raw: any, index: number = 0): Project => {
     category,
     filterCat: raw.filterCat || (category.includes('Design') || category.includes('Brand') ? 'Creative' : category.includes('AI') ? 'AI & Data' : 'Development'),
     title,
-    client: raw.client || 'Enterprise Client',
+    client: (raw.client || '').trim(),
     clientRating,
     shortDescription,
     description: raw.description || shortDescription,
