@@ -21,8 +21,12 @@
   grid-template-columns: 5fr 7fr;
 }
 
-.dh-work-row--single {
-  grid-template-columns: 1fr;
+.dh-work-row--single.dh-work-row--7-5 {
+  grid-template-columns: 7fr 5fr;
+}
+
+.dh-work-row--single.dh-work-row--5-7 {
+  grid-template-columns: 5fr 7fr;
 }
 
 @media (max-width: 899.98px) {

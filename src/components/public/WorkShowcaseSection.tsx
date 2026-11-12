@@ -42,9 +42,8 @@ export const WorkShowcaseSection: React.FC = () => {
     .filter((p) => p.published !== false)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  // Up to 4 projects in CMS order. If odd count, take the largest even number <= 4
-  const targetCount = publishedProjects.length >= 4 ? 4 : publishedProjects.length >= 2 ? 2 : 0;
-  const displayProjects = publishedProjects.slice(0, targetCount);
+  // Up to 6 published projects in CMS order (3 rows of 2 with alternating spans)
+  const displayProjects = publishedProjects.slice(0, 6);
 
   if (displayProjects.length === 0) {
     return null;
