@@ -244,8 +244,15 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Testimonials
     testimonials_tag: 'Client Feedback',
+    testimonials_lead: 'What clients',
+    testimonials_accent: 'say',
     testimonials_heading: 'What Founders Say About DigiHust',
     testimonials_sub: 'Real reviews from international organizations who trusted our managed talent squads.',
+
+    // FAQ
+    faq_lead: 'Frequently asked',
+    faq_accent: 'questions',
+    faq_sub: 'Short answers about how we work, what it costs and what happens next.',
 
     // Pricing
     pricing_tag: 'Transparent Engagements',
@@ -423,8 +430,15 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Testimonials
     testimonials_tag: 'Kundenstimmen',
+    testimonials_lead: 'Was Kunden',
+    testimonials_accent: 'sagen',
     testimonials_heading: 'Was Gründer über DigiHust sagen',
     testimonials_sub: 'Echte Bewertungen internationaler Unternehmen, die unseren Teams vertrauen.',
+
+    // FAQ
+    faq_lead: 'Häufig gestellte',
+    faq_accent: 'Fragen',
+    faq_sub: 'Kurze Antworten zu Arbeitsweise, Kosten und den nächsten Schritten.',
 
     // Pricing
     pricing_tag: 'Transparente Pakete',
@@ -602,8 +616,15 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Testimonials
     testimonials_tag: 'آراء العملاء',
+    testimonials_lead: 'ماذا يقول',
+    testimonials_accent: 'عملاؤنا',
     testimonials_heading: 'ماذا يقول رواد الأعمال عن DigiHust',
     testimonials_sub: 'تقييمات حقيقية من مؤسسات دولية وثقت بفرقنا الرقمية.',
+
+    // FAQ
+    faq_lead: 'الأسئلة',
+    faq_accent: 'الشائعة',
+    faq_sub: 'إجابات موجزة حول كيفية عملنا وتكاليف المشاريع والخطوات القادمة.',
 
     // Pricing
     pricing_tag: 'باقات واضحة ومحددة',
@@ -781,8 +802,15 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Testimonials
     testimonials_tag: 'Opiniones de Clientes',
+    testimonials_lead: 'Lo que dicen nuestros',
+    testimonials_accent: 'clientes',
     testimonials_heading: 'Lo que Dicen los Fundadores sobre DigiHust',
     testimonials_sub: 'Reseñas reales de organizaciones que confían en nuestros equipos especializados.',
+
+    // FAQ
+    faq_lead: 'Preguntas',
+    faq_accent: 'frecuentes',
+    faq_sub: 'Respuestas breves sobre cómo trabajamos, los costos y los siguientes pasos.',
 
     // Pricing
     pricing_tag: 'Paquetes Transparentes',
@@ -960,8 +988,15 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Testimonials
     testimonials_tag: 'Avis clients',
+    testimonials_lead: 'Ce que disent nos',
+    testimonials_accent: 'clients',
     testimonials_heading: 'Ce que disent les fondateurs à propos de DigiHust',
     testimonials_sub: 'Des retours d’expérience authentiques de marques mondiales.',
+
+    // FAQ
+    faq_lead: 'Questions',
+    faq_accent: 'fréquentes',
+    faq_sub: 'Des réponses concises sur nos méthodes, nos tarifs et la suite des démarches.',
 
     // Pricing
     pricing_tag: 'Offres transparentes',

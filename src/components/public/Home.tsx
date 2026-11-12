@@ -35,6 +35,7 @@ import { HeroMediaColumns } from '../ui/HeroMediaColumns';
 import { AboutSection } from './AboutSection';
 import { ServicesSection } from './ServicesSection';
 import { ModelAdvantageSection } from './ModelAdvantageSection';
+import { TestimonialsSection } from './TestimonialsSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
@@ -513,108 +514,8 @@ export const Home: React.FC = () => {
       {/* ── SECTION 4: SELECTED WORK (Extracted Showcase) ── */}
       <WorkShowcaseSection />
 
-      {/* ── SECTION 5: CLIENT FEEDBACK ── */}
-      <section id="feedback" data-hard-stop="feedback" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <div className="inline-block relative">
-              <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-3">
-                {t('testimonials_heading')}
-              </h2>
-            </div>
-            <p className="text-[var(--text-body)] text-sm">
-              {t('testimonials_sub')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 pt-4 items-stretch">
-            {testimonials.slice(0, 3).map((tItem: any, idx: number) => {
-              const isMiddle = idx === 1;
-              const initials = (tItem.name || 'DH')
-                .split(' ')
-                .map((n: string) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2);
-
-              return (
-                <figure
-                  key={tItem.id || tItem.name || idx}
-                  className={`relative rounded-[20px] shadow-md p-7 pt-12 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl select-none ${
-                    isMiddle
-                      ? 'bg-[#E3EFF3] dark:bg-[#0c4458] text-[var(--text-body)] dark:text-white border border-[#1F7A8C]/35 dark:border-[#22A0B4]/40 shadow-lg'
-                      : 'bg-[var(--bg-surface)] text-[var(--text-body)] border border-[var(--border-subtle)]'
-                  }`}
-                >
-                  {/* Overlapping 72px Circular Avatar (-top-9) with 4px surface-colored ring */}
-                  <div className="absolute -top-9 left-7">
-                    {tItem.avatarUrl || tItem.avatar ? (
-                      <img
-                        src={tItem.avatarUrl || tItem.avatar}
-                        alt={tItem.name}
-                        width={72}
-                        height={72}
-                        loading="lazy"
-                        decoding="async"
-                        className={`w-[72px] h-[72px] rounded-full object-cover ring-4 ${
-                          isMiddle ? 'ring-[#E3EFF3] dark:ring-[#0c4458]' : 'ring-[var(--bg-surface)]'
-                        } shadow-md`}
-                      />
-                    ) : (
-                      <div
-                        className={`w-[72px] h-[72px] rounded-full flex items-center justify-center font-display font-bold text-lg ring-4 ${
-                          isMiddle
-                            ? 'bg-[#1F7A8C] text-white ring-[#E3EFF3] dark:ring-[#0c4458]'
-                            : 'bg-[#1F7A8C]/15 dark:bg-cyan-400/20 text-[#1F7A8C] dark:text-cyan-300 ring-[var(--bg-surface)]'
-                        } shadow-md`}
-                      >
-                        {initials}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body with Accent Quote Glyph */}
-                  <div>
-                    {/* Brand Accent Quote Glyph in Outfit */}
-                    <div
-                      className={`font-display font-extrabold leading-none mb-3 select-none ${
-                        isMiddle
-                          ? 'text-[#1F7A8C] dark:text-cyan-300 text-5xl sm:text-6xl'
-                          : 'text-[var(--brand-teal-text)] text-4xl sm:text-5xl'
-                      }`}
-                      aria-hidden="true"
-                    >
-                      &ldquo;
-                    </div>
-
-                    <blockquote
-                      className={`font-sans text-[15px] sm:text-[16px] leading-[1.6] mb-6 ${
-                        isMiddle ? 'text-[var(--text-body)] dark:text-white/90' : 'text-[var(--text-body)]'
-                      }`}
-                    >
-                      &ldquo;{tItem.quote}&rdquo;
-                    </blockquote>
-                  </div>
-
-                  {/* Figcaption with semibold name and muted role */}
-                  <figcaption
-                    className={`pt-4 border-t ${
-                      isMiddle ? 'border-[#1F7A8C]/20 dark:border-white/15' : 'border-[var(--border-subtle)]'
-                    }`}
-                  >
-                    <div className={`font-semibold text-sm ${isMiddle ? 'text-[var(--text-heading)] dark:text-white' : 'text-[var(--text-heading)]'}`}>
-                      {tItem.name}
-                    </div>
-                    <div className={`text-xs ${isMiddle ? 'text-[var(--text-muted)] dark:text-white/70' : 'text-[var(--text-muted)]'}`}>
-                      {tItem.role}{tItem.company ? `, ${tItem.company}` : ''}
-                    </div>
-                  </figcaption>
-                </figure>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* ── SECTION 5: CLIENT TESTIMONIALS ── */}
+      <TestimonialsSection testimonials={testimonials} />
 
       {/* ── SECTION 6: FREQUENTLY ASKED QUESTIONS ── */}
       <section id="home-faq" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
