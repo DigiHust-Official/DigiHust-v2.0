@@ -194,9 +194,6 @@ export const HowItWorks: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
-              Delivery Methodology
-            </p>
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-5">
               How DigiHust Works.
             </h1>
@@ -331,10 +328,6 @@ export const HowItWorks: React.FC = () => {
       <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3 flex items-center justify-center space-x-1.5">
-              <Wrench className="w-4 h-4" />
-              <span>Full-Stack Arsenal</span>
-            </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-4">
               Technologies & Tools
             </h2>
@@ -383,10 +376,6 @@ export const HowItWorks: React.FC = () => {
       <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-2 flex items-center justify-center space-x-1">
-              <HelpCircle className="w-4 h-4" />
-              <span>Clarity & Transparency</span>
-            </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)]">
               Frequently Asked Questions
             </h2>
