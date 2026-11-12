@@ -9,7 +9,7 @@
   flex-direction: column;
   justify-content: center;
   padding-top: clamp(96px, 12vh, 128px);
-  padding-bottom: clamp(36px, 6vh, 64px);
+  padding-bottom: clamp(20px, 3.5vh, 48px);
   padding-inline: clamp(1.25rem, 4vw, 2rem);
   background: linear-gradient(180deg, #EEF4F7 0%, #E4ECF1 100%);
   border-top: 1px solid var(--border-subtle, rgba(10, 31, 43, 0.08));
@@ -46,16 +46,16 @@ html.light .dh-faq {
   align-items: center;
   text-align: center;
   width: 100%;
-  margin-bottom: clamp(28px, 4vh, 48px);
+  margin-bottom: clamp(20px, 3vh, 36px);
 }
 
 .dh-faq__subtext {
   font-family: var(--font-text, 'Inter', system-ui, sans-serif);
   font-weight: 400;
-  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.05rem);
-  line-height: 1.5;
+  font-size: clamp(0.85rem, 0.78rem + 0.25vw, 1rem);
+  line-height: 1.45;
   color: var(--text-body, #4A6070);
-  margin-top: 12px;
+  margin-top: 10px;
   max-width: 44rem;
   text-wrap: balance;
 }
@@ -70,7 +70,7 @@ html.dark .dh-faq__subtext,
 .dh-faq__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: clamp(8px, 1.2vh, 12px);
   width: 100%;
   align-items: start;
 }
@@ -78,14 +78,14 @@ html.dark .dh-faq__subtext,
 @media (min-width: 1024px) {
   .dh-faq__grid {
     grid-template-columns: 1fr 1fr;
-    gap: clamp(16px, 1.8vw, 24px);
+    gap: clamp(14px, 1.6vw, 22px);
   }
 }
 
 .dh-faq__column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(8px, 1.2vh, 12px);
   width: 100%;
 }
 
@@ -95,7 +95,7 @@ html.dark .dh-faq__subtext,
   display: flex;
   flex-direction: column;
   border-radius: clamp(16px, 1.4vw, 22px);
-  padding: clamp(16px, 1.6vw, 24px);
+  padding: clamp(13px, 1.3vw, 20px) clamp(16px, 1.6vw, 24px);
   box-sizing: border-box;
   background-color: var(--dh-card-surface-light, #FFFFFF);
   border: 1px solid var(--dh-card-border-light, rgba(10, 31, 43, 0.08));
