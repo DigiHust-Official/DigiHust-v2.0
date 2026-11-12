@@ -36,6 +36,7 @@ import { AboutSection } from './AboutSection';
 import { ServicesSection } from './ServicesSection';
 import { ModelAdvantageSection } from './ModelAdvantageSection';
 import { TestimonialsSection } from './TestimonialsSection';
+import { FaqSection } from './FaqSection';
 import { useHeroHardScroll } from '../../hooks/useHeroHardScroll';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
@@ -518,35 +519,7 @@ export const Home: React.FC = () => {
       <TestimonialsSection testimonials={testimonials} />
 
       {/* ── SECTION 6: FREQUENTLY ASKED QUESTIONS ── */}
-      <section id="home-faq" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-[var(--text-body)] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              Everything you need to know about our coordinated specialist squads, milestone guarantees, and project delivery.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {HOME_FAQ_ITEMS.map((item, idx) => (
-              <details
-                key={idx}
-                className="group p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--brand-teal)]/40 transition-colors"
-              >
-                <summary className="flex items-center justify-between cursor-pointer list-none font-display font-bold text-base sm:text-lg text-[var(--text-heading)] focus:outline-none">
-                  <span>{item.question}</span>
-                  <ChevronDown className="w-5 h-5 text-[var(--brand-teal)] transition-transform duration-200 group-open:rotate-180 shrink-0 ml-4" />
-                </summary>
-                <p className="mt-4 text-sm sm:text-base text-[var(--text-body)] leading-relaxed border-t border-[var(--border-subtle)] pt-4">
-                  {item.answer}
-                </p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
+      <FaqSection items={HOME_FAQ_ITEMS} />
 
       {/* ── SECTION 7: CALL TO ACTION ── */}
       <section id="home-cta" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-center relative overflow-hidden">
