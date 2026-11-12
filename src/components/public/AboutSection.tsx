@@ -127,7 +127,6 @@ export const AboutSection: React.FC = () => {
         >
           {/* Eyebrow */}
           <div className="dh-about-eyebrow">
-            <span className="dh-about-eyebrow-dot" aria-hidden="true" />
             <span>{t('about_eyebrow') || 'About us'}</span>
           </div>
 

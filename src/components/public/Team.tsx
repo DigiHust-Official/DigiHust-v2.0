@@ -263,10 +263,6 @@ export const Team: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3 flex items-center space-x-2">
-              <Award className="w-4 h-4" />
-              <span>Team & Original Roles</span>
-            </p>
             <h1 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[var(--text-heading)] mb-4">
               Meet the Minds Behind DigiHust.
             </h1>
@@ -307,10 +303,6 @@ export const Team: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-1.5 flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Domain Specialists</span>
-                </p>
                 <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)]">
                   Specialists & Engineers
                 </h3>
@@ -435,9 +427,6 @@ export const Team: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <p className="text-xs font-extrabold text-amber-500 uppercase tracking-widest mb-1.5 flex items-center space-x-1.5">
-                  <span>DigiSkills Ecosystem</span>
-                </p>
                 <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)]">
                   Interns & Apprentices
                 </h3>

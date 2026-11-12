@@ -68,7 +68,6 @@ export const Work: React.FC = () => {
             className="w-full flex justify-center"
           >
             <SectionHeading
-              eyebrow={t('work_v3_eyebrow') || 'Case studies'}
               title={t('work_v3_heading_1') || 'Selected'}
               accent={t('work_v3_heading_2') || 'work.'}
               subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}

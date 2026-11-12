@@ -17,33 +17,6 @@
   text-align: start;
 }
 
-/* Outlined pill eyebrow: Inter 600, uppercase, letter-spacing, rounded-full border */
-.dh-section-heading__pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(31, 122, 140, 0.28);
-  background: rgba(31, 122, 140, 0.06);
-  color: var(--brand-teal);
-  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: clamp(12px, 1.6vh, 18px);
-  user-select: none;
-  width: fit-content;
-}
-
-html[data-theme="dark"] .dh-section-heading__pill,
-html.dark .dh-section-heading__pill {
-  border-color: rgba(46, 196, 214, 0.30);
-  background: rgba(46, 196, 214, 0.08);
-  color: #2EC4D6;
-}
-
 /* Montserrat 600 H2 with shared scale */
 .dh-section-heading__title {
   margin: 0;

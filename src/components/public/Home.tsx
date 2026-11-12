@@ -516,15 +516,11 @@ export const Home: React.FC = () => {
       {/* ── SECTION 5: CLIENT FEEDBACK ── */}
       <section id="feedback" data-hard-stop="feedback" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20 max-w-2xl mx-auto">
-            <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
-              {t('testimonials_tag')}
-            </p>
+          <div className="text-center mb-16 max-w-2xl mx-auto">
             <div className="inline-block relative">
               <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-3">
                 {t('testimonials_heading')}
               </h2>
-              <div className="w-16 h-[2px] bg-[var(--brand-teal)] mx-auto mb-4" />
             </div>
             <p className="text-[var(--text-body)] text-sm">
               {t('testimonials_sub')}
@@ -624,9 +620,6 @@ export const Home: React.FC = () => {
       <section id="home-faq" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-extrabold text-[var(--brand-teal-text)] uppercase tracking-widest mb-3">
-              Clear Answers
-            </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-4">
               Frequently Asked Questions
             </h2>

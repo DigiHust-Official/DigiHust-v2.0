@@ -105,14 +105,6 @@
   margin-bottom: 14px;
 }
 
-.dh-about-eyebrow-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background-color: var(--text-muted);
-  opacity: 0.8;
-}
-
 .dh-about-title {
   font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
   font-weight: 600;

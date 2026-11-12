@@ -43,9 +43,6 @@ export const Apply: React.FC = () => {
       <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 space-y-8">
       
       <div className="text-center space-y-3">
-        <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase tracking-widest">
-          Join the Ecosystem
-        </span>
         <h1 className="font-display font-extrabold text-4xl text-[var(--text-heading)]">Apply to DigiHust Community</h1>
         <p className="text-xs text-[var(--text-muted)] max-w-lg mx-auto">
           Exclusive membership for verified Digiskill graduates. Get assigned to high-ticket client projects routed through department group leaders.

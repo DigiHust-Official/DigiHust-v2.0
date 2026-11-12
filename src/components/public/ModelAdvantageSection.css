@@ -99,23 +99,6 @@ html.dark .dh-model-v2 {
   width: 100%;
 }
 
-.dh-model-v2__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  padding-inline: 14px;
-  border-radius: 999px;
-  border: 1px solid var(--dh-mv2-accent-border);
-  color: var(--dh-mv2-accent);
-  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
 .dh-model-v2__title {
   font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
   font-weight: 600;

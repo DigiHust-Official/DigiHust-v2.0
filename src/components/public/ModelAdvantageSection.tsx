@@ -176,9 +176,6 @@ export function ModelAdvantageSection() {
         >
           {/* ── HEADER (Centered) ── */}
           <motion.div className="dh-model-v2__header" variants={itemVariants}>
-            <div className="dh-model-v2__eyebrow">
-              {t('model_v2_eyebrow') || 'The DigiHust model'}
-            </div>
             <h2 id="dh-model-v2-heading" className="dh-model-v2__title">
               <span className="dh-model-v2__title-primary">{headingA}</span>{' '}
               <span className="dh-model-v2__title-accent">{headingB}</span>

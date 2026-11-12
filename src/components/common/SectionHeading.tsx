@@ -2,7 +2,6 @@ import React from 'react';
 import './SectionHeading.css';
 
 export interface SectionHeadingProps {
-  eyebrow?: string;
   title: string;
   accent?: string;
   subtitle?: string;
@@ -12,7 +11,6 @@ export interface SectionHeadingProps {
 }
 
 export const SectionHeading: React.FC<SectionHeadingProps> = ({
-  eyebrow,
   title,
   accent,
   subtitle,
@@ -24,11 +22,6 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     <div
       className={`dh-section-heading dh-section-heading--${align} ${className}`}
     >
-      {eyebrow && (
-        <div className="dh-section-heading__pill">
-          <span>{eyebrow}</span>
-        </div>
-      )}
       <h2 id={id} className="dh-section-heading__title">
         {title}
         {accent && (

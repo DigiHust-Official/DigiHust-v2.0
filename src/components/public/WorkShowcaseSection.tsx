@@ -16,25 +16,25 @@ export const WorkShowcaseSection: React.FC = () => {
   const rawCaseStudies = siteContent?.caseStudies || [];
   const allProjects: Project[] = (rawCaseStudies && rawCaseStudies.length > 0)
     ? rawCaseStudies.map((cs, idx) => normalizeProject({
-        id: cs.slug || cs.id,
-        category: cs.category || 'Web Development',
-        filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
-        title: cs.title,
-        client: cs.client,
-        description: cs.summary,
-        shortDescription: cs.summary,
-        cardImage: {
-          src: formatImageUrl(cs.imageUrl, cs.category),
-          alt: cs.title,
-        },
-        challenge: cs.challenge || '',
-        solution: cs.solution || '',
-        results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || ''}`] : ['100% On-Time Delivery'],
-        tags: cs.tags || ['React', 'Full Stack'],
-        img: formatImageUrl(cs.imageUrl, cs.category),
-        published: true,
-        order: idx,
-      }, idx))
+      id: cs.slug || cs.id,
+      category: cs.category || 'Web Development',
+      filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
+      title: cs.title,
+      client: cs.client,
+      description: cs.summary,
+      shortDescription: cs.summary,
+      cardImage: {
+        src: formatImageUrl(cs.imageUrl, cs.category),
+        alt: cs.title,
+      },
+      challenge: cs.challenge || '',
+      solution: cs.solution || '',
+      results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || ''}`] : ['100% On-Time Delivery'],
+      tags: cs.tags || ['React', 'Full Stack'],
+      img: formatImageUrl(cs.imageUrl, cs.category),
+      published: true,
+      order: idx,
+    }, idx))
     : getValidProjects(siteContent);
 
   // Filter published only and sort by order
@@ -62,7 +62,6 @@ export const WorkShowcaseSection: React.FC = () => {
         <div className="dh-work-showcase__header">
           <SectionHeading
             id="dh-work-showcase-heading"
-            eyebrow={t('work_v3_eyebrow') || 'Case studies'}
             title={t('work_v3_heading_1') || 'Selected'}
             accent={t('work_v3_heading_2') || 'work.'}
             subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}

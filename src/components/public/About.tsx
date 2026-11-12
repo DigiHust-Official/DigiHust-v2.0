@@ -37,9 +37,6 @@ export const About: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
-              The Story & Mission
-            </p>
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-5">
               The DigiHust Mission.
             </h1>
@@ -59,9 +56,6 @@ export const About: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-xs font-extrabold text-rose-500 uppercase tracking-widest mb-3">
-              The Market Dilemma
-            </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-6 leading-tight">
               Exceptional Talent. Broken Freelance Marketplaces.
             </h2>
@@ -123,9 +117,6 @@ export const About: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
-              The DigiHust Architecture
-            </p>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-6 leading-tight">
               A Sustainable Bridge Between Talent & Enterprise Demand.
             </h2>
@@ -185,9 +176,6 @@ export const About: React.FC = () => {
       {/* Core Values (Hustle. Create. Deliver.) */}
       <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
-            Core Principles
-          </p>
           <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-12">
             How We Operate Every Day
           </h2>

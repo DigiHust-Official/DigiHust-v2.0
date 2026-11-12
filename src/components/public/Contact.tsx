@@ -772,10 +772,6 @@ export const Contact: React.FC = () => {
           transition={{ duration: 0.4 }}
           className="mb-8 sm:mb-10 text-center sm:text-left"
         >
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest text-[#1F7A8C] dark:text-cyan-400 bg-[#E0F2F5] dark:bg-cyan-950/80 border border-[#CEE9ED] dark:border-cyan-800/40 mb-3.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1F7A8C] dark:text-cyan-400 animate-pulse" />
-            <span>Project Intake & Scoping</span>
-          </div>
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[#022B3A] dark:text-white tracking-tight mb-3">
             Let&apos;s Build Something Great.
           </h1>

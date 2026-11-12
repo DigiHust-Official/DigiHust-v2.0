@@ -265,10 +265,6 @@ export const Services: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3 flex items-center gap-1.5">
-              <Layers className="w-4 h-4" />
-              <span>Full-Spectrum Capabilities</span>
-            </p>
             <h1 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[var(--text-heading)] mb-4">
               Services Built for Execution.
             </h1>
@@ -318,19 +314,9 @@ export const Services: React.FC = () => {
         {/* Soft Ambient Corner Glows & Dots */}
         <div className="absolute top-0 left-0 w-[450px] h-[450px] bg-gradient-to-br from-[#1F7A8C]/10 via-[#1F7A8C]/5 to-transparent rounded-full blur-3xl pointer-events-none -translate-x-1/3 -translate-y-1/3" aria-hidden="true" />
         <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-gradient-to-tl from-[#1F7A8C]/10 via-[#1F7A8C]/5 to-transparent rounded-full blur-3xl pointer-events-none translate-x-1/3 translate-y-1/3" aria-hidden="true" />
-        <div className="absolute bottom-8 left-8 hidden xl:grid grid-cols-6 gap-2.5 opacity-20 pointer-events-none" aria-hidden="true">
-          {Array.from({ length: 24 }).map((_, i) => (
-            <span key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--brand-teal)]" />
-          ))}
-        </div>
-
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 dark:bg-slate-900/60 border border-[#1F7A8C]/35 text-xs font-bold uppercase tracking-widest text-[var(--brand-teal)] mb-4 shadow-xs backdrop-blur-xs">
-              <Zap className="w-3.5 h-3.5" />
-              <span>CO-ORDINATED DELIVERY MODEL</span>
-            </div>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight text-[var(--text-heading)] mb-4">
               How One Managed Contract Powers<br className="hidden sm:inline" />{' '}
               <span className="text-[var(--brand-teal)]">Multiple Specialized Squads</span>

@@ -106,9 +106,6 @@ export const Blog: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-widest mb-3">
-              Engineering & Digital Strategy
-            </p>
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-5">
               Insights & Knowledge Hub.
             </h1>
@@ -190,15 +187,6 @@ export const Blog: React.FC = () => {
               className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-[var(--brand-teal)]/10 rounded-full blur-3xl pointer-events-none" 
               aria-hidden="true" 
             />
-
-            {/* Live Status Pill */}
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[var(--brand-teal-subtle)] border border-[var(--brand-teal)]/30 text-[11px] font-bold text-[var(--brand-teal)] uppercase tracking-wider mb-4 relative z-10">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--brand-teal)] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand-teal)]" />
-              </span>
-              <span>Editorial Pipeline</span>
-            </div>
 
             {/* Heading */}
             <h2 className="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-[var(--text-heading)] mb-3 relative z-10 tracking-tight">
