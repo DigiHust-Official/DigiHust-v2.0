@@ -1,0 +1,125 @@
+/* Footer.css - Calibrated footer container, column alignment, and spacing */
+
+.dh-footer {
+  background-color: var(--bg-page);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: clamp(32px, 3.6vw, 52px);
+  padding-bottom: 0;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.dh-footer__container {
+  max-width: 80rem; /* 1280px / max-w-7xl */
+  margin-inline: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dh-footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding-bottom: clamp(24px, 3vw, 32px);
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .dh-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .dh-footer__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(2rem, 2.5vw, 2.5rem);
+  }
+}
+
+.dh-footer__col-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .dh-footer__col-brand {
+    grid-column: span 4;
+  }
+}
+
+.dh-footer__col-links {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .dh-footer__col-links {
+    grid-column: span 2;
+  }
+}
+
+.dh-footer__col-newsletter {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .dh-footer__col-newsletter {
+    grid-column: span 4;
+  }
+}
+
+/* Headings share one baseline */
+.dh-footer__heading {
+  font-family: var(--font-text, 'Inter', system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top line of logo aligns with headings' cap height */
+.dh-footer__brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.dh-footer__brand-header img {
+  display: block;
+}
+
+/* Offset below headings: link lists and newsletter intro text share exact same offset */
+.dh-footer__col-content {
+  margin-top: 12px;
+}
+
+/* Bottom Bar: padding-block 16px with zero extra space below */
+.dh-footer__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .dh-footer__bottom {
+    flex-direction: row;
+  }
+}
