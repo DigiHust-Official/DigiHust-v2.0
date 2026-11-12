@@ -2,7 +2,8 @@ import React from 'react';
 import './SectionHeading.css';
 
 export interface SectionHeadingProps {
-  title: string;
+  title?: string;
+  lead?: string;
   accent?: string;
   subtitle?: string;
   align?: 'center' | 'start';
@@ -12,6 +13,7 @@ export interface SectionHeadingProps {
 
 export const SectionHeading: React.FC<SectionHeadingProps> = ({
   title,
+  lead,
   accent,
   subtitle,
   align = 'center',
@@ -23,11 +25,25 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
       className={`dh-section-heading dh-section-heading--${align} ${className}`}
     >
       <h2 id={id} className="dh-section-heading__title">
-        {title}
-        {accent && (
+        {lead ? (
           <>
-            {' '}
-            <span className="dh-section-heading__accent">{accent}</span>
+            <span className="dh-section-heading__lead">{lead}</span>
+            {accent && (
+              <>
+                {' '}
+                <span className="dh-section-heading__accent">{accent}</span>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            {title}
+            {accent && (
+              <>
+                {' '}
+                <span className="dh-section-heading__accent">{accent}</span>
+              </>
+            )}
           </>
         )}
       </h2>
@@ -37,3 +53,5 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     </div>
   );
 };
+
+export default SectionHeading;

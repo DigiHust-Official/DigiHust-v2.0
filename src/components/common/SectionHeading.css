@@ -17,23 +17,31 @@
   text-align: start;
 }
 
-/* Montserrat 600 H2 with shared scale */
+/* Montserrat 300 lead / 700 accent heading scale */
 .dh-section-heading__title {
   margin: 0;
   padding: 0;
   font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
   font-weight: 600;
-  font-size: clamp(2rem, 3.8vw, 3.25rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.4rem, 4.8vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
   color: var(--text-heading);
 }
 
-/* Non-italic accent phrase in brand teal / cyan */
+/* Lead word in Montserrat 300 */
+.dh-section-heading__lead {
+  font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
+  font-weight: 300;
+  color: var(--text-heading);
+}
+
+/* Accent word in Montserrat 700 (light: var(--brand-teal), dark: #2EC4D6), no italic, no period */
 .dh-section-heading__accent {
   font-family: var(--font-display, 'Montserrat', system-ui, sans-serif);
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--brand-teal);
 }
 
@@ -42,14 +50,24 @@ html.dark .dh-section-heading__accent {
   color: #2EC4D6;
 }
 
-/* Inter 400 subtext max 56ch */
+/* Inter 400 subtext max 50ch centered 14px below heading */
 .dh-section-heading__subtitle {
-  margin: clamp(12px, 1.6vh, 18px) 0 0;
+  margin-top: 14px;
+  margin-bottom: 0;
   padding: 0;
   font-family: var(--font-text, 'Inter', system-ui, sans-serif);
-  font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+  font-size: clamp(15px, 1.15vw, 17px);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-muted);
-  max-width: 56ch;
+  max-width: 50ch;
+}
+
+.dh-section-heading--center .dh-section-heading__subtitle {
+  margin-inline: auto;
+}
+
+.dh-section-heading--start .dh-section-heading__subtitle {
+  margin-inline-start: 0;
+  margin-inline-end: auto;
 }

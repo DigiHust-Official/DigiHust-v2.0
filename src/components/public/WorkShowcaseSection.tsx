@@ -61,8 +61,8 @@ export const WorkShowcaseSection: React.FC = () => {
         <div className="dh-work-showcase__header">
           <SectionHeading
             id="dh-work-showcase-heading"
-            title={t('work_v3_heading_1') || 'Selected'}
-            accent={t('work_v3_heading_2') || 'work.'}
+            lead={t('work_v3_heading_1') || 'Selected'}
+            accent={t('work_v3_heading_2') || 'work'}
             subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
             align="center"
           />
@@ -76,7 +76,7 @@ export const WorkShowcaseSection: React.FC = () => {
         {/* ── Centered Bottom View-All Pill Button (Matches Services Style) ── */}
         <div className="dh-work-showcase__footer">
           <Link
-            to="/portfolio"
+            to="/work"
             className="dh-work-showcase__view-all-pill"
             aria-label={t('work_v3_view_all') || 'View all work'}
           >

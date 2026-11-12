@@ -237,7 +237,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Case studies',
     work_v3_heading_1: 'Selected',
-    work_v3_heading_2: 'work.',
+    work_v3_heading_2: 'work',
     work_v3_subtext: 'A few recent projects. Open any card for the full story.',
     work_v3_view_all: 'View all work',
     work_v3_rated_out_of: 'Rated {rating} out of 5 stars',
@@ -416,7 +416,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Fallstudien',
     work_v3_heading_1: 'Ausgewählte',
-    work_v3_heading_2: 'Arbeiten.',
+    work_v3_heading_2: 'Arbeiten',
     work_v3_subtext: 'Einige aktuelle Projekte. Öffnen Sie ein Projekt für Details.',
     work_v3_view_all: 'Alle Arbeiten',
     work_v3_rated_out_of: 'Mit {rating} von 5 Sternen bewertet',
@@ -595,7 +595,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'دراسات الحالة',
     work_v3_heading_1: 'مشاريع',
-    work_v3_heading_2: 'مختارة.',
+    work_v3_heading_2: 'مختارة',
     work_v3_subtext: 'مشاريع حديثة من إنجازنا. افتح أي بطاقة لمعرفة التفاصيل كاملة.',
     work_v3_view_all: 'عرض كل الأعمال',
     work_v3_rated_out_of: 'تقييم {rating} من 5 نجوم',
@@ -774,7 +774,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Casos de estudio',
     work_v3_heading_1: 'Proyectos',
-    work_v3_heading_2: 'destacados.',
+    work_v3_heading_2: 'destacados',
     work_v3_subtext: 'Algunos proyectos recientes. Abre una tarjeta para ver más.',
     work_v3_view_all: 'Ver todos',
     work_v3_rated_out_of: 'Calificado con {rating} de 5 estrellas',
@@ -953,7 +953,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Études de cas',
     work_v3_heading_1: 'Projets',
-    work_v3_heading_2: 'choisis.',
+    work_v3_heading_2: 'choisis',
     work_v3_subtext: 'Quelques projets récents. Ouvrez une carte pour en savoir plus.',
     work_v3_view_all: 'Tous les projets',
     work_v3_rated_out_of: 'Noté {rating} sur 5 étoiles',

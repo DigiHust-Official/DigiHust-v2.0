@@ -34,7 +34,7 @@ html.light .dh-work-showcase {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: clamp(36px, 5vw, 64px);
+  margin-bottom: clamp(36px, 5vw, 72px);
   width: 100%;
 }
 
@@ -141,7 +141,17 @@ html.dark .dh-work-showcase__view-all-pill:hover .dh-work-showcase__view-all-arr
 
 .dh-work-showcase__view-all-pill:hover .dh-work-showcase__view-all-arrow,
 .dh-work-showcase__view-all-pill:focus-visible .dh-work-showcase__view-all-arrow {
-  transform: translateX(2px);
+  transform: rotate(-45deg);
+}
+
+/* RTL Arrow Support */
+html[dir="rtl"] .dh-work-showcase__view-all-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .dh-work-showcase__view-all-pill:hover .dh-work-showcase__view-all-arrow,
+html[dir="rtl"] .dh-work-showcase__view-all-pill:focus-visible .dh-work-showcase__view-all-arrow {
+  transform: scaleX(-1) rotate(-45deg);
 }
 
 [dir="rtl"] .dh-work-showcase__view-all-pill:hover .dh-work-showcase__view-all-arrow,
