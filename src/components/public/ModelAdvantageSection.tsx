@@ -116,25 +116,6 @@ export function ModelAdvantageSection() {
     },
   };
 
-  // Chaotic chip drift animation (settles at tilted resting position)
-  const chaosChipVariants: Variants = {
-    hidden: {
-      opacity: shouldReduceMotion ? 1 : 0,
-      y: shouldReduceMotion ? 0 : 12,
-      scale: shouldReduceMotion ? 1 : 0.96,
-    },
-    visible: (idx: number) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.45,
-        delay: shouldReduceMotion ? 0 : 0.1 + idx * 0.06,
-        ease: EASE_TUPLE as unknown as [number, number, number, number],
-      },
-    }),
-  };
-
   // Ordered chip sequential entrance
   const orderChipVariants: Variants = {
     hidden: {
@@ -158,6 +139,7 @@ export function ModelAdvantageSection() {
 
   return (
     <section
+      id="why-digihust"
       data-hard-stop="why-digihust"
       className="dh-model-v2"
       aria-labelledby="dh-model-v2-heading"
@@ -197,41 +179,26 @@ export function ModelAdvantageSection() {
                 <span className="dh-model-v2__panel-badge">Fragmented</span>
               </div>
 
-              {/* Scattered Visual with Tangled Dashed Lines */}
-              <div className="dh-model-v2__chaos-visual" aria-hidden="true">
-                <svg
-                  className="dh-model-v2__chaos-svg"
-                  viewBox="0 0 500 80"
-                  preserveAspectRatio="none"
-                >
-                  {/* Tangled crossing dashed lines */}
-                  <path
-                    d="M 50 35 C 120 70, 160 10, 240 45"
-                    className="dh-model-v2__tangle-line"
-                  />
-                  <path
-                    d="M 140 30 C 200 80, 280 5, 360 40"
-                    className="dh-model-v2__tangle-line"
-                  />
-                  <path
-                    d="M 260 45 C 330 15, 390 75, 450 35"
-                    className="dh-model-v2__tangle-line"
-                  />
-                </svg>
+              {/* 5 equal-size role chips on a thin dashed line */}
+              <div className="dh-model-v2__infographic dh-model-v2__infographic--left" aria-hidden="true">
+                {/* Thin dashed horizontal line across the center of chips */}
+                <div className="dh-model-v2__dashed-track" />
 
-                {ROLES.map((role, idx) => (
-                  <motion.div
-                    key={role.key}
-                    custom={idx}
-                    variants={chaosChipVariants}
-                    className={`dh-model-v2__chip dh-model-v2__chip--chaos dh-model-v2__chip--${role.classModifier}`}
-                  >
-                    {role.hasWarn && (
-                      <AlertTriangle className="dh-model-v2__chip-warn" />
-                    )}
-                    <span>{t(role.key) || role.fallback}</span>
-                  </motion.div>
-                ))}
+                <div className="dh-model-v2__chips-grid">
+                  {ROLES.map((role, idx) => (
+                    <motion.div
+                      key={role.key}
+                      custom={idx}
+                      variants={orderChipVariants}
+                      className="dh-model-v2__chip dh-model-v2__chip--left"
+                    >
+                      {role.hasWarn && (
+                        <AlertTriangle className="dh-model-v2__chip-warn" />
+                      )}
+                      <span className="truncate">{t(role.key) || role.fallback}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
               {/* 4 Pain Points (2x2 Grid) */}
@@ -277,54 +244,42 @@ export function ModelAdvantageSection() {
                 <span className="dh-model-v2__panel-badge">Managed Squad</span>
               </div>
 
-              {/* Ordered Visual: Hub Node connected down to 5 aligned chips */}
-              <div className="dh-model-v2__order-visual" aria-hidden="true">
+              {/* Ordered Visual: Hub Node connected down to 5 aligned chips with straight connector lines */}
+              <div className="dh-model-v2__infographic dh-model-v2__infographic--right" aria-hidden="true">
                 {/* Central DigiHust Node */}
                 <div className="dh-model-v2__hub-node">
                   <span className="dh-model-v2__hub-node-dot" />
                   <span>DigiHust Lead</span>
                 </div>
 
-                {/* Clean tree connector lines */}
+                {/* Straight tree connector lines meeting chip centers at 10%, 30%, 50%, 70%, 90% */}
                 <svg
                   className="dh-model-v2__order-svg"
-                  viewBox="0 0 500 80"
+                  viewBox="0 0 100 24"
                   preserveAspectRatio="none"
                 >
                   {/* Vertical drop from hub */}
-                  <line
-                    x1="250"
-                    y1="24"
-                    x2="250"
-                    y2="42"
-                    className="dh-model-v2__order-line"
-                  />
+                  <line x1="50" y1="0" x2="50" y2="12" className="dh-model-v2__order-line" />
                   {/* Horizontal distribution bus */}
-                  <line
-                    x1="50"
-                    y1="42"
-                    x2="450"
-                    y2="42"
-                    className="dh-model-v2__order-line"
-                  />
-                  {/* Vertical branches to 5 chips */}
-                  <line x1="50" y1="42" x2="50" y2="54" className="dh-model-v2__order-line" />
-                  <line x1="150" y1="42" x2="150" y2="54" className="dh-model-v2__order-line" />
-                  <line x1="250" y1="42" x2="250" y2="54" className="dh-model-v2__order-line" />
-                  <line x1="350" y1="42" x2="350" y2="54" className="dh-model-v2__order-line" />
-                  <line x1="450" y1="42" x2="450" y2="54" className="dh-model-v2__order-line" />
+                  <line x1="10" y1="12" x2="90" y2="12" className="dh-model-v2__order-line" />
+                  {/* Vertical branches meeting each chip's center */}
+                  <line x1="10" y1="12" x2="10" y2="24" className="dh-model-v2__order-line" />
+                  <line x1="30" y1="12" x2="30" y2="24" className="dh-model-v2__order-line" />
+                  <line x1="50" y1="12" x2="50" y2="24" className="dh-model-v2__order-line" />
+                  <line x1="70" y1="12" x2="70" y2="24" className="dh-model-v2__order-line" />
+                  <line x1="90" y1="12" x2="90" y2="24" className="dh-model-v2__order-line" />
                 </svg>
 
-                {/* Straight aligned row of chips */}
-                <div className="dh-model-v2__order-chips">
+                {/* Straight aligned row of 5 chips on CSS grid */}
+                <div className="dh-model-v2__chips-grid">
                   {ROLES.map((role, idx) => (
                     <motion.div
                       key={role.key}
                       custom={idx}
                       variants={orderChipVariants}
-                      className="dh-model-v2__chip dh-model-v2__chip--order"
+                      className="dh-model-v2__chip dh-model-v2__chip--right"
                     >
-                      <span>{t(role.key) || role.fallback}</span>
+                      <span className="truncate">{t(role.key) || role.fallback}</span>
                     </motion.div>
                   ))}
                 </div>

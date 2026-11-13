@@ -6,6 +6,7 @@ import './WorkGrid.css';
 interface WorkGridProps {
   projects: Project[];
   className?: string;
+  columns?: 2 | 3;
 }
 
 interface RowItem {
@@ -65,9 +66,25 @@ const WorkRow: React.FC<{
   );
 };
 
-export const WorkGrid: React.FC<WorkGridProps> = ({ projects, className = '' }) => {
+export const WorkGrid: React.FC<WorkGridProps> = ({ projects, className = '', columns = 3 }) => {
   if (!projects || projects.length === 0) {
     return null;
+  }
+
+  // 3-column desktop layout (Selected Work showcase)
+  if (columns === 3) {
+    return (
+      <div className={`dh-work-grid dh-work-grid--3col ${className}`}>
+        {projects.map((project) => (
+          <ProjectCardV2
+            key={project.id || project.slug}
+            project={project}
+            span="3"
+            className="dh-work-grid__item dh-work-grid__item--span-3"
+          />
+        ))}
+      </div>
+    );
   }
 
   // Group into pairs with alternating 7/5 and 5/7 column spans

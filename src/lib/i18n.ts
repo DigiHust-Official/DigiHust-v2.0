@@ -236,23 +236,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Case studies',
-    work_v3_heading_1: 'Selected',
-    work_v3_heading_2: 'work',
-    work_v3_subtext: 'A few recent projects. Open any card for the full story.',
+    work_v3_heading_1: 'Work that grows',
+    work_v3_heading_2: 'your business',
+    work_v3_subtext: 'Websites and digital products built for real brands — open any card for the full story.',
     work_v3_view_all: 'View all work',
     work_v3_rated_out_of: 'Rated {rating} out of 5 stars',
 
     // Testimonials
     testimonials_tag: 'Client Feedback',
-    testimonials_lead: 'What clients',
-    testimonials_accent: 'say',
     testimonials_heading: 'What Founders Say About DigiHust',
     testimonials_sub: 'Real reviews from international organizations who trusted our managed talent squads.',
-
-    // FAQ
-    faq_lead: 'Frequently asked',
-    faq_accent: 'questions',
-    faq_sub: 'Short answers about how we work, what it costs and what happens next.',
 
     // Pricing
     pricing_tag: 'Transparent Engagements',
@@ -422,23 +415,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Fallstudien',
-    work_v3_heading_1: 'Ausgewählte',
-    work_v3_heading_2: 'Arbeiten',
-    work_v3_subtext: 'Einige aktuelle Projekte. Öffnen Sie ein Projekt für Details.',
+    work_v3_heading_1: 'Ergebnisse, die',
+    work_v3_heading_2: 'überzeugen',
+    work_v3_subtext: 'Websites und digitale Produkte für reale Marken – öffnen Sie ein Projekt für Details.',
     work_v3_view_all: 'Alle Arbeiten',
     work_v3_rated_out_of: 'Mit {rating} von 5 Sternen bewertet',
 
     // Testimonials
     testimonials_tag: 'Kundenstimmen',
-    testimonials_lead: 'Was Kunden',
-    testimonials_accent: 'sagen',
     testimonials_heading: 'Was Gründer über DigiHust sagen',
     testimonials_sub: 'Echte Bewertungen internationaler Unternehmen, die unseren Teams vertrauen.',
-
-    // FAQ
-    faq_lead: 'Häufig gestellte',
-    faq_accent: 'Fragen',
-    faq_sub: 'Kurze Antworten zu Arbeitsweise, Kosten und den nächsten Schritten.',
 
     // Pricing
     pricing_tag: 'Transparente Pakete',
@@ -608,23 +594,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'دراسات الحالة',
-    work_v3_heading_1: 'مشاريع',
-    work_v3_heading_2: 'مختارة',
-    work_v3_subtext: 'مشاريع حديثة من إنجازنا. افتح أي بطاقة لمعرفة التفاصيل كاملة.',
+    work_v3_heading_1: 'أعمال تنمي',
+    work_v3_heading_2: 'مشروعك',
+    work_v3_subtext: 'مواقع ومنتجات رقمية بنيت لعلامات تجارية حقيقية — افتح أي بطاقة لمعرفة التفاصيل.',
     work_v3_view_all: 'عرض كل الأعمال',
     work_v3_rated_out_of: 'تقييم {rating} من 5 نجوم',
 
     // Testimonials
     testimonials_tag: 'آراء العملاء',
-    testimonials_lead: 'ماذا يقول',
-    testimonials_accent: 'عملاؤنا',
     testimonials_heading: 'ماذا يقول رواد الأعمال عن DigiHust',
     testimonials_sub: 'تقييمات حقيقية من مؤسسات دولية وثقت بفرقنا الرقمية.',
-
-    // FAQ
-    faq_lead: 'الأسئلة',
-    faq_accent: 'الشائعة',
-    faq_sub: 'إجابات موجزة حول كيفية عملنا وتكاليف المشاريع والخطوات القادمة.',
 
     // Pricing
     pricing_tag: 'باقات واضحة ومحددة',
@@ -794,23 +773,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Casos de estudio',
-    work_v3_heading_1: 'Proyectos',
-    work_v3_heading_2: 'destacados',
-    work_v3_subtext: 'Algunos proyectos recientes. Abre una tarjeta para ver más.',
+    work_v3_heading_1: 'Trabajo que impulsa',
+    work_v3_heading_2: 'tu negocio',
+    work_v3_subtext: 'Sitios web y productos digitales creados para marcas reales — abre cualquier tarjeta para ver más.',
     work_v3_view_all: 'Ver todos',
     work_v3_rated_out_of: 'Calificado con {rating} de 5 estrellas',
 
     // Testimonials
     testimonials_tag: 'Opiniones de Clientes',
-    testimonials_lead: 'Lo que dicen nuestros',
-    testimonials_accent: 'clientes',
     testimonials_heading: 'Lo que Dicen los Fundadores sobre DigiHust',
     testimonials_sub: 'Reseñas reales de organizaciones que confían en nuestros equipos especializados.',
-
-    // FAQ
-    faq_lead: 'Preguntas',
-    faq_accent: 'frecuentes',
-    faq_sub: 'Respuestas breves sobre cómo trabajamos, los costos y los siguientes pasos.',
 
     // Pricing
     pricing_tag: 'Paquetes Transparentes',
@@ -980,23 +952,16 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Work v3 Showcase Redesign
     work_v3_eyebrow: 'Études de cas',
-    work_v3_heading_1: 'Projets',
-    work_v3_heading_2: 'choisis',
-    work_v3_subtext: 'Quelques projets récents. Ouvrez une carte pour en savoir plus.',
+    work_v3_heading_1: 'Des projets qui',
+    work_v3_heading_2: 'font grandir',
+    work_v3_subtext: 'Sites web et produits digitaux conçus pour de vraies marques — ouvrez une carte pour en savoir plus.',
     work_v3_view_all: 'Tous les projets',
     work_v3_rated_out_of: 'Noté {rating} sur 5 étoiles',
 
     // Testimonials
     testimonials_tag: 'Avis clients',
-    testimonials_lead: 'Ce que disent nos',
-    testimonials_accent: 'clients',
     testimonials_heading: 'Ce que disent les fondateurs à propos de DigiHust',
     testimonials_sub: 'Des retours d’expérience authentiques de marques mondiales.',
-
-    // FAQ
-    faq_lead: 'Questions',
-    faq_accent: 'fréquentes',
-    faq_sub: 'Des réponses concises sur nos méthodes, nos tarifs et la suite des démarches.',
 
     // Pricing
     pricing_tag: 'Offres transparentes',

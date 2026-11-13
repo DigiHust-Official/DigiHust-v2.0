@@ -22,13 +22,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: clamp(24px, 2.2vw, 32px);
+  border-radius: clamp(18px, 1.8vw, 24px);
   padding: clamp(10px, 1vw, 14px);
   box-sizing: border-box;
   background-color: var(--dh-card-surface-light);
   border: 1px solid var(--dh-card-border-light);
   box-shadow: var(--dh-card-shadow-light);
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
   --dh-card-surface: var(--dh-card-surface-light);
   --dh-card-title: var(--dh-card-title-light);
   --dh-card-desc: var(--dh-card-desc-light);

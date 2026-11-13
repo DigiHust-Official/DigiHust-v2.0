@@ -47,8 +47,7 @@ function checkSectionEnd(
  *   Stop 2: Core Capabilities top (data-hard-stop="capabilities")
  *   Stop 3: Why DigiHust top (data-hard-stop="why-digihust")
  *   Stop 4: Work top (data-hard-stop="work")
- *   Stop 5: Testimonials top (data-hard-stop="testimonials")
- *   Stop 6: FAQ top (data-hard-stop="faq")
+ *   Stop 5: Client Feedback top (data-hard-stop="feedback")
  *
  * Inside Core Capabilities and Work, normal native scrolling occurs.
  * At the end of each, a deliberate gesture advances to the next stop.
@@ -87,18 +86,14 @@ export function useHeroHardScroll({
       );
     };
 
-    // Helper: check if target or activeElement is an interactive control (button, link, input, tab)
-    const isInteractiveElement = (target: EventTarget | null): boolean => {
+    // Helper: check if target is inside an internally scrollable element or form field
+    const isInsideScrollable = (target: EventTarget | null): boolean => {
       const activeEl = document.activeElement;
       if (
         activeEl &&
         (activeEl.tagName === 'INPUT' ||
           activeEl.tagName === 'TEXTAREA' ||
-          activeEl.tagName === 'SELECT' ||
-          activeEl.tagName === 'BUTTON' ||
-          activeEl.tagName === 'A' ||
-          activeEl.getAttribute('role') === 'tab' ||
-          activeEl.getAttribute('role') === 'tablist')
+          activeEl.tagName === 'SELECT')
       ) {
         return true;
       }
@@ -106,25 +101,12 @@ export function useHeroHardScroll({
       let el = target as HTMLElement | null;
       while (el && el !== document.body && el !== document.documentElement) {
         if (
-          el.tagName === 'BUTTON' ||
-          el.tagName === 'A' ||
           el.tagName === 'INPUT' ||
           el.tagName === 'TEXTAREA' ||
-          el.tagName === 'SELECT' ||
-          el.getAttribute('role') === 'tab' ||
-          el.getAttribute('role') === 'tablist'
+          el.tagName === 'SELECT'
         ) {
           return true;
         }
-        el = el.parentElement;
-      }
-      return false;
-    };
-
-    // Helper: check if target is inside an internally scrollable element or form field
-    const isInsideScrollable = (target: EventTarget | null): boolean => {
-      let el = target as HTMLElement | null;
-      while (el && el !== document.body && el !== document.documentElement) {
         const style = window.getComputedStyle(el);
         const overflowY = style.overflowY;
         if (
@@ -138,7 +120,7 @@ export function useHeroHardScroll({
       return false;
     };
 
-    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities, 3: Why DigiHust, 4: Work, 5: Testimonials, 6: FAQ)
+    // Helper: get ordered stops (0: Hero, 1: About, 2: Capabilities, 3: Why DigiHust, 4: Work, 5: Feedback)
     const getStops = (): number[] => {
       const stops: number[] = [0];
 
@@ -160,11 +142,12 @@ export function useHeroHardScroll({
         stops.push(Math.round(top));
       }
 
-      // Stop 3: Why DigiHust top
+      // Stop 3: Why DigiHust top (subtract navbar height + offset so heading is never covered)
       const whyEl = document.querySelector<HTMLElement>('[data-hard-stop="why-digihust"]');
       if (whyEl) {
-        const top = whyEl.getBoundingClientRect().top + window.scrollY;
-        stops.push(Math.round(top));
+        const navH = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dh-nav-bottom')) || 72) + 16;
+        const top = whyEl.getBoundingClientRect().top + window.scrollY - navH;
+        stops.push(Math.max(0, Math.round(top)));
       }
 
       // Stop 4: Work top
@@ -174,19 +157,10 @@ export function useHeroHardScroll({
         stops.push(Math.round(top));
       }
 
-      // Stop 5: Testimonials top
-      const testEl =
-        document.querySelector<HTMLElement>('[data-hard-stop="testimonials"]') ||
-        document.querySelector<HTMLElement>('[data-hard-stop="feedback"]');
-      if (testEl) {
-        const top = testEl.getBoundingClientRect().top + window.scrollY;
-        stops.push(Math.round(top));
-      }
-
-      // Stop 6: FAQ top
-      const faqEl = document.querySelector<HTMLElement>('[data-hard-stop="faq"]');
-      if (faqEl) {
-        const top = faqEl.getBoundingClientRect().top + window.scrollY;
+      // Stop 5: Feedback top
+      const fbEl = document.querySelector<HTMLElement>('[data-hard-stop="feedback"]');
+      if (fbEl) {
+        const top = fbEl.getBoundingClientRect().top + window.scrollY;
         stops.push(Math.round(top));
       }
 
@@ -239,7 +213,7 @@ export function useHeroHardScroll({
     const handleWheel = (e: WheelEvent) => {
       if (!isDesktop() || isModalOrMenuOpen()) return;
       if (e.ctrlKey || e.metaKey) return; // Allow pinch-to-zoom / ctrl-zoom
-      if (isInteractiveElement(e.target) || isInsideScrollable(e.target)) return;
+      if (isInsideScrollable(e.target)) return;
 
       if (isAnimatingRef.current) {
         e.preventDefault();
@@ -256,7 +230,6 @@ export function useHeroHardScroll({
       const s3 = stops[3];
       const s4 = stops[4];
       const s5 = stops[5];
-      const s6 = stops[6];
       const TOL = 40;
       const deltaY = e.deltaY;
       const THRESHOLD = 12;
@@ -320,20 +293,12 @@ export function useHeroHardScroll({
             e.preventDefault();
             animateScrollTo(s5);
           }
-        } else if (s6 && currentY >= s5 - 2 && currentY < s6 - 2) {
-          // At Stop 5 (Testimonials): jump to Stop 6 (FAQ)
-          e.preventDefault();
-          animateScrollTo(s6);
         }
         // Inside services / why-digihust / work: free native scroll down
       } else {
         // ── SCROLLING UP ──
-        if (s6 && currentY >= s6 - 2 && currentY <= s6 + 60) {
-          // Scrolling UP from FAQ top: animate back to Testimonials top
-          e.preventDefault();
-          animateScrollTo(s5);
-        } else if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
-          // Scrolling UP from Testimonials top: animate back to Work end
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
+          // Scrolling UP from Feedback top: animate back to Work end
           e.preventDefault();
           animateScrollTo(work.returnY);
         } else if (s4 && currentY > s4 + 60) {
@@ -363,7 +328,7 @@ export function useHeroHardScroll({
     // Keyboard navigation (PageDown, PageUp, ArrowDown, ArrowUp, Space)
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isDesktop() || isModalOrMenuOpen()) return;
-      if (isInteractiveElement(e.target) || isInsideScrollable(e.target)) return;
+      if (isInsideScrollable(e.target)) return;
 
       const isDownKey =
         e.key === 'ArrowDown' ||
@@ -391,7 +356,6 @@ export function useHeroHardScroll({
       const s3 = stops[3];
       const s4 = stops[4];
       const s5 = stops[5];
-      const s6 = stops[6];
       const TOL = 40;
 
       const cap = checkSectionEnd('[data-hard-stop="capabilities"]', endReachedTimeRef, performance.now());
@@ -413,16 +377,10 @@ export function useHeroHardScroll({
         } else if (s5 && work.isAtEnd && currentY < s5 - 2) {
           e.preventDefault();
           animateScrollTo(s5);
-        } else if (s6 && currentY >= s5 - 2 && currentY < s6 - 2) {
-          e.preventDefault();
-          animateScrollTo(s6);
         }
         // Inside services / work: let down key scroll naturally
       } else if (isUpKey) {
-        if (s6 && currentY >= s6 - 2 && currentY <= s6 + 60) {
-          e.preventDefault();
-          animateScrollTo(s5);
-        } else if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
           e.preventDefault();
           animateScrollTo(work.returnY);
         } else if (s4 && currentY > s4 + 60) {
@@ -454,7 +412,7 @@ export function useHeroHardScroll({
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDesktop() || isModalOrMenuOpen() || touchStartYRef.current === null) return;
-      if (isInteractiveElement(e.target) || isInsideScrollable(e.target)) return;
+      if (isInsideScrollable(e.target)) return;
 
       if (isAnimatingRef.current) {
         e.preventDefault();
@@ -477,7 +435,6 @@ export function useHeroHardScroll({
       const s3 = stops[3];
       const s4 = stops[4];
       const s5 = stops[5];
-      const s6 = stops[6];
       const TOL = 40;
 
       const cap = checkSectionEnd('[data-hard-stop="capabilities"]', endReachedTimeRef, performance.now());
@@ -505,18 +462,10 @@ export function useHeroHardScroll({
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(s5);
-        } else if (s6 && currentY >= s5 - 2 && currentY < s6 - 2) {
-          e.preventDefault();
-          touchStartYRef.current = null;
-          animateScrollTo(s6);
         }
       } else {
         // ── SWIPE DOWN = SCROLL UP ──
-        if (s6 && currentY >= s6 - 2 && currentY <= s6 + 60) {
-          e.preventDefault();
-          touchStartYRef.current = null;
-          animateScrollTo(s5);
-        } else if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
+        if (s5 && currentY >= s5 - 2 && currentY <= s5 + 60) {
           e.preventDefault();
           touchStartYRef.current = null;
           animateScrollTo(work.returnY);

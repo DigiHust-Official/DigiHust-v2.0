@@ -61,16 +61,16 @@ export const WorkShowcaseSection: React.FC = () => {
         <div className="dh-work-showcase__header">
           <SectionHeading
             id="dh-work-showcase-heading"
-            lead={t('work_v3_heading_1') || 'Selected'}
-            accent={t('work_v3_heading_2') || 'work'}
-            subtitle={t('work_v3_subtext') || 'A few recent projects. Open any card for the full story.'}
+            lead={t('work_v3_heading_1') || 'Work that grows'}
+            accent={t('work_v3_heading_2') || 'your business'}
+            subtitle={t('work_v3_subtext') || 'Websites and digital products built for real brands — open any card for the full story.'}
             align="center"
           />
         </div>
 
-        {/* ── Project Grid ── */}
+        {/* ── Project Grid (3 Columns on Desktop) ── */}
         <div className="dh-work-showcase__grid">
-          <WorkGrid projects={displayProjects} />
+          <WorkGrid projects={displayProjects} columns={3} />
         </div>
 
         {/* ── Centered Bottom View-All Pill Button (Matches Services Style) ── */}

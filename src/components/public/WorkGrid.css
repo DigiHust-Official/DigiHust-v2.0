@@ -1,4 +1,4 @@
-/* ── Shared Work Grid Styles (Alternating 7/5 & 5/7 columns) ── */
+/* ── Shared Work Grid Styles (Alternating 7/5 & 5/7 columns, or 3-column grid) ── */
 
 .dh-work-grid {
   display: flex;
@@ -6,6 +6,28 @@
   gap: clamp(16px, 2vw, 28px);
   width: 100%;
   box-sizing: border-box;
+}
+
+/* 3-column grid for Selected Work showcase */
+.dh-work-grid--3col {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 1.8vw, 24px);
+  align-items: stretch;
+}
+
+@media (max-width: 1023.98px) {
+  .dh-work-grid--3col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 22px);
+  }
+}
+
+@media (max-width: 639.98px) {
+  .dh-work-grid--3col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .dh-work-row {

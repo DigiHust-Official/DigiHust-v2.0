@@ -9,7 +9,7 @@ import './ProjectCardV2.css';
 
 interface ProjectCardV2Props {
   project: Project;
-  span?: '7' | '5';
+  span?: '7' | '5' | '3';
   className?: string;
 }
 

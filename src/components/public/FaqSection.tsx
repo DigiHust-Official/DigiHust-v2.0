@@ -105,3 +105,4 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ items }) => {
     </section>
   );
 };
+
