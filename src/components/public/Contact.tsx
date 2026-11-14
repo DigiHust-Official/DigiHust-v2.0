@@ -904,43 +904,42 @@ export const Contact: React.FC = () => {
             <motion.section
               key="success"
               aria-labelledby="contact-success-heading"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="max-w-xl mx-auto text-left rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 mb-6"
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="max-w-md mx-auto text-center rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-10 sm:px-10 sm:py-12 mb-6"
             >
-              <p className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-teal-text)] mb-3">
-                <Check className="w-4 h-4" aria-hidden="true" />
-                <span>Brief received</span>
-              </p>
+              <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-teal-subtle)] text-[var(--brand-teal-text)]">
+                <Check className="h-6 w-6" strokeWidth={2.5} aria-hidden="true" />
+              </span>
               <h2
                 id="contact-success-heading"
                 ref={successHeadingRef}
                 tabIndex={-1}
-                className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-heading)] tracking-tight focus:outline-none"
+                className="font-display font-semibold text-2xl sm:text-[1.75rem] leading-tight tracking-tight text-[var(--text-heading)] focus:outline-none"
               >
-                Thanks, {form.name.trim().split(/\s+/)[0]} — we got your brief.
+                Thanks, {form.name.trim().split(/\s+/)[0]}.
               </h2>
-              <p className="mt-3 text-sm sm:text-base text-[var(--text-body)] leading-relaxed">
-                We&apos;ll reply to <span className="font-semibold text-[var(--text-heading)] break-all">{form.email.trim()}</span> within 24 hours.
+              <p className="mt-2 text-[15px] leading-relaxed text-[var(--text-muted)]">
+                We got your brief and will reply to{' '}
+                <span className="font-medium text-[var(--text-heading)] break-all">{form.email.trim()}</span>{' '}
+                within 24 hours.
               </p>
 
-              <dl className="mt-6 border-t border-[var(--border-subtle)] text-sm">
-                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
-                  <dt className="text-[var(--text-muted)]">Services</dt>
-                  <dd className="text-[var(--text-heading)]">{form.services.join(', ')}</dd>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
-                  <dt className="text-[var(--text-muted)]">Timeline</dt>
-                  <dd className="text-[var(--text-heading)]">{form.timeline}</dd>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
-                  <dt className="text-[var(--text-muted)]">Budget</dt>
-                  <dd className="text-[var(--text-heading)]">{getEffectiveBudget()}</dd>
-                </div>
+              <dl className="mt-8 rounded-2xl bg-[var(--bg-subtle)] px-4 text-left text-sm divide-y divide-[var(--border-subtle)]">
+                {[
+                  { label: 'Services', value: form.services.join(', ') },
+                  { label: 'Timeline', value: form.timeline },
+                  { label: 'Budget', value: getEffectiveBudget() },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-start justify-between gap-4 py-3.5">
+                    <dt className="shrink-0 text-[var(--text-muted)]">{row.label}</dt>
+                    <dd className="min-w-0 text-right font-medium text-[var(--text-heading)]">{row.value}</dd>
+                  </div>
+                ))}
               </dl>
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold">
+              <div className="mt-8 flex flex-col items-center gap-3 text-[15px]">
                 <button
                   type="button"
                   onClick={() => {
@@ -968,13 +967,13 @@ export const Contact: React.FC = () => {
                     setEmailSuggestion(null);
                     descriptionPrefillRef.current = '';
                   }}
-                  className="text-[var(--brand-teal-text)] hover:underline underline-offset-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
+                  className="font-semibold text-[var(--brand-teal-text)] hover:opacity-80 transition-opacity rounded-md px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
                 >
                   Submit another brief
                 </button>
                 <Link
                   to="/"
-                  className="text-[var(--brand-teal-text)] hover:underline underline-offset-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
+                  className="font-medium text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors rounded-md px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
                 >
                   Back to home
                 </Link>

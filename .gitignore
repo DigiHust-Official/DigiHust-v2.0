@@ -147,3 +147,8 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local AI agent setup (not for repo)
+CLAUDE.md
+docs/ui-changes/
+.claude/
