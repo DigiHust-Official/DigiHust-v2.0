@@ -533,6 +533,7 @@ export interface CareerJob {
   title: string;
   department: string;
   location: string;
+  applyUrl?: string; // Google Form (or any https) link for this position
 }
 
 export interface SiteCareersContent {

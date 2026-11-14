@@ -356,7 +356,17 @@ export const SiteContentManager: React.FC = () => {
 
   const handleSaveCareers = (e: React.FormEvent) => {
     e.preventDefault();
-    updateSiteContent('careers', careersDraft);
+    const openPositions = (careersDraft.openPositions || []).map((pos) => ({
+      ...pos,
+      applyUrl: pos.applyUrl?.trim() || undefined,
+    }));
+    if (openPositions.some((pos) => pos.applyUrl && !pos.applyUrl.startsWith('https://'))) {
+      showToast('Every application form link must start with https://', 'error');
+      return;
+    }
+    const cleaned = { ...careersDraft, openPositions };
+    setCareersDraft(cleaned);
+    updateSiteContent('careers', cleaned);
     triggerSaved('Careers page updated live!');
   };
 
@@ -3307,11 +3317,12 @@ export const SiteContentManager: React.FC = () => {
                     newArr.splice(idx, 1);
                     setCareersDraft({ ...careersDraft, openPositions: newArr });
                   }}
+                  aria-label={`Remove position ${pos.title || idx + 1}`}
                   className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-rose-400"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pr-8">
                   <input
                     type="text"
                     placeholder="Job Title"
@@ -3346,6 +3357,40 @@ export const SiteContentManager: React.FC = () => {
                     className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-xs"
                   />
                 </div>
+                {(() => {
+                  const url = (pos.applyUrl || '').trim();
+                  const invalid = url !== '' && !url.startsWith('https://');
+                  const inputId = `career-apply-url-${idx}`;
+                  const hintId = `${inputId}-hint`;
+                  return (
+                    <div className="mt-3">
+                      <label htmlFor={inputId} className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">
+                        Application form link
+                      </label>
+                      <input
+                        id={inputId}
+                        type="url"
+                        inputMode="url"
+                        placeholder="Google Form link (https://forms.gle/...)"
+                        value={pos.applyUrl || ''}
+                        aria-invalid={invalid}
+                        aria-describedby={hintId}
+                        onChange={(e) => {
+                          const newArr = careersDraft.openPositions.map((p, i) => (i === idx ? { ...p, applyUrl: e.target.value } : p));
+                          setCareersDraft({ ...careersDraft, openPositions: newArr });
+                        }}
+                        className={`w-full bg-[var(--bg-surface)] border rounded-lg px-3 py-2 text-xs ${invalid ? 'border-rose-400' : 'border-[var(--border-subtle)]'}`}
+                      />
+                      <p id={hintId} className={`mt-1 text-[11px] ${invalid ? 'text-rose-400' : 'text-[var(--text-muted)]'}`}>
+                        {invalid
+                          ? 'Link must start with https://'
+                          : url
+                            ? 'Apply Now opens this form in a new tab.'
+                            : 'Without a link, Apply Now opens an email to digihust@gmail.com.'}
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>

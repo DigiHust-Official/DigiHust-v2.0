@@ -3,15 +3,28 @@ import { motion } from 'framer-motion';
 import { Briefcase, ArrowRight } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
 import { useApp } from '../../context/AppContext';
+import { CareerJob, SiteCareersContent } from '../../types';
+
+const CAREERS_EMAIL = 'digihust@gmail.com';
+
+// Admin-set Google Form link if it is a safe https URL; otherwise a Gmail compose link with the role in the subject.
+const getApplyLink = (job: CareerJob): { href: string; isForm: boolean } => {
+  const url = job.applyUrl?.trim();
+  if (url && url.startsWith('https://')) return { href: url, isForm: true };
+  const subject = encodeURIComponent(`Application: ${job.title}`);
+  return { href: `https://mail.google.com/mail/?view=cm&fs=1&to=${CAREERS_EMAIL}&su=${subject}`, isForm: false };
+};
 
 export const Careers: React.FC = () => {
   const { siteContent } = useApp();
 
   // Extract career data from CMS if available, otherwise fallback
-  const careersData = siteContent?.careers || {
+  const careersData: SiteCareersContent = siteContent?.careers || {
     noPositionsMessage: "We're always looking for exceptional talent, but we don't have any open positions right now. Check back soon!",
     openPositions: []
   };
+
+  const openPositions: CareerJob[] = careersData.openPositions || [];
 
   return (
     <div className="pt-20 lg:pt-24 min-h-screen bg-[var(--bg-page)] text-[var(--text-body)]">
@@ -49,22 +62,31 @@ export const Careers: React.FC = () => {
       {/* Jobs Section */}
       <section className="py-20 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {careersData.openPositions && careersData.openPositions.length > 0 ? (
+          {openPositions.length > 0 ? (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-[var(--text-heading)]">Open Roles</h2>
               <div className="grid grid-cols-1 gap-4">
-                {careersData.openPositions.map((job: any, index: number) => (
+                {openPositions.map((job, index) => {
+                  const apply = getApplyLink(job);
+                  return (
                   <div key={index} className="p-6 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] hover:border-[var(--brand-teal)]/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h3 className="font-bold text-lg text-[var(--text-heading)]">{job.title}</h3>
                       <p className="text-sm text-[var(--text-muted)] mt-1">{job.department} · {job.location}</p>
                     </div>
-                    <button className="px-5 py-2.5 rounded-xl bg-[var(--text-heading)] text-[var(--bg-page)] text-sm font-bold flex items-center justify-center space-x-2 hover:bg-[var(--brand-teal)] transition-colors">
+                    <a
+                      href={apply.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Apply now for ${job.title} (${apply.isForm ? 'opens application form' : 'opens email'} in a new tab)`}
+                      className="px-5 py-2.5 rounded-xl bg-[var(--text-heading)] text-[var(--bg-page)] text-sm font-bold flex items-center justify-center space-x-2 hover:bg-[var(--brand-teal)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--brand-teal)]"
+                    >
                       <span>Apply Now</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                      <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                    </a>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
