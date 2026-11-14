@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   User,
   Mail,
@@ -17,7 +17,6 @@ import {
   Phone,
   MapPin,
   X,
-  MessageSquare,
   AlertCircle,
   ExternalLink,
   Loader2,
@@ -237,6 +236,83 @@ export const validatePhoneNumber = (phone: string): { isValid: boolean; error?: 
   return { isValid: true };
 };
 
+type FieldCheck = { isValid: boolean; error?: string };
+
+const DESCRIPTION_MIN = 20;
+const DESCRIPTION_MAX = 500;
+const ATTACHMENT_MAX_MB = 15;
+const ATTACHMENT_EXTENSIONS = ['pdf', 'zip', 'png', 'jpg', 'jpeg', 'docx'];
+const ATTACHMENT_MIME_TYPES = [
+  'application/pdf',
+  'application/zip',
+  'application/x-zip',
+  'application/x-zip-compressed',
+  'multipart/x-zip',
+  'image/png',
+  'image/jpeg',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+// Optional field: only validated when the user typed something.
+const validateCompany = (company: string): FieldCheck => {
+  const trimmed = company.trim();
+  if (!trimmed) return { isValid: true };
+  if (trimmed.length < 2) {
+    return { isValid: false, error: 'Company name must be at least 2 characters' };
+  }
+  if (trimmed.length > 100) {
+    return { isValid: false, error: 'Company name cannot exceed 100 characters' };
+  }
+  if (!/\p{L}/u.test(trimmed)) {
+    return { isValid: false, error: 'Company name must contain at least one letter' };
+  }
+  return { isValid: true };
+};
+
+// `prefill` is the auto-generated header added from URL params; it doesn't count toward the minimum.
+const validateDescription = (description: string, prefill: string): FieldCheck => {
+  const ownText = prefill && description.startsWith(prefill) ? description.slice(prefill.length) : description;
+  const length = ownText.trim().length;
+  if (length === 0) {
+    return { isValid: false, error: 'Please describe your project' };
+  }
+  if (length < DESCRIPTION_MIN) {
+    return { isValid: false, error: `Please describe your project in at least ${DESCRIPTION_MIN} characters` };
+  }
+  if (description.length > DESCRIPTION_MAX) {
+    return { isValid: false, error: `Description cannot exceed ${DESCRIPTION_MAX} characters` };
+  }
+  return { isValid: true };
+};
+
+const validateCustomBudget = (amount: string): FieldCheck => {
+  const trimmed = amount.trim();
+  if (!trimmed) {
+    return { isValid: false, error: 'Please specify your target budget amount' };
+  }
+  const normalized = trimmed.replace(/,/g, '');
+  if (!/^\d+(\.\d+)?$/.test(normalized) || !(parseFloat(normalized) > 0)) {
+    return { isValid: false, error: 'Budget must be a number greater than 0' };
+  }
+  return { isValid: true };
+};
+
+const validateAttachment = (file: File | null): FieldCheck => {
+  if (!file) return { isValid: true };
+  const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+  // Some OSes report an empty MIME type, so only reject when one is present and not allowed.
+  if (!ATTACHMENT_EXTENSIONS.includes(ext) || (file.type && !ATTACHMENT_MIME_TYPES.includes(file.type))) {
+    return { isValid: false, error: 'Only PDF, ZIP, PNG, JPG or DOCX files are allowed' };
+  }
+  if (file.size === 0) {
+    return { isValid: false, error: 'The selected file is empty' };
+  }
+  if (file.size > ATTACHMENT_MAX_MB * 1024 * 1024) {
+    return { isValid: false, error: `File size exceeds ${ATTACHMENT_MAX_MB}MB limit` };
+  }
+  return { isValid: true };
+};
+
 export const Contact: React.FC = () => {
   const [searchParams] = useSearchParams();
   const projectParam = searchParams.get('project');
@@ -267,9 +343,14 @@ export const Contact: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [waDispatched, setWaDispatched] = useState<boolean>(false);
-  const [whatsappLink, setWhatsappLink] = useState<string>('');
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
+  // Auto-generated brief header from URL params; excluded from the description length check.
+  const descriptionPrefillRef = useRef<string>('');
+  const prefersReducedMotion = useReducedMotion();
+  // Move focus to the confirmation heading when it mounts so screen readers announce it.
+  const successHeadingRef = useCallback((el: HTMLHeadingElement | null) => {
+    el?.focus();
+  }, []);
 
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [budgetMode, setBudgetMode] = useState<'range' | 'custom'>('range');
@@ -352,6 +433,9 @@ export const Contact: React.FC = () => {
           summaryLines.length > 0
             ? `${summaryLines.join('\n')}\n\nProject Goals & Context:\n`
             : prev.description;
+        if (!prev.description && summaryLines.length > 0) {
+          descriptionPrefillRef.current = autoBrief;
+        }
 
         return {
           ...prev,
@@ -465,8 +549,14 @@ export const Contact: React.FC = () => {
       errs.phone = phoneCheck.error!;
     }
 
-    if (!form.description.trim() || form.description.length < 10) {
-      errs.description = 'Please provide a brief description (at least 10 characters)';
+    const companyCheck = validateCompany(form.company);
+    if (!companyCheck.isValid) {
+      errs.company = companyCheck.error!;
+    }
+
+    const descriptionCheck = validateDescription(form.description, descriptionPrefillRef.current);
+    if (!descriptionCheck.isValid) {
+      errs.description = descriptionCheck.error!;
     }
 
     if (budgetMode === 'range') {
@@ -474,8 +564,9 @@ export const Contact: React.FC = () => {
         errs.budget = 'Please select a target budget range';
       }
     } else {
-      if (!customBudgetAmount.trim()) {
-        errs.budget = 'Please specify your target budget amount';
+      const budgetCheck = validateCustomBudget(customBudgetAmount);
+      if (!budgetCheck.isValid) {
+        errs.budget = budgetCheck.error!;
       }
     }
 
@@ -483,9 +574,46 @@ export const Contact: React.FC = () => {
       errs.timeline = 'Please select a completion window';
     }
 
+    const fileCheck = validateAttachment(form.file);
+    if (!fileCheck.isValid) {
+      errs.file = fileCheck.error!;
+    }
+
     setErrors(errs);
     return { isValid: Object.keys(errs).length === 0, domain: emailCheck.domain };
   };
+
+  const validateStep2Sync = (): boolean => {
+    if (form.services.length === 0) {
+      setErrors({ services: 'Please select at least one capability' });
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep3Sync = (): boolean => {
+    if (!STAGE_OPTIONS.includes(form.stage)) {
+      setErrors({ stage: 'Please select your current project stage' });
+      return false;
+    }
+    return true;
+  };
+
+  // Sets or clears a single field's error (used by on-blur validation).
+  const applyFieldCheck = (field: string, check: FieldCheck) => {
+    setErrors((prev) => {
+      if (!check.isValid) return { ...prev, [field]: check.error! };
+      if (!(field in prev)) return prev;
+      const copy = { ...prev };
+      delete copy[field];
+      return copy;
+    });
+  };
+
+  const fieldErrorProps = (field: string) => ({
+    'aria-invalid': Boolean(errors[field]),
+    'aria-describedby': errors[field] ? `contact-${field}-error` : undefined,
+  });
 
   const handleNextStep = async () => {
     if (step === 1) {
@@ -512,13 +640,12 @@ export const Contact: React.FC = () => {
       setErrors({});
       setStep(2);
     } else if (step === 2) {
-      if (form.services.length === 0) {
-        setErrors({ services: 'Please select at least one capability' });
-        return;
-      }
+      if (!validateStep2Sync()) return;
       setErrors({});
       setStep(3);
     } else if (step === 3) {
+      if (!validateStep3Sync()) return;
+      setErrors({});
       setStep(4);
     }
   };
@@ -533,8 +660,10 @@ export const Contact: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 15 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, file: 'File size exceeds 15MB limit' }));
+      const fileCheck = validateAttachment(file);
+      if (!fileCheck.isValid) {
+        setErrors((prev) => ({ ...prev, file: fileCheck.error! }));
+        e.target.value = '';
         return;
       }
       setErrors((prev) => {
@@ -558,6 +687,14 @@ export const Contact: React.FC = () => {
     const { isValid } = validateStep1Sync();
     if (!isValid) {
       setStep(1);
+      return;
+    }
+    if (!validateStep2Sync()) {
+      setStep(2);
+      return;
+    }
+    if (!validateStep3Sync()) {
+      setStep(3);
       return;
     }
 
@@ -658,7 +795,7 @@ export const Contact: React.FC = () => {
         rating: 5.0,
       };
 
-      // 1. Submit lead to AppContext & Supabase (CEO & Co-Founder Portal)
+      // 1. Submit lead to AppContext & Supabase (management portal)
       await submitLead(newLeadData);
 
       // 2. Dispatch detailed lead alert to management email (digihust@gmail.com)
@@ -701,9 +838,9 @@ export const Contact: React.FC = () => {
         console.warn('Client confirmation email dispatch warning:', clientEmailErr);
       }
 
-      // 4. Automated background WhatsApp dispatch to DigiHust Leadership (+923226806396 / +923206806396)
+      // 4. Automated background WhatsApp dispatch to DigiHust Leadership (internal, never shown to the user)
       try {
-        const waRes = await notificationService.dispatchLeadWhatsApp({
+        await notificationService.dispatchLeadWhatsApp({
           name: form.name,
           email: form.email,
           clientPhone: cleanPhone,
@@ -719,28 +856,9 @@ export const Contact: React.FC = () => {
           callmebotApiKey: siteContent?.callmebotApiKey,
           webhookUrl: siteContent?.whatsappWebhookUrl,
         });
-        setWaDispatched(Boolean(waRes.success));
       } catch (waErr) {
         console.warn('Background WhatsApp automated dispatch warning:', waErr);
-        setWaDispatched(false);
       }
-
-      // 5. Direct WhatsApp instant 1-tap message link
-      const phone = siteContent?.contactPhone || '923226806396';
-      const cleanManagementPhone = phone.replace(/[^0-9]/g, '');
-      const waBriefText =
-        `*🚨 New DigiHust Client Intake*\n\n` +
-        (projectParam ? `*Referenced Project:* ${projectParam}\n` : '') +
-        `*Client:* ${form.name}\n` +
-        `*Email:* ${form.email}\n` +
-        (cleanPhone ? `*Phone / WhatsApp:* ${cleanPhone}\n` : '') +
-        (form.company ? `*Company:* ${form.company}\n` : '') +
-        `*Services:* ${form.services.join(', ')}\n` +
-        `*Budget:* ${effectiveBudget} (${selectedCurrency})\n` +
-        `*Timeline:* ${form.timeline}\n` +
-        (uploadedAttachmentUrl ? `*Document:* ${uploadedAttachmentName} (${uploadedAttachmentUrl})\n` : '') +
-        `\n*Project Overview:*\n${form.description}`;
-      setWhatsappLink(`https://api.whatsapp.com/send?phone=${cleanManagementPhone}&text=${encodeURIComponent(waBriefText)}`);
     } catch (err) {
       console.warn('Lead submission warning:', err);
     }
@@ -782,79 +900,49 @@ export const Contact: React.FC = () => {
 
         <AnimatePresence mode="wait">
           {submitted ? (
-            /* ── SUCCESS STATE CARD ── */
-            <motion.div
+            /* ── SUCCESS STATE ── */
+            <motion.section
               key="success"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="p-8 sm:p-12 rounded-[32px] bg-white dark:bg-[var(--bg-surface)] text-[var(--text-heading)] border border-[#E2ECEF] dark:border-[var(--border-subtle)] text-center shadow-[0_16px_50px_rgba(2,43,58,0.08)] space-y-6 max-w-2xl mx-auto"
+              aria-labelledby="contact-success-heading"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="max-w-xl mx-auto text-left rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 sm:p-8 mb-6"
             >
-              <div className="w-20 h-20 rounded-3xl bg-[#E0F2F5] dark:bg-cyan-950/80 border-2 border-[#1F7A8C] dark:border-cyan-500 flex items-center justify-center mx-auto shadow-sm">
-                <CheckCircle2 className="w-10 h-10 text-[#1F7A8C] dark:text-cyan-400" />
-              </div>
-              <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#022B3A] dark:text-white">
-                Project Intake Dispatched!
+              <p className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-teal-text)] mb-3">
+                <Check className="w-4 h-4" aria-hidden="true" />
+                <span>Brief received</span>
+              </p>
+              <h2
+                id="contact-success-heading"
+                ref={successHeadingRef}
+                tabIndex={-1}
+                className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-heading)] tracking-tight focus:outline-none"
+              >
+                Thanks, {form.name.trim().split(/\s+/)[0]} — we got your brief.
               </h2>
-              <p className="text-[var(--text-body)] max-w-lg mx-auto leading-relaxed text-sm sm:text-base">
-                Thank you, <strong className="text-[#022B3A] dark:text-white font-bold">{form.name}</strong>. Your project scope for{' '}
-                <span className="text-[#1F7A8C] dark:text-cyan-400 font-semibold">{form.services.join(', ')}</span> has been securely transmitted.
+              <p className="mt-3 text-sm sm:text-base text-[var(--text-body)] leading-relaxed">
+                We&apos;ll reply to <span className="font-semibold text-[var(--text-heading)] break-all">{form.email.trim()}</span> within 24 hours.
               </p>
 
-              {/* Multi-channel Delivery Status Badges */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left">
-                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-extrabold block">Executive Portal</span>
-                    <span className="text-[11px] opacity-80">Queued in CEO / Co-Founder Desk</span>
-                  </div>
+              <dl className="mt-6 border-t border-[var(--border-subtle)] text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
+                  <dt className="text-[var(--text-muted)]">Services</dt>
+                  <dd className="text-[var(--text-heading)]">{form.services.join(', ')}</dd>
                 </div>
-
-                <div className={`p-3 rounded-2xl border text-xs flex items-start space-x-2 ${
-                  waDispatched
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
-                    : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-800 dark:text-cyan-300'
-                }`}>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-extrabold block">WhatsApp Status</span>
-                    <span className="text-[11px] opacity-80">
-                      {waDispatched ? 'Auto-sent to DigiHust Leadership' : 'Instant Chat Link Ready'}
-                    </span>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
+                  <dt className="text-[var(--text-muted)]">Timeline</dt>
+                  <dd className="text-[var(--text-heading)]">{form.timeline}</dd>
                 </div>
-
-                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-extrabold block">Email Delivery</span>
-                    <span className="text-[11px] opacity-80">Sent to digihust & your inbox</span>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1 sm:gap-4 py-3 border-b border-[var(--border-subtle)]">
+                  <dt className="text-[var(--text-muted)]">Budget</dt>
+                  <dd className="text-[var(--text-heading)]">{getEffectiveBudget()}</dd>
                 </div>
-              </div>
+              </dl>
 
-              {whatsappLink && (
-                <div className="pt-2 space-y-3 max-w-md mx-auto">
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center space-x-2.5 w-full px-6 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-xl transition-all hover:scale-[1.02] cursor-pointer"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                    <span>Send Inquiry on WhatsApp to CEO (+92 322 6806396)</span>
-                  </a>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    {waDispatched
-                      ? 'Inquiry already auto-dispatched to leadership. Click above if you want to chat directly with our CEO.'
-                      : 'Click above to instantly send your full project brief directly to DigiHust Leadership on WhatsApp with 1 tap — nothing to copy or paste!'}
-                  </p>
-                </div>
-              )}
-
-              <div className="pt-6 border-t border-[var(--border-subtle)]">
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold">
                 <button
+                  type="button"
                   onClick={() => {
                     setSubmitted(false);
                     setStep(1);
@@ -875,13 +963,23 @@ export const Contact: React.FC = () => {
                     setSelectedCurrency('USD');
                     setBudgetMode('range');
                     setCustomBudgetAmount('');
+                    setErrors({});
+                    setVerifiedEmail(null);
+                    setEmailSuggestion(null);
+                    descriptionPrefillRef.current = '';
                   }}
-                  className="text-xs font-bold text-[#1F7A8C] hover:underline"
+                  className="text-[var(--brand-teal-text)] hover:underline underline-offset-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
                 >
-                  Submit Another Project Scope →
+                  Submit another brief
                 </button>
+                <Link
+                  to="/"
+                  className="text-[var(--brand-teal-text)] hover:underline underline-offset-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)]"
+                >
+                  Back to home
+                </Link>
               </div>
-            </motion.div>
+            </motion.section>
           ) : (
             /* ── MAIN CARD CONTAINER (2 COLUMNS) ── */
             <motion.div
@@ -947,13 +1045,17 @@ export const Contact: React.FC = () => {
                           {/* Row 1: Full Name & Work Email Address */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
+                              <label htmlFor="contact-name" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
                                 Full Name <span className="text-rose-500">*</span>
                               </label>
                               <div className="relative">
                                 <User className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                                 <input
+                                  id="contact-name"
                                   type="text"
+                                  autoComplete="name"
+                                  {...fieldErrorProps('name')}
+                                  onBlur={() => applyFieldCheck('name', validateFullName(form.name))}
                                   value={form.name}
                                   onChange={(e) => {
                                     const val = e.target.value;
@@ -975,12 +1077,12 @@ export const Contact: React.FC = () => {
                                     }`}
                                 />
                               </div>
-                              {errors.name && <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.name}</p>}
+                              {errors.name && <p id="contact-name-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.name}</p>}
                             </div>
 
                             <div>
                               <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-xs font-bold text-[#1E293B] dark:text-white">
+                                <label htmlFor="contact-email" className="block text-xs font-bold text-[#1E293B] dark:text-white">
                                   Work Email Address <span className="text-rose-500">*</span>
                                 </label>
                                 {isValidatingEmail ? (
@@ -996,7 +1098,10 @@ export const Contact: React.FC = () => {
                               <div className="relative">
                                 <Mail className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                                 <input
+                                  id="contact-email"
                                   type="email"
+                                  autoComplete="email"
+                                  {...fieldErrorProps('email')}
                                   value={form.email}
                                   onBlur={handleEmailBlur}
                                   onChange={(e) => {
@@ -1023,8 +1128,8 @@ export const Contact: React.FC = () => {
                                 />
                               </div>
                               {errors.email && (
-                                <p className="text-[11px] text-rose-500 mt-1 font-medium flex items-center gap-1.5">
-                                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                <p id="contact-email-error" className="text-[11px] text-rose-500 mt-1 font-medium flex items-center gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                                   {errors.email}
                                 </p>
                               )}
@@ -1045,29 +1150,43 @@ export const Contact: React.FC = () => {
                           {/* Row 2: Company / Organization Name & Phone / WhatsApp Number */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
+                              <label htmlFor="contact-company" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
                                 Company / Organization Name <span className="text-[#94A3B8] font-normal">(optional)</span>
                               </label>
                               <div className="relative">
                                 <Building2 className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                                 <input
+                                  id="contact-company"
                                   type="text"
+                                  autoComplete="organization"
+                                  maxLength={100}
+                                  {...fieldErrorProps('company')}
                                   value={form.company}
-                                  onChange={(e) => setForm({ ...form, company: e.target.value })}
+                                  onChange={(e) => {
+                                    setForm({ ...form, company: e.target.value });
+                                    if (errors.company) applyFieldCheck('company', { isValid: true });
+                                  }}
+                                  onBlur={() => applyFieldCheck('company', validateCompany(form.company))}
                                   placeholder="e.g. Acme Innovations Ltd."
-                                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E2ECEF] dark:border-[var(--border-subtle)] text-xs sm:text-sm text-[var(--text-heading)] bg-[#F8FAFC]/70 dark:bg-black/20 placeholder:text-[#94A3B8] focus:outline-none focus:border-[#1F7A8C] focus:ring-1 focus:ring-[#1F7A8C] transition-colors"
+                                  className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs sm:text-sm text-[var(--text-heading)] bg-[#F8FAFC]/70 dark:bg-black/20 placeholder:text-[#94A3B8] focus:outline-none focus:border-[#1F7A8C] focus:ring-1 focus:ring-[#1F7A8C] transition-colors ${errors.company ? 'border-rose-400 bg-rose-50/20' : 'border-[#E2ECEF] dark:border-[var(--border-subtle)]'
+                                    }`}
                                 />
                               </div>
+                              {errors.company && <p id="contact-company-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.company}</p>}
                             </div>
 
                             <div>
-                              <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
+                              <label htmlFor="contact-phone" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
                                 Phone / WhatsApp Number <span className="text-rose-500">*</span>
                               </label>
                               <div className="relative">
                                 <Phone className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                                 <input
+                                  id="contact-phone"
                                   type="tel"
+                                  autoComplete="tel"
+                                  {...fieldErrorProps('phone')}
+                                  onBlur={() => applyFieldCheck('phone', validatePhoneNumber(form.phone))}
                                   value={form.phone}
                                   onChange={(e) => {
                                     const val = e.target.value;
@@ -1082,30 +1201,33 @@ export const Contact: React.FC = () => {
                                       });
                                     }
                                   }}
-                                  placeholder="e.g. +92 322 6806396 or +1 415 555 2671"
+                                  placeholder="e.g. +92 300 1234567 or +1 415 555 2671"
                                   className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs sm:text-sm text-[var(--text-heading)] bg-[#F8FAFC]/70 dark:bg-black/20 placeholder:text-[#94A3B8] focus:outline-none focus:border-[#1F7A8C] focus:ring-1 focus:ring-[#1F7A8C] transition-colors ${errors.phone ? 'border-rose-400 bg-rose-50/20' : 'border-[#E2ECEF] dark:border-[var(--border-subtle)]'
                                     }`}
                                 />
                               </div>
-                              {errors.phone && <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.phone}</p>}
+                              {errors.phone && <p id="contact-phone-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.phone}</p>}
                             </div>
                           </div>
 
                           {/* Row 3: Project Overview */}
                           <div>
-                            <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
+                            <label htmlFor="contact-description" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
                               Project Overview <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">
                               <FileText className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-3 pointer-events-none" />
                               <textarea
+                                id="contact-description"
                                 rows={3}
-                                maxLength={500}
+                                maxLength={DESCRIPTION_MAX}
+                                {...fieldErrorProps('description')}
                                 value={form.description}
                                 onChange={(e) => {
                                   setForm({ ...form, description: e.target.value });
-                                  if (errors.description) setErrors((prev) => ({ ...prev, description: '' }));
+                                  if (errors.description) applyFieldCheck('description', { isValid: true });
                                 }}
+                                onBlur={() => applyFieldCheck('description', validateDescription(form.description, descriptionPrefillRef.current))}
                                 placeholder="Tell us what you are looking to build or solve. Include target audience, desired features, deadlines, or existing tech stack..."
                                 className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs sm:text-sm text-[var(--text-heading)] bg-[#F8FAFC]/70 dark:bg-black/20 placeholder:text-[#94A3B8] focus:outline-none focus:border-[#1F7A8C] focus:ring-1 focus:ring-[#1F7A8C] transition-colors resize-none ${errors.description ? 'border-rose-400 bg-rose-50/20' : 'border-[#E2ECEF] dark:border-[var(--border-subtle)]'
                                   }`}
@@ -1113,10 +1235,10 @@ export const Contact: React.FC = () => {
                             </div>
                             <div className="flex items-center justify-between mt-1">
                               {errors.description ? (
-                                <p className="text-[11px] text-rose-500 font-medium">{errors.description}</p>
+                                <p id="contact-description-error" className="text-[11px] text-rose-500 font-medium">{errors.description}</p>
                               ) : <span />}
                               <span className="text-[11px] text-[#94A3B8] font-medium">
-                                {form.description.length}/500
+                                {form.description.length}/{DESCRIPTION_MAX}
                               </span>
                             </div>
                           </div>
@@ -1125,7 +1247,7 @@ export const Contact: React.FC = () => {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-xs font-bold text-[#1E293B] dark:text-white">
+                                <label htmlFor="contact-budget" className="block text-xs font-bold text-[#1E293B] dark:text-white">
                                   Target Budget <span className="text-rose-500">*</span>
                                 </label>
                                 <div className="inline-flex rounded-lg bg-[#EAEFF2] dark:bg-black/40 p-0.5 text-[10px] font-bold">
@@ -1162,6 +1284,7 @@ export const Contact: React.FC = () => {
                                 {/* Currency Selector */}
                                 <div className="relative w-28 sm:w-32 shrink-0">
                                   <select
+                                    aria-label="Budget currency"
                                     value={selectedCurrency}
                                     onChange={(e) => {
                                       const newCurr = e.target.value;
@@ -1185,6 +1308,8 @@ export const Contact: React.FC = () => {
                                   {budgetMode === 'range' ? (
                                     <>
                                       <select
+                                        id="contact-budget"
+                                        {...fieldErrorProps('budget')}
                                         value={form.budget}
                                         onChange={(e) => {
                                           setForm({ ...form, budget: e.target.value });
@@ -1203,7 +1328,11 @@ export const Contact: React.FC = () => {
                                     </>
                                   ) : (
                                     <input
+                                      id="contact-budget"
                                       type="text"
+                                      inputMode="decimal"
+                                      {...fieldErrorProps('budget')}
+                                      onBlur={() => applyFieldCheck('budget', validateCustomBudget(customBudgetAmount))}
                                       value={customBudgetAmount}
                                       onChange={(e) => {
                                         const val = e.target.value.replace(/[^0-9.,]/g, '');
@@ -1218,15 +1347,17 @@ export const Contact: React.FC = () => {
                                   )}
                                 </div>
                               </div>
-                              {errors.budget && <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.budget}</p>}
+                              {errors.budget && <p id="contact-budget-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.budget}</p>}
                             </div>
 
                             <div>
-                              <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
+                              <label htmlFor="contact-timeline" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-1.5">
                                 Target Completion Window <span className="text-rose-500">*</span>
                               </label>
                               <div className="relative">
                                 <select
+                                  id="contact-timeline"
+                                  {...fieldErrorProps('timeline')}
                                   value={form.timeline}
                                   onChange={(e) => {
                                     setForm({ ...form, timeline: e.target.value });
@@ -1243,7 +1374,7 @@ export const Contact: React.FC = () => {
                                 </select>
                                 <ChevronDown className="w-4 h-4 text-[#94A3B8] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                               </div>
-                              {errors.timeline && <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.timeline}</p>}
+                              {errors.timeline && <p id="contact-timeline-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.timeline}</p>}
                             </div>
                           </div>
 
@@ -1275,33 +1406,41 @@ export const Contact: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={removeFile}
+                                  aria-label="Remove attached file"
                                   className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-md text-[#64748B] hover:text-rose-500 transition-colors"
                                 >
-                                  <X className="w-3.5 h-3.5" />
+                                  <X className="w-3.5 h-3.5" aria-hidden="true" />
                                 </button>
                               </div>
                             ) : (
-                              <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="border-2 border-dashed border-[#CBD5E1] dark:border-slate-700 hover:border-[#1F7A8C] dark:hover:border-cyan-500 rounded-2xl p-5 text-center transition-colors cursor-pointer bg-[#F8FAFC]/50 dark:bg-black/20 group"
-                              >
+                              <>
                                 <input
+                                  id="contact-file"
                                   type="file"
                                   ref={fileInputRef}
                                   onChange={handleFileChange}
                                   accept=".pdf,.zip,.png,.jpg,.jpeg,.docx"
                                   className="hidden"
+                                  tabIndex={-1}
+                                  aria-hidden="true"
                                 />
-                                <UploadCloud className="w-7 h-7 text-[#1F7A8C] dark:text-cyan-400 mx-auto mb-1.5 group-hover:scale-105 transition-transform" />
-                                <p className="text-xs sm:text-sm font-semibold text-[#1E293B] dark:text-white">
-                                  Click to upload or drag & drop
-                                </p>
-                                <p className="text-[11px] text-[#94A3B8] mt-0.5">
-                                  PDF, ZIP, PNG, DOCX (Max 15MB)
-                                </p>
-                              </div>
+                                <button
+                                  type="button"
+                                  onClick={() => fileInputRef.current?.click()}
+                                  {...fieldErrorProps('file')}
+                                  className={`w-full border-2 border-dashed hover:border-[#1F7A8C] dark:hover:border-cyan-500 rounded-2xl p-5 text-center transition-colors cursor-pointer bg-[#F8FAFC]/50 dark:bg-black/20 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] ${errors.file ? 'border-rose-400' : 'border-[#CBD5E1] dark:border-slate-700'}`}
+                                >
+                                  <UploadCloud className="w-7 h-7 text-[#1F7A8C] dark:text-cyan-400 mx-auto mb-1.5 group-hover:scale-105 transition-transform" aria-hidden="true" />
+                                  <span className="block text-xs sm:text-sm font-semibold text-[#1E293B] dark:text-white">
+                                    Click to upload
+                                  </span>
+                                  <span className="block text-[11px] text-[#94A3B8] mt-0.5">
+                                    PDF, ZIP, PNG, JPG, DOCX (Max {ATTACHMENT_MAX_MB}MB)
+                                  </span>
+                                </button>
+                              </>
                             )}
-                            {errors.file && <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.file}</p>}
+                            {errors.file && <p id="contact-file-error" className="text-[11px] text-rose-500 mt-1 font-medium">{errors.file}</p>}
                           </div>
                         </div>
                       </motion.div>
@@ -1322,13 +1461,19 @@ export const Contact: React.FC = () => {
                           Choose the specialized disciplines and engineering services your solution needs.
                         </p>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                        <div
+                          role="group"
+                          aria-label="Services"
+                          aria-describedby={errors.services ? 'contact-services-error' : undefined}
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4"
+                        >
                           {SERVICES.map((s) => {
                             const selected = form.services.includes(s);
                             return (
                               <button
                                 key={s}
                                 type="button"
+                                aria-pressed={selected}
                                 onClick={() => toggleService(s)}
                                 className={`p-3.5 rounded-xl border text-left flex items-center justify-between transition-all ${selected
                                     ? 'bg-[#E0F2F5] dark:bg-cyan-950/60 border-[#1F7A8C] dark:border-cyan-500 text-[#022B3A] dark:text-white shadow-xs'
@@ -1348,7 +1493,7 @@ export const Contact: React.FC = () => {
                             );
                           })}
                         </div>
-                        {errors.services && <p className="text-xs text-rose-500 font-medium mb-3">{errors.services}</p>}
+                        {errors.services && <p id="contact-services-error" role="alert" className="text-xs text-rose-500 font-medium mb-3">{errors.services}</p>}
                       </motion.div>
                     )}
 
@@ -1369,15 +1514,24 @@ export const Contact: React.FC = () => {
 
                         <div className="space-y-4 mb-4">
                           <div>
-                            <label className="block text-xs font-bold text-[#1E293B] dark:text-white mb-2">
-                              Current Project Stage
-                            </label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <p id="contact-stage-label" className="block text-xs font-bold text-[#1E293B] dark:text-white mb-2">
+                              Current Project Stage <span className="text-rose-500">*</span>
+                            </p>
+                            <div
+                              role="group"
+                              aria-labelledby="contact-stage-label"
+                              aria-describedby={errors.stage ? 'contact-stage-error' : undefined}
+                              className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
+                            >
                               {STAGE_OPTIONS.map((stg) => (
                                 <button
                                   key={stg}
                                   type="button"
-                                  onClick={() => setForm({ ...form, stage: stg })}
+                                  aria-pressed={form.stage === stg}
+                                  onClick={() => {
+                                    setForm({ ...form, stage: stg });
+                                    if (errors.stage) applyFieldCheck('stage', { isValid: true });
+                                  }}
                                   className={`p-3 rounded-xl border text-xs sm:text-sm font-medium text-left transition-all ${form.stage === stg
                                       ? 'bg-[#E0F2F5] dark:bg-cyan-950/60 border-[#1F7A8C] dark:border-cyan-500 text-[#022B3A] dark:text-white'
                                       : 'bg-[#F8FAFC]/70 dark:bg-black/20 border-[#E2ECEF] dark:border-[var(--border-subtle)] text-[#64748B] dark:text-slate-300'
@@ -1387,6 +1541,7 @@ export const Contact: React.FC = () => {
                                 </button>
                               ))}
                             </div>
+                            {errors.stage && <p id="contact-stage-error" role="alert" className="text-xs text-rose-500 font-medium mt-2">{errors.stage}</p>}
                           </div>
 
                           <div className="pt-2">
