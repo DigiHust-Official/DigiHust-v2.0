@@ -487,16 +487,9 @@ export const getValidProjects = (siteContent?: any): Project[] => {
   return PROJECTS.map((p, idx) => normalizeProject(p, idx));
 };
 
-/**
- * Projects shown in the home page "Work" section. The legacy
- * `siteContent.caseStudies` list wins when present (sanitizeSiteContent keeps
- * it non-empty); otherwise falls back to getValidProjects().
- */
-export const getShowcaseProjects = (siteContent?: Partial<SiteContent> | null): Project[] => {
-  const legacy: SiteCaseStudy[] = siteContent?.caseStudies || [];
-  if (legacy.length === 0) return getValidProjects(siteContent);
-
-  return legacy.map((cs, idx) => normalizeProject({
+/** Legacy CMS case study -> Project, exactly as the home page shows it. */
+const legacyToProject = (cs: SiteCaseStudy, idx: number): Project =>
+  normalizeProject({
     id: cs.slug || cs.id,
     category: cs.category || 'Web Development',
     filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
@@ -516,7 +509,93 @@ export const getShowcaseProjects = (siteContent?: Partial<SiteContent> | null): 
     projectUrl: cs.projectUrl || '',
     published: true,
     order: idx,
-  }, idx));
+  }, idx);
+
+/**
+ * Projects shown on the home page "Work" section and /portfolio.
+ * - After the admin imports the home-page projects into the Work tab
+ *   (`workSource === 'work'`), the Work list is the single source.
+ * - Before that, the legacy `siteContent.caseStudies` list is used
+ *   (sanitizeSiteContent keeps it non-empty); otherwise getValidProjects().
+ */
+export const getShowcaseProjects = (siteContent?: Partial<SiteContent> | null): Project[] => {
+  if (siteContent?.workSource === 'work') return getValidProjects(siteContent);
+  const legacy: SiteCaseStudy[] = siteContent?.caseStudies || [];
+  if (legacy.length === 0) return getValidProjects(siteContent);
+  return legacy.map(legacyToProject);
+};
+
+const truncateAtWord = (text: string, max: number): string => {
+  const clean = (text || '').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–—-]+$/, '')}…`;
+};
+
+/**
+ * Legacy home-page projects that are not yet in the Work list, converted into
+ * editable Work projects. Slugs equal the current home-card links, so existing
+ * URLs keep working. Fits the Work tab's limits (short description ≤ 140,
+ * case study summary ≤ 280). The old impact metric goes into Results.
+ */
+export const getLegacyProjectsToImport = (siteContent?: Partial<SiteContent> | null): Project[] => {
+  const legacy: SiteCaseStudy[] = siteContent?.caseStudies || [];
+  const existing: Project[] = (siteContent?.workProjects || []).map((p, i) => normalizeProject(p, i));
+  const takenSlugs = new Set(existing.map((p) => p.slug));
+  const takenIds = new Set(existing.map((p) => p.id));
+
+  return legacy
+    .map(legacyToProject)
+    .filter((p) => !takenSlugs.has(p.slug))
+    .map((p) => {
+      const id = takenIds.has(p.id) ? `${p.id}-home` : p.id;
+      takenIds.add(id);
+      const summary = (p.description || p.shortDescription || '').trim();
+      return {
+        ...p,
+        id,
+        shortDescription: truncateAtWord(summary, 140),
+        description: truncateAtWord(summary, 140),
+        caseStudy: {
+          summary: truncateAtWord(summary, 280),
+          challenge: p.challenge || '',
+          solution: p.solution || '',
+          results: (p.results || []).join('\n'),
+          gallery: [],
+        },
+      };
+    });
+};
+
+/**
+ * Full Work list after importing the home-page projects:
+ * the home projects first, in home-page order (an existing Work project with
+ * the same slug is reused and published, so its richer content is kept), then
+ * every other saved Work project in its current order. Built-in sample
+ * projects that were never saved are not added.
+ */
+export const buildHomeImportList = (siteContent?: Partial<SiteContent> | null): { list: Project[]; added: number } => {
+  const saved: Project[] = (siteContent?.workProjects || [])
+    .map((p, i) => normalizeProject(p, i))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const bySlug = new Map(saved.map((p) => [p.slug, p]));
+  const newOnes = new Map(getLegacyProjectsToImport(siteContent).map((p) => [p.slug, p]));
+
+  const homeSlugs = (siteContent?.caseStudies || []).map((cs, i) => legacyToProject(cs, i).slug);
+  const homeFirst: Project[] = homeSlugs
+    .map((slug) => {
+      const existing = bySlug.get(slug);
+      return existing ? { ...existing, published: true } : newOnes.get(slug);
+    })
+    .filter((p): p is Project => Boolean(p));
+  const homeSet = new Set(homeFirst.map((p) => p.slug));
+  const rest = saved.filter((p) => !homeSet.has(p.slug));
+
+  return {
+    list: [...homeFirst, ...rest].map((p, idx) => ({ ...p, order: idx })),
+    added: newOnes.size,
+  };
 };
 
 /**
@@ -527,5 +606,14 @@ export const getShowcaseProjects = (siteContent?: Partial<SiteContent> | null): 
 export const findProjectBySlug = (siteContent: Partial<SiteContent> | null | undefined, slug?: string): Project | undefined => {
   if (!slug) return undefined;
   const matches = (p: Project) => p.slug === slug || p.id === slug;
-  return getValidProjects(siteContent).find(matches) || getShowcaseProjects(siteContent).find(matches);
+  const direct = getValidProjects(siteContent).find(matches) || getShowcaseProjects(siteContent).find(matches);
+  if (direct) return direct;
+
+  // Old-style URL using a legacy entry's own slug/id (e.g. /work/autonomous-logistics-support-ai):
+  // resolve to the project that entry became (same title-based slug).
+  const legacy = (siteContent?.caseStudies || []).find((cs) => cs.slug === slug || cs.id === slug);
+  if (!legacy) return undefined;
+  const target = toSlug(legacy.title || '');
+  return getShowcaseProjects(siteContent).find((p) => p.slug === target)
+    || getValidProjects(siteContent).find((p) => p.slug === target);
 };

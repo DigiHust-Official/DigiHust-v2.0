@@ -565,6 +565,9 @@ export interface SiteContent {
   whatsappWebhookUrl?: string;
   callmebotApiKey?: string;
   workProjects?: WorkProject[];
+  // Which list feeds the home page Work section and /portfolio.
+  // 'work' once the admin imports home-page projects into the Work tab; unset = legacy caseStudies.
+  workSource?: 'legacy' | 'work';
 }
 
 // ── SECURITY & PERMISSION AUDIT LOG TYPES ────────────────────────────────────

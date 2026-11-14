@@ -1604,6 +1604,34 @@ export const SiteContentManager: React.FC = () => {
         {/* ── TAB 3: CASE STUDIES & PROJECTS ── */}
       {activeTab === 'caseStudies' && (
         <div className="space-y-6">
+          {safeContent.workSource === 'work' ? (
+            <div role="note" className="p-4 rounded-2xl border border-[var(--brand-teal)] bg-[var(--brand-teal-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-xs text-[var(--text-body)]">
+                <span className="font-bold text-[var(--text-heading)]">Not used on the website anymore.</span>{' '}
+                The home page, /portfolio and case study pages now use &quot;4. Work (Portfolio)&quot;. Edit projects there.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('work')}
+                className="px-3.5 py-2 rounded-xl bg-[var(--brand-teal)] text-white text-xs font-bold shrink-0 w-fit"
+              >
+                Go to Work (Portfolio)
+              </button>
+            </div>
+          ) : (
+            <div role="note" className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-xs text-[var(--text-body)]">
+                These projects are on the home page, but their case study pages can only be fully edited in &quot;4. Work (Portfolio)&quot;. Import them there once (one click).
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('work')}
+                className="px-3.5 py-2 rounded-xl bg-[var(--brand-teal)] text-white text-xs font-bold shrink-0 w-fit"
+              >
+                Open Work (Portfolio)
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
             <h3 className="font-display font-extrabold text-base text-[var(--text-heading)]">Portfolio Projects & Case Studies ({(siteContent.caseStudies || []).length})</h3>
             <div className="flex items-center gap-2">

@@ -24,6 +24,8 @@ import {
   toSlug,
   normalizeProject,
   normalizeCaseStudy,
+  getLegacyProjectsToImport,
+  buildHomeImportList,
   CaseStudyData,
   CaseStudyProcessStep,
   PROCESS_ICON_OPTIONS,
@@ -126,8 +128,33 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
     updateSiteContent('workProjects', sorted);
   };
 
+  // ── Import home-page (legacy) projects so everything is edited in one place ──
+  const [importConfirm, setImportConfirm] = useState(false);
+  const legacyToImport = getLegacyProjectsToImport(siteContent);
+  const homeUsesWorkList = siteContent.workSource === 'work';
+
+  const handleImportLegacy = () => {
+    if (!isAdmin) {
+      showToast('Only management can edit work projects and case studies.', 'error');
+      return;
+    }
+    // Home projects first (same order and links as today), then other saved projects.
+    // Built-in sample projects that were never saved are not added.
+    const { list, added } = buildHomeImportList(siteContent);
+    setProjectsList(list);
+    // One save: the list + switch the home page and /portfolio to this list
+    updateSiteContent({ workProjects: list, workSource: 'work' });
+    setImportConfirm(false);
+    showToast(
+      added > 0
+        ? `Imported ${added} home-page project(s). Edit them below; the home page now uses this list.`
+        : 'The home page now uses this list.',
+      'success'
+    );
+  };
+
   // Reordering
-  const moveProject = (index: number, direction: 'up' | 'down') => {
+  const moveProject =(index: number, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= projectsList.length) return;
     const nextList = [...projectsList];
@@ -1612,6 +1639,60 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
           <span>Add New Project</span>
         </button>
       </div>
+
+      {/* Import banner: until imported, the home page shows the Legacy Case Studies list */}
+      {isAdmin && !homeUsesWorkList && (
+        <div
+          role="region"
+          aria-label="Home page projects"
+          className="p-4 rounded-2xl border border-[var(--brand-teal)] bg-[var(--brand-teal-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-3"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[var(--text-heading)]">
+              The home page still shows {(siteContent.caseStudies || []).length} project(s) from &quot;Legacy Case Studies&quot;.
+            </p>
+            <p className="text-xs text-[var(--text-body)] mt-1">
+              {legacyToImport.length > 0
+                ? `Import them here once to edit every case study section (role, stats, tools, process, logo…) in one place. Their page links stay the same.`
+                : 'All of them are already in this list. Switch the home page to this list to manage everything here.'}
+            </p>
+          </div>
+          {importConfirm ? (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleImportLegacy}
+                className="px-3.5 py-2 rounded-xl bg-[var(--brand-teal)] text-white text-xs font-bold"
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setImportConfirm(false)}
+                className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] text-xs font-semibold border border-[var(--border-subtle)]"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setImportConfirm(true)}
+              className="px-4 py-2 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal-hover)] text-white text-xs font-bold shrink-0 w-fit"
+            >
+              {legacyToImport.length > 0
+                ? `Import ${legacyToImport.length} home-page project(s)`
+                : 'Use this list on the home page'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {homeUsesWorkList && (
+        <p className="text-xs text-[var(--text-muted)]">
+          The home page shows the first 6 published projects in this order. <span className="font-semibold">/portfolio</span> shows all published projects.
+        </p>
+      )}
 
       {/* Projects Table / Card List */}
       <div className="space-y-3">

@@ -22,8 +22,9 @@
 /* ── Hero ─────────────────────────────────────────────────────────── */
 .dh-cs-hero {
   position: relative;
-  padding-top: calc(var(--dh-nav-bottom, 72px) + clamp(16px, 3vh, 32px));
+  padding-top: calc(var(--dh-nav-bottom, 72px) + clamp(12px, 2vh, 24px));
   padding-bottom: clamp(40px, 7vh, 80px);
+  margin-bottom: clamp(16px, 3vh, 32px);
   /* Soft brand wash in place of the reference's coloured orbs */
   background:
     radial-gradient(60% 70% at 0% 30%, var(--brand-teal-subtle), transparent 70%),
@@ -65,7 +66,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 4px;
-  margin-top: clamp(20px, 3vh, 32px);
   font-family: var(--font-text, 'Inter', sans-serif);
   font-size: 11px;
   font-weight: 600;
@@ -102,83 +102,58 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 52rem;
-  margin: clamp(28px, 5vh, 56px) auto 0;
+  max-width: 54rem;
+  margin: clamp(32px, 6vh, 64px) auto 0;
 }
 
 .dh-cs-hero__logo {
-  max-height: 72px;
-  max-width: 180px;
+  max-height: 64px;
+  max-width: 160px;
   width: auto;
   object-fit: contain;
-  margin-bottom: 20px;
+  margin-bottom: clamp(20px, 3.5vh, 36px);
 }
 
 .dh-cs-hero__subtitle {
   font-family: var(--font-display, 'Montserrat', sans-serif);
   font-weight: 500;
-  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+  font-size: clamp(1.2rem, 2vw, 1.75rem);
   color: var(--text-heading);
-  margin: 0 0 8px;
+  margin: 0 0 clamp(8px, 1.5vh, 16px);
 }
 
+/* Reference: very large, heavy, all-caps title */
 .dh-cs-hero__title {
   font-family: var(--font-display, 'Montserrat', sans-serif);
-  font-weight: 700;
-  font-size: clamp(2rem, 6vw, 4rem);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-size: clamp(2.1rem, 6.4vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   color: var(--text-heading);
-  margin: 0 0 18px;
-  overflow-wrap: anywhere;
+  margin: 0 0 clamp(16px, 3vh, 28px);
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.dh-cs-hero__title--md {
+  font-size: clamp(1.8rem, 4.6vw, 3.6rem);
+}
+
+.dh-cs-hero__title--sm {
+  font-size: clamp(1.6rem, 3.4vw, 2.75rem);
 }
 
 .dh-cs-hero__lead {
   font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.6;
+  font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+  line-height: 1.5;
   color: var(--text-body);
   margin: 0;
   max-width: 44rem;
 }
 
-.dh-cs-hero__client {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 8px 16px;
-  margin-top: 18px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.dh-cs-hero__client strong {
-  color: var(--text-heading);
-  font-weight: 600;
-}
-
-.dh-cs-hero__rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.dh-cs-hero__rating strong {
-  margin-inline-start: 4px;
-}
-
-.dh-cs-star {
-  color: var(--text-muted);
-  opacity: 0.35;
-}
-
-.dh-cs-star--on {
-  color: var(--brand-teal);
-  fill: currentColor;
-  opacity: 1;
-}
-
+/* Tags: minimal page only */
 .dh-cs-tags {
   list-style: none;
   display: flex;
@@ -186,7 +161,7 @@
   justify-content: center;
   gap: 8px;
   padding: 0;
-  margin: 18px 0 0;
+  margin: 0 0 clamp(24px, 4vh, 40px);
 }
 
 .dh-cs-tag {
@@ -199,12 +174,23 @@
   color: var(--text-body);
 }
 
+/* Bottom links bar (back + preview); not part of the reference layout */
+.dh-cs-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: clamp(48px, 8vh, 88px);
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
 .dh-cs-hero__cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 24px;
-  padding: 10px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
   border: 1px solid var(--brand-teal);
   color: var(--text-heading);
@@ -237,19 +223,20 @@
 
 /* ── Sections ────────────────────────────────────────────────────── */
 .dh-cs-section {
-  margin-top: clamp(36px, 6vh, 64px);
+  margin-top: clamp(48px, 9vh, 96px);
 }
 
-.dh-cs-cover + .dh-cs-section {
+.dh-cs-container > .dh-cs-section:first-child {
   margin-top: 0;
 }
 
 .dh-cs-h2 {
   font-family: var(--font-display, 'Montserrat', sans-serif);
-  font-weight: 600;
-  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 500;
+  font-size: clamp(1.3rem, 2vw, 1.6rem);
+  line-height: 1.25;
   color: var(--text-heading);
-  margin: 0 0 22px;
+  margin: 0 0 clamp(16px, 2.5vh, 24px);
   position: relative;
   padding-bottom: 12px;
 }
@@ -260,7 +247,7 @@
   position: absolute;
   inset-inline-start: 0;
   bottom: 0;
-  width: 36px;
+  width: 34px;
   height: 3px;
   border-radius: 2px;
   background: var(--brand-teal);
@@ -268,7 +255,7 @@
 
 .dh-cs-body {
   font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.75;
   color: var(--text-body);
   white-space: pre-line;
@@ -290,7 +277,7 @@
 .dh-cs-roles li {
   position: relative;
   padding-inline-start: 16px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -457,10 +444,10 @@
   margin-bottom: 14px;
 }
 
+/* Reference alternates two solid tile colours */
 .dh-cs-step__icon--alt {
-  background: var(--brand-teal-subtle);
-  color: var(--brand-teal);
-  border: 1px solid var(--brand-teal);
+  background: var(--text-heading);
+  color: var(--bg-page);
 }
 
 .dh-cs-step__title {

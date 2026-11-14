@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
-  Star,
   Search,
   User,
   Lightbulb,
@@ -138,6 +137,27 @@ export const CaseStudyPage: React.FC = () => {
   const tools = caseStudy?.tools || [];
   const process = caseStudy?.process || [];
 
+  const gallerySize = gallery.length;
+  // Full layout when any reference section has content; otherwise the minimal page.
+  const hasSections = Boolean(
+    challenge || solution || results || roles.length || stats.length || tools.length || process.length || gallerySize
+  );
+  const hasLiveUrl = Boolean(liveUrl && liveUrl.trim().length > 0);
+
+  // Reference hero = small subtitle + short big title. Titles written as
+  // "Name | Type" or "Name — Type" use the type as the subtitle when none is set.
+  let heroTitle = project.title.trim();
+  let heroSubtitle = (caseStudy?.subtitle || '').trim();
+  if (!heroSubtitle) {
+    const parts = heroTitle.split(/\s+[|—–]\s+/).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      heroTitle = parts[0];
+      heroSubtitle = parts.slice(1).join(' · ');
+    }
+  }
+  // Long titles step down in size so they stay at ~2 lines like the reference.
+  const titleSize = heroTitle.length <= 22 ? 'lg' : heroTitle.length <= 40 ? 'md' : 'sm';
+
   const metaLeft = caseStudy?.eyebrow || project.category;
   const hasMetaBar = Boolean(metaLeft || caseStudy?.credit || caseStudy?.date);
 
@@ -154,14 +174,9 @@ export const CaseStudyPage: React.FC = () => {
         ogImage={coverSrc || undefined}
       />
 
-      {/* ── Hero ── */}
+      {/* ── Hero (reference: meta bar, logo, subtitle, big title, lead — nothing else) ── */}
       <header className="dh-cs-hero">
         <div className="dh-cs-container">
-          <Link to="/portfolio" className="dh-cs-back-link">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
-            <span>{t('work_v2_all_work')}</span>
-          </Link>
-
           {hasMetaBar && (
             <div className="dh-cs-meta">
               <span className="dh-cs-meta__item dh-cs-meta__item--start">{metaLeft}</span>
@@ -181,72 +196,28 @@ export const CaseStudyPage: React.FC = () => {
               />
             )}
 
-            {caseStudy?.subtitle && <p className="dh-cs-hero__subtitle">{caseStudy.subtitle}</p>}
+            {heroSubtitle && <p className="dh-cs-hero__subtitle">{heroSubtitle}</p>}
 
-            <h1 className="dh-cs-hero__title">{project.title}</h1>
+            <h1 className={`dh-cs-hero__title dh-cs-hero__title--${titleSize}`}>{heroTitle}</h1>
 
             {lead && <p className="dh-cs-hero__lead">{lead}</p>}
-
-            {(project.client || project.clientRating !== undefined) && (
-              <div className="dh-cs-hero__client">
-                {project.client && (
-                  <span>
-                    Client: <strong>{project.client}</strong>
-                  </span>
-                )}
-                {project.clientRating !== undefined && project.clientRating !== null && (
-                  <span
-                    className="dh-cs-hero__rating"
-                    role="img"
-                    aria-label={`Rated ${project.clientRating} out of 5 stars`}
-                  >
-                    {[1, 2, 3, 4, 5].map((s) => {
-                      const rating = project.clientRating ?? 0;
-                      const filled = rating >= s - 0.5;
-                      return (
-                        <Star
-                          key={s}
-                          size={13}
-                          aria-hidden="true"
-                          className={filled ? 'dh-cs-star dh-cs-star--on' : 'dh-cs-star'}
-                        />
-                      );
-                    })}
-                    <strong>{project.clientRating.toFixed(1)}</strong>
-                  </span>
-                )}
-              </div>
-            )}
-
-            {tags.length > 0 && (
-              <ul className="dh-cs-tags" aria-label="Tags">
-                {tags.map((tag) => (
-                  <li key={tag} className="dh-cs-tag">
-                    {tag}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {liveUrl && liveUrl.trim().length > 0 && (
-              <a
-                href={liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="dh-cs-hero__cta"
-                aria-label={`${t('work_v2_preview_work')}: ${project.title}`}
-              >
-                <span>{t('work_v2_preview_work')}</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              </a>
-            )}
           </div>
         </div>
       </header>
 
       <div className="dh-cs-container">
-        {/* ── Cover ── */}
-        {coverSrc && (
+        {/* ── Minimal page only (no case study sections): tags + cover ── */}
+        {!hasSections && tags.length > 0 && (
+          <ul className="dh-cs-tags" aria-label="Tags">
+            {tags.map((tag) => (
+              <li key={tag} className="dh-cs-tag">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {!hasSections && coverSrc && (
           <figure className="dh-cs-cover">
             <img
               src={formatImageUrl(coverSrc, project.category)}
@@ -394,6 +365,26 @@ export const CaseStudyPage: React.FC = () => {
             </div>
           </section>
         )}
+
+        {/* ── Links (not in reference; kept at the very end so the layout above matches it) ── */}
+        <nav className="dh-cs-footer-links" aria-label="Case study links">
+          <Link to="/portfolio" className="dh-cs-back-link">
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+            <span>{t('work_v2_all_work')}</span>
+          </Link>
+          {hasLiveUrl && (
+            <a
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dh-cs-hero__cta"
+              aria-label={`${t('work_v2_preview_work')}: ${project.title}`}
+            >
+              <span>{t('work_v2_preview_work')}</span>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            </a>
+          )}
+        </nav>
       </div>
 
       {/* ── Native Accessible Dialog Lightbox ── */}
