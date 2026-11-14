@@ -17,8 +17,29 @@ import {
   FileText,
   Image as ImageIcon,
 } from 'lucide-react';
-import { Project, GalleryItem, PROJECTS, toSlug, normalizeProject } from '../../data/workProjects';
+import {
+  Project,
+  GalleryItem,
+  PROJECTS,
+  toSlug,
+  normalizeProject,
+  normalizeCaseStudy,
+  CaseStudyData,
+  CaseStudyProcessStep,
+  PROCESS_ICON_OPTIONS,
+  ProcessIconKey,
+} from '../../data/workProjects';
 import { SiteContent } from '../../types';
+import { useApp } from '../../context/AppContext';
+import { PERMISSIONS } from '../../lib/permissions';
+
+const CS_INPUT =
+  'w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--brand-teal)]';
+const CS_LABEL = 'block text-xs font-bold uppercase text-[var(--text-muted)] mb-1';
+const CS_ROW_BTN =
+  'p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] disabled:opacity-30';
+
+const isValidImageSrc = (src: string) => src.startsWith('https://') || src.startsWith('data:image/');
 
 interface WorkContentTabProps {
   siteContent: SiteContent;
@@ -45,6 +66,10 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
   showToast,
   uploadAssetSafely,
 }) => {
+  // Second layer behind the /portal/cms route guard: only management can edit case studies
+  const { currentTier, currentUser } = useApp();
+  const isAdmin = PERMISSIONS.canEditWebsiteContent(currentTier, currentUser);
+
   // Use existing workProjects or seed from PROJECTS
   const currentProjects: Project[] =
     siteContent.workProjects && siteContent.workProjects.length > 0
@@ -74,6 +99,12 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
   const [isUploadingGalleryImg, setIsUploadingGalleryImg] = useState(false);
   const [galleryUploadError, setGalleryUploadError] = useState<string | null>(null);
 
+  // Logo / tool icon upload state
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [uploadingToolIdx, setUploadingToolIdx] = useState<number | null>(null);
+  const [toolError, setToolError] = useState<string | null>(null);
+
   // Sync with prop updates if not actively editing
   React.useEffect(() => {
     if (!editingProject) {
@@ -86,6 +117,10 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
   }, [siteContent.workProjects, editingProject]);
 
   const saveToCMS = (updated: Project[]) => {
+    if (!isAdmin) {
+      showToast('Only management can edit work projects and case studies.', 'error');
+      return;
+    }
     const sorted = [...updated].map((p, idx) => ({ ...p, order: idx }));
     setProjectsList(sorted);
     updateSiteContent('workProjects', sorted);
@@ -175,6 +210,8 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
     setUrlValidationError(null);
     setSlugError(null);
     setShowAddGallery(false);
+    setLogoError(null);
+    setToolError(null);
   };
 
   // File Upload handler with validation (jpg, png, webp only, max 5MB)
@@ -213,6 +250,10 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
   const handleSaveForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProject) return;
+    if (!isAdmin) {
+      showToast('Only management can edit work projects and case studies.', 'error');
+      return;
+    }
 
     // 1. Title validation
     if (!editingProject.title.trim()) {
@@ -291,10 +332,25 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
         showToast('Case study summary cannot exceed 280 characters.', 'error');
         return;
       }
+      const logoSrc = editingProject.caseStudy.logo?.src?.trim();
+      if (logoSrc && !isValidImageSrc(logoSrc)) {
+        setLogoError('Logo URL must begin with https://');
+        showToast('Logo URL must begin with https://', 'error');
+        return;
+      }
+      const badTool = (editingProject.caseStudy.tools || []).find(
+        (tool) => tool.iconUrl && tool.iconUrl.trim() && !isValidImageSrc(tool.iconUrl.trim())
+      );
+      if (badTool) {
+        setToolError(`Icon URL for "${badTool.name || 'tool'}" must begin with https://`);
+        showToast('Tool icon URLs must begin with https://', 'error');
+        return;
+      }
     }
 
     const finalizedProject: Project = {
       ...editingProject,
+      caseStudy: editingProject.caseStudy ? normalizeCaseStudy(editingProject.caseStudy) : undefined,
       slug: candidateSlug,
       img: cardImg,
       cardImage: {
@@ -316,6 +372,28 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
     saveToCMS(updatedList);
     setEditingProject(null);
     showToast(isNewProject ? 'New project added successfully!' : 'Project updated successfully!', 'success');
+  };
+
+  // Case study field helpers (immutable updates on the editing draft)
+  const updateCS = (patch: Partial<CaseStudyData>) => {
+    setEditingProject((prev) => {
+      if (!prev || !prev.caseStudy) return prev;
+      return { ...prev, caseStudy: { ...prev.caseStudy, ...patch } };
+    });
+  };
+
+  const moveInList = <T,>(list: T[], index: number, direction: 'up' | 'down'): T[] => {
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return list;
+    const next = [...list];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    return next;
+  };
+
+  const updateProcessStep = (index: number, patch: Partial<CaseStudyProcessStep>) => {
+    const steps = editingProject?.caseStudy?.process || [];
+    updateCS({ process: steps.map((s, i) => (i === index ? { ...s, ...patch } : s)) });
   };
 
   // Gallery Management Helpers
@@ -385,7 +463,8 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
 
   // ── Render: Edit / Create Modal ──
   if (editingProject) {
-    const isUploadingAny = isUploadingCardImg || isUploadingGalleryImg;
+    const isUploadingAny =
+      isUploadingCardImg || isUploadingGalleryImg || isUploadingLogo || uploadingToolIdx !== null;
     const hasCaseStudy = Boolean(editingProject.caseStudy);
 
     return (
@@ -751,15 +830,16 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
             </div>
           </div>
 
-          {/* ── CASE STUDY DETAIL SECTION ── */}
+          {/* ── CASE STUDY DETAIL SECTION (management only) ── */}
+          {isAdmin && (
           <div className="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold uppercase tracking-widest text-[var(--brand-teal)]">
-                  2. Dedicated Case Study Page (/work/{editingProject.slug || 'slug'})
+                  2. Case Study Page (/work/{editingProject.slug || 'slug'})
                 </h4>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Enables the detailed case study narrative, results, and lightbox gallery.
+                  The page always exists. Without case study content it shows the title, cover, short description, tags and links. Empty sections are hidden.
                 </p>
               </div>
               <label className="flex items-center cursor-pointer space-x-2">
@@ -789,7 +869,7 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
                   className="rounded text-[var(--brand-teal)]"
                 />
                 <span className="text-xs font-bold text-[var(--text-heading)]">
-                  Enable Case Study Page
+                  Add case study content
                 </span>
               </label>
             </div>
@@ -831,10 +911,132 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
                   />
                 </div>
 
+                {/* Hero meta bar, subtitle & logo (all optional) */}
+                <fieldset className="space-y-3 p-3 sm:p-4 rounded-xl border border-[var(--border-subtle)]">
+                  <legend className="px-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-muted)]">
+                    Page header (optional)
+                  </legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="cs-eyebrow" className={CS_LABEL}>Top-left label</label>
+                      <input
+                        id="cs-eyebrow"
+                        type="text"
+                        value={editingProject.caseStudy.eyebrow || ''}
+                        onChange={(e) => updateCS({ eyebrow: e.target.value })}
+                        placeholder={`Defaults to category: ${editingProject.category || 'e.g. UX Case Study'}`}
+                        className={CS_INPUT}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cs-credit" className={CS_LABEL}>Top-centre credit</label>
+                      <input
+                        id="cs-credit"
+                        type="text"
+                        value={editingProject.caseStudy.credit || ''}
+                        onChange={(e) => updateCS({ credit: e.target.value })}
+                        placeholder="e.g. Design by DigiHust Creative Squad"
+                        className={CS_INPUT}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cs-date" className={CS_LABEL}>Top-right date</label>
+                      <input
+                        id="cs-date"
+                        type="text"
+                        value={editingProject.caseStudy.date || ''}
+                        onChange={(e) => updateCS({ date: e.target.value })}
+                        placeholder="e.g. March 2026"
+                        className={CS_INPUT}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cs-subtitle" className={CS_LABEL}>Subtitle above title</label>
+                      <input
+                        id="cs-subtitle"
+                        type="text"
+                        value={editingProject.caseStudy.subtitle || ''}
+                        onChange={(e) => updateCS({ subtitle: e.target.value })}
+                        placeholder="e.g. Online Rental App"
+                        className={CS_INPUT}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Logo */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+                    <div>
+                      <label htmlFor="cs-logo-src" className={CS_LABEL}>Client logo URL</label>
+                      <input
+                        id="cs-logo-src"
+                        type="url"
+                        value={editingProject.caseStudy.logo?.src || ''}
+                        onChange={(e) => {
+                          setLogoError(null);
+                          updateCS({
+                            logo: { src: e.target.value, alt: editingProject.caseStudy?.logo?.alt || '' },
+                          });
+                        }}
+                        placeholder="https://..."
+                        aria-invalid={Boolean(logoError)}
+                        aria-describedby={logoError ? 'cs-logo-error' : undefined}
+                        className={`${CS_INPUT} ${logoError ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cs-logo-alt" className={CS_LABEL}>Logo alt text</label>
+                      <input
+                        id="cs-logo-alt"
+                        type="text"
+                        value={editingProject.caseStudy.logo?.alt || ''}
+                        onChange={(e) =>
+                          updateCS({
+                            logo: { src: editingProject.caseStudy?.logo?.src || '', alt: e.target.value },
+                          })
+                        }
+                        placeholder="e.g. Acme logo"
+                        className={CS_INPUT}
+                      />
+                    </div>
+                    <label className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-[var(--border-subtle)] hover:border-[var(--brand-teal)] text-xs font-semibold text-[var(--text-muted)] cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-[var(--brand-teal)]">
+                      {isUploadingLogo ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                      )}
+                      <span>{isUploadingLogo ? 'Uploading...' : 'Upload'}</span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        disabled={isUploadingLogo}
+                        className="sr-only"
+                        aria-label="Upload client logo (JPG, PNG or WebP, max 5 MB)"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleFileUpload(
+                              file,
+                              (url) =>
+                                updateCS({
+                                  logo: { src: url, alt: editingProject.caseStudy?.logo?.alt || '' },
+                                }),
+                              (err) => setLogoError(err || null),
+                              setIsUploadingLogo
+                            );
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {logoError && (
+                    <p id="cs-logo-error" className="text-xs text-red-500">{logoError}</p>
+                  )}
+                </fieldset>
+
                 {/* Challenge */}
                 <div>
                   <label className="block text-xs font-bold uppercase text-[var(--text-muted)] mb-1">
-                    The Challenge
+                    Problem Statement (Challenge)
                   </label>
                   <textarea
                     rows={3}
@@ -856,7 +1058,7 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
                 {/* Solution */}
                 <div>
                   <label className="block text-xs font-bold uppercase text-[var(--text-muted)] mb-1">
-                    The Solution
+                    The Solution <span className="normal-case font-normal">(one bullet per line)</span>
                   </label>
                   <textarea
                     rows={3}
@@ -873,6 +1075,260 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
                     placeholder="Describe the technical architecture, custom models, design systems delivered..."
                     className="w-full px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--brand-teal)]"
                   />
+                </div>
+
+                {/* Our Role */}
+                <div>
+                  <label htmlFor="cs-roles" className={CS_LABEL}>
+                    Our Role <span className="normal-case font-normal">(one item per line)</span>
+                  </label>
+                  <textarea
+                    id="cs-roles"
+                    rows={4}
+                    value={(editingProject.caseStudy.roles || []).join('\n')}
+                    onChange={(e) => updateCS({ roles: e.target.value.split('\n') })}
+                    placeholder={'User Research\nInformation Architecture\nHigh Fidelity Design'}
+                    className={CS_INPUT}
+                  />
+                </div>
+
+                {/* Project Duration stats */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={CS_LABEL}>Project Duration (stats)</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateCS({ stats: [...(editingProject.caseStudy?.stats || []), { value: '', label: '' }] })
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] text-[var(--text-heading)] text-xs font-semibold flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>Add stat</span>
+                    </button>
+                  </div>
+                  {(editingProject.caseStudy.stats || []).length === 0 ? (
+                    <p className="text-xs text-[var(--text-muted)] italic">No stats. Section hidden on the page.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(editingProject.caseStudy.stats || []).map((stat, idx, arr) => (
+                        <div key={idx} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center">
+                          <input
+                            type="text"
+                            value={stat.value}
+                            onChange={(e) =>
+                              updateCS({ stats: arr.map((s, i) => (i === idx ? { ...s, value: e.target.value } : s)) })
+                            }
+                            placeholder="14"
+                            aria-label={`Stat ${idx + 1} value`}
+                            className={CS_INPUT}
+                          />
+                          <input
+                            type="text"
+                            value={stat.label}
+                            onChange={(e) =>
+                              updateCS({ stats: arr.map((s, i) => (i === idx ? { ...s, label: e.target.value } : s)) })
+                            }
+                            placeholder="Weeks"
+                            aria-label={`Stat ${idx + 1} label`}
+                            className={CS_INPUT}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateCS({ stats: arr.filter((_, i) => i !== idx) })}
+                            className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                            aria-label={`Remove stat ${idx + 1}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tools Used */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={CS_LABEL}>Tools Used</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateCS({ tools: [...(editingProject.caseStudy?.tools || []), { name: '', iconUrl: '' }] })
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] text-[var(--text-heading)] text-xs font-semibold flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>Add tool</span>
+                    </button>
+                  </div>
+                  {(editingProject.caseStudy.tools || []).length === 0 ? (
+                    <p className="text-xs text-[var(--text-muted)] italic">No tools. Section hidden on the page.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(editingProject.caseStudy.tools || []).map((tool, idx, arr) => (
+                        <div key={idx} className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto_auto] gap-2 items-center p-2 sm:p-0 rounded-xl border sm:border-0 border-[var(--border-subtle)]">
+                          <input
+                            type="text"
+                            value={tool.name}
+                            onChange={(e) => {
+                              setToolError(null);
+                              updateCS({ tools: arr.map((t, i) => (i === idx ? { ...t, name: e.target.value } : t)) });
+                            }}
+                            placeholder="Figma"
+                            aria-label={`Tool ${idx + 1} name`}
+                            className={CS_INPUT}
+                          />
+                          <input
+                            type="url"
+                            value={tool.iconUrl || ''}
+                            onChange={(e) => {
+                              setToolError(null);
+                              updateCS({ tools: arr.map((t, i) => (i === idx ? { ...t, iconUrl: e.target.value } : t)) });
+                            }}
+                            placeholder="Icon URL (optional, https://). Empty = first letter"
+                            aria-label={`Tool ${idx + 1} icon URL`}
+                            aria-describedby={toolError ? 'cs-tool-error' : undefined}
+                            className={CS_INPUT}
+                          />
+                          <label className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-[var(--border-subtle)] hover:border-[var(--brand-teal)] text-xs font-semibold text-[var(--text-muted)] cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-[var(--brand-teal)]">
+                            {uploadingToolIdx === idx ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                            )}
+                            <span>Icon</span>
+                            <input
+                              type="file"
+                              accept=".jpg,.jpeg,.png,.webp"
+                              disabled={uploadingToolIdx !== null}
+                              className="sr-only"
+                              aria-label={`Upload icon for tool ${idx + 1}`}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload(
+                                    file,
+                                    (url) =>
+                                      setEditingProject((prev) => {
+                                        if (!prev || !prev.caseStudy) return prev;
+                                        const tools = (prev.caseStudy.tools || []).map((t, i) =>
+                                          i === idx ? { ...t, iconUrl: url } : t
+                                        );
+                                        return { ...prev, caseStudy: { ...prev.caseStudy, tools } };
+                                      }),
+                                    (err) => setToolError(err || null),
+                                    (busy) => setUploadingToolIdx(busy ? idx : null)
+                                  );
+                                }
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => updateCS({ tools: arr.filter((_, i) => i !== idx) })}
+                            className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10 justify-self-end"
+                            aria-label={`Remove tool ${idx + 1}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {toolError && (
+                    <p id="cs-tool-error" className="text-xs text-red-500 mt-1">{toolError}</p>
+                  )}
+                </div>
+
+                {/* Design Process */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={CS_LABEL}>Design Process (steps)</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateCS({
+                          process: [
+                            ...(editingProject.caseStudy?.process || []),
+                            { title: '', items: [], icon: 'layers' },
+                          ],
+                        })
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] text-[var(--text-heading)] text-xs font-semibold flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>Add step</span>
+                    </button>
+                  </div>
+                  {(editingProject.caseStudy.process || []).length === 0 ? (
+                    <p className="text-xs text-[var(--text-muted)] italic">No steps. Section hidden on the page.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {(editingProject.caseStudy.process || []).map((step, idx, arr) => (
+                        <div key={idx} className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] gap-2 items-center">
+                            <input
+                              type="text"
+                              value={step.title}
+                              onChange={(e) => updateProcessStep(idx, { title: e.target.value })}
+                              placeholder="Step title, e.g. Empathize"
+                              aria-label={`Step ${idx + 1} title`}
+                              className={CS_INPUT}
+                            />
+                            <select
+                              value={step.icon || 'layers'}
+                              onChange={(e) => updateProcessStep(idx, { icon: e.target.value as ProcessIconKey })}
+                              aria-label={`Step ${idx + 1} icon`}
+                              className={CS_INPUT}
+                            >
+                              {PROCESS_ICON_OPTIONS.map((opt) => (
+                                <option key={opt.key} value={opt.key}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="flex items-center gap-0.5 justify-self-end">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => updateCS({ process: moveInList(arr, idx, 'up') })}
+                                className={CS_ROW_BTN}
+                                aria-label={`Move step ${idx + 1} up`}
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" aria-hidden="true" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === arr.length - 1}
+                                onClick={() => updateCS({ process: moveInList(arr, idx, 'down') })}
+                                className={CS_ROW_BTN}
+                                aria-label={`Move step ${idx + 1} down`}
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateCS({ process: arr.filter((_, i) => i !== idx) })}
+                                className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                                aria-label={`Remove step ${idx + 1}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                              </button>
+                            </div>
+                          </div>
+                          <textarea
+                            rows={3}
+                            value={step.items.join('\n')}
+                            onChange={(e) => updateProcessStep(idx, { items: e.target.value.split('\n') })}
+                            placeholder={'Sub-items, one per line\nUser Interview\nUser Research'}
+                            aria-label={`Step ${idx + 1} sub-items, one per line`}
+                            className={CS_INPUT}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Results */}
@@ -1103,6 +1559,7 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
               </div>
             )}
           </div>
+          )}
 
           {/* Form Actions */}
           <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--border-subtle)]">
@@ -1115,7 +1572,8 @@ export const WorkContentTab: React.FC<WorkContentTabProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isUploadingAny}
+              disabled={isUploadingAny || !isAdmin}
+              title={!isAdmin ? 'Only management can save changes' : undefined}
               className="px-5 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal-hover)] text-white text-xs font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               {isUploadingAny ? (

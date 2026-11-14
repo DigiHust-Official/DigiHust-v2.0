@@ -228,7 +228,7 @@ export const SiteContentManager: React.FC = () => {
           <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto mb-3" />
           <h2 className="font-display font-bold text-lg text-[var(--text-heading)] mb-1">Restricted Access</h2>
           <p className="text-xs text-[var(--text-body)] mb-4">
-            Only Executive CEO authority (or users with delegated CMS permissions) can access the Live Website CMS Studio.
+            Only management (CEO or managers) can access the Live Website CMS Studio.
           </p>
           <a
             href="/portal/dashboard"

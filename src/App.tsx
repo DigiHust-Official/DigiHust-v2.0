@@ -11,6 +11,7 @@ import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 import { FloatingCTA } from './components/ui/FloatingCTA';
 import { GlobalLoaderOverlay } from './components/ui/GlobalLoaderOverlay';
 import { ProtectedRoute } from './components/portal/ProtectedRoute';
+import { PERMISSIONS } from './lib/permissions';
 
 // Home kept static for instant landing load
 import { Home } from './components/public/Home';
@@ -172,7 +173,7 @@ export const App: React.FC = () => {
                   <Route path="/portal/directory" element={<ProtectedRoute><PeopleDirectoryView /></ProtectedRoute>} />
                   <Route path="/portal/announcements" element={<ProtectedRoute><AnnouncementsFeed /></ProtectedRoute>} />
                   <Route path="/portal/certificates" element={<ProtectedRoute><CertificateManager /></ProtectedRoute>} />
-                  <Route path="/portal/cms" element={<ProtectedRoute><SiteContentManager /></ProtectedRoute>} />
+                  <Route path="/portal/cms" element={<ProtectedRoute allow={PERMISSIONS.canEditWebsiteContent}><SiteContentManager /></ProtectedRoute>} />
                   <Route path="/portal/migration" element={<ProtectedRoute><PortalDashboard /></ProtectedRoute>} />
                   <Route path="/portal/ledger" element={<Navigate to="/portal/dashboard" replace />} />
                   <Route path="/portal/settings" element={<Navigate to="/portal/dashboard" replace />} />
