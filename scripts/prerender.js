@@ -100,13 +100,6 @@ const routes = [
     summary: 'Founded inside Pakistans Digiskill community to replace isolated freelance bidding with managed, world-class project delivery under the motto: Hustle. Create. Deliver.',
   },
   {
-    path: '/team',
-    title: 'Our Team & Domain Specialists  DigiHust',
-    description: 'Meet the specialized talent behind DigiHust: Full-stack software engineers, UI/UX designers, AI practitioners, growth leads, and cybersecurity auditors.',
-    h1: 'Meet the Talent.',
-    summary: 'Verified specialists in Web Engineering, UI/UX Design, AI Workflows, Technical SEO, and Cybersecurity.',
-  },
-  {
     path: '/contact',
     title: 'Get a Scoped Quote & Project Proposal  DigiHust',
     description: 'Submit your digital project scope to DigiHust. Receive a transparent milestone quote, technical architecture review, and timeline proposal within 24 hours.',

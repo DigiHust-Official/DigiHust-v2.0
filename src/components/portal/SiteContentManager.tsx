@@ -666,7 +666,7 @@ export const SiteContentManager: React.FC = () => {
           { id: 'work' as const,        label: '4. Work (Portfolio)', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'live',     tip: 'Manage 16:9 cards, sliding hover panels, and case study detail pages' },
           { id: 'caseStudies' as const, label: 'Legacy Case Studies', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'fallback', tip: 'Legacy portfolio items' },
           { id: 'testimonials' as const,label: '5. Testimonials',     icon: <Star className="w-3.5 h-3.5" />,         status: 'live',     tip: 'Client reviews shown on homepage' },
-          { id: 'team' as const,        label: '6. Team Profiles',    icon: <Users className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Team members shown on the /team page' },
+          { id: 'team' as const,        label: '6. Team Profiles',    icon: <Users className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Team members shown in the team section of the About page' },
           { id: 'blog' as const,        label: '7. Blog & Insights',  icon: <FileText className="w-3.5 h-3.5" />,     status: 'live',     tip: 'Manage articles and technical guides on /blog and /blog/:slug' },
           { id: 'faqs' as const,        label: '8. FAQs',             icon: <HelpCircle className="w-3.5 h-3.5" />,   status: 'live',     tip: 'Frequently asked questions shown across the platform' },
           { id: 'about' as const,       label: '9. Company Story',    icon: <Info className="w-3.5 h-3.5" />,         status: 'live',     tip: 'Mission, vision, and company story shown on /about page' },
@@ -2256,7 +2256,7 @@ export const SiteContentManager: React.FC = () => {
                 Public Team Specialists & Domain Leads ({(siteContent.teamMembers || []).length})
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Manage the specialist profiles showcased on the public /team directory.
+                Manage the specialist profiles showcased on the team section of the About page.
               </p>
             </div>
             <div className="flex items-center gap-2">

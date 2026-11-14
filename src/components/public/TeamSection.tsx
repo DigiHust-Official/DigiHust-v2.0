@@ -1,12 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, CheckCircle2, ShieldCheck, X, UserCheck, Star, Pin, Award } from 'lucide-react';
-import { SEOHead } from '../seo/SEOHead';
+import {
+  motion,
+  AnimatePresence,
+  animate,
+  useMotionValue,
+  useTransform,
+  useReducedMotion,
+  type AnimationPlaybackControls,
+} from 'framer-motion';
+import { ArrowRight, CheckCircle2, X, UserCheck } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { realtimeSync } from '../../lib/realtimeSync';
-import { handleCardSpotlightMove, handleCardSpotlightLeave } from '../../lib/cardSpotlight';
 import { FounderBrainsShowcase } from './FounderBrainsShowcase';
+import './TeamSection.css';
 
 export type TeamTier = 'executive' | 'specialist' | 'intern';
 
@@ -76,18 +83,146 @@ export const getCategoryStyles = (category: string) => {
   }
 };
 
-const CAT_COLORS: Record<string, string> = {
-  Development: '#1F7A8C',
-  Creative: '#8B5CF6',
-  'AI & Data': '#0284C7',
-  Marketing: '#D97706',
-  Cybersecurity: '#E11D48',
+/* ── Hanging card swing physics ─────────────────────────────────────────────
+ * Low stiffness + low damping → underdamped pendulum (ζ ≈ 0.30): a push swings
+ * the card out, then it oscillates back to rest over ~1.5s with 2–3 overshoots.
+ * Pushes are impulses (velocity in deg/s) added to the current motion.
+ * Peak angle ≈ 0.08 × velocity, so 85 → ~7°, 125 → ~10°.
+ */
+const SWING_SPRING = { type: 'spring' as const, stiffness: 70, damping: 5, mass: 1, restDelta: 0.01 };
+const MAX_ANGLE = 10;
+const ENTER_PUSH = 85;
+const TOUCH_PUSH = 45;
+const MAX_PUSH = 125;
+const MOVE_THROTTLE_MS = 150;
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+interface HangingCardProps {
+  member: TeamMember;
+  variant: 'member' | 'intern';
+  onOpen: (member: TeamMember) => void;
+}
+
+const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) => {
+  const reduceMotion = useReducedMotion();
+  const rawRotate = useMotionValue(0);
+  const rotate = useTransform(rawRotate, (v) => clamp(v, -MAX_ANGLE, MAX_ANGLE));
+  // Lift the swinging card above its neighbours so it is never clipped by them
+  const zIndex = useTransform(rawRotate, (v) => (Math.abs(v) > 0.2 ? 2 : 1));
+  const controlsRef = useRef<AnimationPlaybackControls | null>(null);
+  const lastMovePushRef = useRef(0);
+  const lastPointerTypeRef = useRef<string>('mouse');
+
+  useEffect(() => () => controlsRef.current?.stop(), []);
+
+  // Positive CSS rotation with a top pivot moves the card's bottom LEFT, so a push
+  // "to the right" is a negative velocity.
+  const push = (velocity: number) => {
+    const current = rawRotate.getVelocity();
+    controlsRef.current?.stop();
+    controlsRef.current = animate(rawRotate, 0, {
+      ...SWING_SPRING,
+      velocity: clamp(current + velocity, -MAX_PUSH, MAX_PUSH),
+    });
+  };
+
+  const directionFromCenter = (e: React.PointerEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Pointer on the left half → card is pushed to the right (negative rotation)
+    return e.clientX < rect.left + rect.width / 2 ? -1 : 1;
+  };
+
+  const swingHandlers = reduceMotion
+    ? {}
+    : {
+        onPointerEnter: (e: React.PointerEvent<HTMLElement>) => {
+          if (e.pointerType === 'touch') return;
+          push(directionFromCenter(e) * ENTER_PUSH);
+        },
+        onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+          if (e.pointerType === 'touch') return;
+          const now = performance.now();
+          if (Math.abs(e.movementX) <= 3 || now - lastMovePushRef.current < MOVE_THROTTLE_MS) return;
+          lastMovePushRef.current = now;
+          push(clamp(-e.movementX * 5, -MAX_PUSH, MAX_PUSH));
+        },
+        onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+          if (e.pointerType !== 'touch') return;
+          // Tapping the left side pushes the card right, and vice versa
+          push(directionFromCenter(e) * TOUCH_PUSH);
+        },
+      };
+
+  const handleCardClick = () => {
+    // Mouse/pen: the whole card opens the profile. Touch: a tap on the card body
+    // only swings it; the View Profile button opens the profile.
+    if (lastPointerTypeRef.current === 'touch') return;
+    onOpen(member);
+  };
+
+  const isHaris = member.id === 'usr-1787949460689' || member.name.toLowerCase().includes('haris');
+
+  return (
+    <motion.li className="hc" style={{ zIndex }}>
+      <motion.div
+        className="hc__pendulum"
+        style={reduceMotion ? undefined : { rotate, transformOrigin: '50% 0%' }}
+        onPointerDownCapture={(e) => {
+          lastPointerTypeRef.current = e.pointerType;
+        }}
+        {...swingHandlers}
+      >
+        <span className="hc__string" aria-hidden="true" />
+        <span className="hc__clip" aria-hidden="true" />
+        <article
+          className={`hc__card hc__card--${variant} bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-md hover:shadow-lg transition-shadow`}
+          onClick={handleCardClick}
+        >
+          <div className="hc__photo">
+            <img
+              src={member.img}
+              alt={member.name}
+              loading="lazy"
+              decoding="async"
+              style={{ objectPosition: isHaris ? '41% 12%' : 'center 15%' }}
+              className="w-full h-full object-cover pointer-events-none"
+            />
+          </div>
+
+          <h4 className="font-display font-semibold text-[17px] leading-snug text-[var(--text-heading)] mt-4 break-words">
+            {member.name}
+          </h4>
+          <span className="hc__accent" aria-hidden="true" />
+          <p className="text-sm text-[var(--text-body)] leading-snug">{member.role}</p>
+          {member.digiskillBatch && (
+            <p className="text-xs text-[var(--text-muted)] mt-1">{member.digiskillBatch}</p>
+          )}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen(member);
+            }}
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[var(--brand-teal)] text-[var(--brand-teal)] text-xs font-bold hover:bg-[var(--brand-teal-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+            aria-label={`View profile of ${member.name}`}
+          >
+            <span>View Profile</span>
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
+        </article>
+      </motion.div>
+    </motion.li>
+  );
 };
 
-export const Team: React.FC = () => {
+export const TeamSection: React.FC = () => {
   const { siteContent, users } = useApp();
   const [filter, setFilter] = useState<string>('All');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   // Real Pinned Member IDs directly from Supabase-backed siteContent
   const pinnedIds: string[] = useMemo(() => {
@@ -101,7 +236,7 @@ export const Team: React.FC = () => {
     return unsub;
   }, []);
 
-  // Close modal on Escape key
+  // Close modal on Escape key; lock body scroll; move focus into the dialog and restore it on close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedMember(null);
@@ -109,14 +244,22 @@ export const Team: React.FC = () => {
     if (selectedMember) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
+      closeBtnRef.current?.focus();
     } else {
       document.body.style.overflow = 'unset';
+      returnFocusRef.current?.focus();
+      returnFocusRef.current = null;
     }
     return () => {
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedMember]);
+
+  const openMember = (member: TeamMember) => {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    setSelectedMember(member);
+  };
 
   // Helper to identify CEO & Co-founders (Permanent Executive Tier)
   const isCeoOrFounder = (u: any) => {
@@ -242,47 +385,44 @@ export const Team: React.FC = () => {
   const coFounderMember = executives.find((m) => (m.role.toLowerCase().includes('co-founder') || m.role.toLowerCase().includes('cofounder') || m.id === 'usr-1788019490206') && m.id !== ceoMember?.id) || executives[1];
 
   return (
-    <div className="pt-16">
-      <SEOHead
-        title="Our Team & Leadership | DigiHust"
-        description="Meet our real executive leadership, domain specialists, and interns driving digital delivery at DigiHust."
-      />
-
-      {/* ── 1. TIER 1: EXECUTIVE LEADERSHIP (Top of page, always visible across filters) ── */}
+    <>
+      {/* ── 1. EXECUTIVE LEADERSHIP (always visible across filters) ── */}
       <FounderBrainsShowcase
-        dataHero
-        onSelectMahad={() => ceoMember && setSelectedMember(ceoMember)}
-        onSelectHaseeb={() => coFounderMember && setSelectedMember(coFounderMember)}
+        onSelectMahad={() => ceoMember && openMember(ceoMember)}
+        onSelectHaseeb={() => coFounderMember && openMember(coFounderMember)}
       />
 
-      {/* ── 2. PAGE HEADING SECTION ── */}
-      <section className="bg-[var(--bg-page)] py-14 sm:py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
+      {/* ── 2. SECTION HEADING ── */}
+      <div className="bg-[var(--bg-page)] py-14 sm:py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[var(--text-heading)] mb-4">
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[var(--text-heading)] mb-4">
               Meet the Minds Behind DigiHust.
-            </h1>
+            </h2>
             <p className="text-base sm:text-lg text-[var(--text-body)] max-w-2xl leading-relaxed">
               Explore our core team: specialized engineers, designers, and emerging talent driving digital delivery.
             </p>
           </motion.div>
         </div>
-      </section>
+      </div>
 
-      {/* ── 3. CATEGORY FILTER SECTION NAVBAR ── */}
-      <section className="bg-[var(--bg-page)] border-b border-[var(--border-subtle)] relative z-10">
+      {/* ── 3. CATEGORY FILTER ── */}
+      <div className="bg-[var(--bg-page)] border-b border-[var(--border-subtle)] relative z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center space-x-2 py-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center space-x-2 py-4 overflow-x-auto no-scrollbar" role="group" aria-label="Filter team by category">
             {CATS.map((cat) => {
               const active = filter === cat;
               return (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setFilter(cat)}
+                  aria-pressed={active}
                   className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                     active
                       ? 'bg-[var(--brand-teal)] text-white shadow-md shadow-[var(--brand-teal)]/20'
@@ -295,13 +435,13 @@ export const Team: React.FC = () => {
             })}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ── 2. TIER 2: DOMAIN SPECIALISTS (PINNED MEMBERS ALWAYS ON TOP) ── */}
+      {/* ── 4. SPECIALISTS (pinned first) ── */}
       {filteredSpecialists.length > 0 && (
-        <section className="bg-[var(--bg-page)] py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
+        <div className="bg-[var(--bg-page)] py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)]">
                   Specialists & Engineers
@@ -315,117 +455,20 @@ export const Team: React.FC = () => {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-              {filteredSpecialists.map((member) => {
-                const isPinned = pinnedIds.includes(member.id);
-                return (
-                  <div
-                    key={member.id}
-                    onClick={() => setSelectedMember(member)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedMember(member);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    className={`group relative rounded-[24px] overflow-hidden bg-[#073547] text-white border flex flex-col justify-between cursor-pointer select-none transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl ${
-                      isPinned
-                        ? 'border-cyan-400/70 shadow-[0_12px_32px_rgba(31,122,140,0.3)] ring-1 ring-cyan-400/30'
-                        : 'border-white/10 hover:border-cyan-400/40 shadow-lg'
-                    }`}
-                  >
-                    <div>
-                      {/* Photo with generous space and smooth bottom fade into surface color (#073547) */}
-                      <div className="relative w-full h-60 sm:h-64 overflow-hidden bg-[#022B3A]">
-                        <img
-                          src={member.img}
-                          alt={member.name}
-                          loading="lazy"
-                          decoding="async"
-                          style={{
-                            objectPosition:
-                              member.id === 'usr-1787949460689' || member.name.toLowerCase().includes('haris')
-                                ? '41% 12%'
-                                : 'center 15%',
-                          }}
-                          className="w-full h-full object-cover pointer-events-none"
-                        />
-                        {/* Smooth bottom fade into card surface */}
-                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#073547] via-[#073547]/50 to-transparent pointer-events-none" />
-
-                        {/* Pinned Member Badge */}
-                        {isPinned && (
-                          <div className="absolute top-3 left-3 inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-sans font-bold uppercase tracking-wider backdrop-blur-md">
-                            <Pin className="w-2.5 h-2.5 fill-amber-300" />
-                            <span>Pinned</span>
-                          </div>
-                        )}
-
-                        {/* Specialist Role on Image Lower Left Side */}
-                        <div className="absolute bottom-3 left-3.5 sm:left-4 z-10 max-w-[85%]">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#022B3A]/85 backdrop-blur-md border border-cyan-400/30 text-xs font-sans font-semibold text-cyan-300 shadow-md">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                            <span className="truncate">{member.role}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Body */}
-                      <div className="p-4 sm:p-5 pt-3.5 pb-2">
-                        {/* Translucent Chips on Dark Surface */}
-                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                          <span className="text-[11px] font-sans font-bold px-2.5 py-0.5 rounded-full bg-[#1F7A8C]/30 text-cyan-300 border border-cyan-400/20">
-                            {member.category}
-                          </span>
-                          {member.skills.slice(0, 2).map((s) => (
-                            <span
-                              key={s}
-                              className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-md bg-white/[0.08] text-white/75 border border-white/10 truncate max-w-[120px]"
-                            >
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-
-                        {/* Name in Outfit 600 (font-display font-semibold) */}
-                        <h4 className="font-display font-semibold text-[18px] text-white leading-snug group-hover:text-cyan-300 transition-colors">
-                          {member.name}
-                        </h4>
-                      </div>
-                    </div>
-
-                    {/* Card Footer: Solid White Pill Button */}
-                    <div className="p-4 sm:p-5 pt-3 mt-auto border-t border-white/10 flex items-center justify-between">
-                      <span className="text-[11px] text-white/60 font-sans">
-                        {member.digiskillBatch}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMember(member);
-                        }}
-                        className="px-4 py-2 rounded-full bg-white text-[#022B3A] font-sans font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
-                      >
-                        <span>View Profile</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ul className="hc-grid" role="list">
+              {filteredSpecialists.map((member) => (
+                <HangingCard key={member.id} member={member} variant="member" onOpen={openMember} />
+              ))}
+            </ul>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* ── 3. TIER 3: INTERNS (PINNED MEMBERS ALWAYS ON TOP) ── */}
+      {/* ── 5. INTERNS (pinned first) ── */}
       {filteredInterns.length > 0 && (
-        <section className="bg-[var(--bg-subtle)] py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
+        <div className="bg-[var(--bg-subtle)] py-16 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)]">
                   Interns & Apprentices
@@ -434,102 +477,21 @@ export const Team: React.FC = () => {
                   Active interns and graduates contributing to sprints across web, AI, design, and marketing.
                 </p>
               </div>
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 self-start sm:self-auto">
+              <span className="text-xs font-bold text-[var(--text-muted)] bg-[var(--bg-surface)] px-3 py-1.5 rounded-full border border-[var(--border-subtle)] self-start sm:self-auto">
                 {filteredInterns.length} Interns Active
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-              {filteredInterns.map((intern) => {
-                const isPinned = pinnedIds.includes(intern.id);
-                return (
-                  <div
-                    key={intern.id}
-                    onClick={() => setSelectedMember(intern)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedMember(intern);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onPointerMove={handleCardSpotlightMove}
-                    onPointerLeave={handleCardSpotlightLeave}
-                    className={`group premium-card p-5 flex flex-col justify-between cursor-pointer select-none overflow-hidden relative ${
-                      isPinned
-                        ? 'border-amber-400/80 ring-2 ring-amber-400/25 shadow-lg'
-                        : ''
-                    }`}
-                  >
-                    <div className="relative z-[2]">
-                      {/* Pinned Badge */}
-                      {isPinned && (
-                        <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-[9px] font-extrabold uppercase tracking-wider mb-3">
-                          <Pin className="w-2.5 h-2.5 fill-amber-500" />
-                          <span>Pinned Member</span>
-                        </div>
-                      )}
-
-                      {/* Header */}
-                      <div className="flex items-start space-x-3 mb-3.5">
-                        <div className="relative flex-shrink-0">
-                          <img
-                            src={intern.img}
-                            alt={intern.name}
-                            className="w-12 h-12 rounded-xl object-cover ring-2 ring-amber-400/20 group-hover:ring-amber-400/50 transition-all"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="inline-block text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 uppercase tracking-wider mb-1">
-                            Intern
-                          </span>
-                          <h4 className="font-bold text-sm text-[var(--text-heading)] leading-snug break-words group-hover:text-amber-500 transition-colors">
-                            {intern.name}
-                          </h4>
-                          <p className="text-[11px] font-semibold text-[var(--text-muted)] truncate">
-                            {intern.role}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Bio */}
-                      <p className="text-xs text-[var(--text-body)] leading-relaxed mb-3.5 line-clamp-3">
-                        {intern.bio}
-                      </p>
-
-                      {/* Skills */}
-                      <div className="flex flex-wrap gap-1 mb-3.5">
-                        {intern.skills.slice(0, 3).map((s) => (
-                          <span
-                            key={s}
-                            className="text-[9px] px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-body)] border border-[var(--border-subtle)] font-medium group-hover:border-amber-400/20 transition-colors"
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between mt-auto relative z-[2]">
-                      <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wide">
-                        {intern.category}
-                      </span>
-                      <span className="text-[11px] font-bold text-amber-500 flex items-center space-x-1 group-hover:translate-x-1 transition-transform">
-                        <span>View Profile</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ul className="hc-grid" role="list">
+              {filteredInterns.map((intern) => (
+                <HangingCard key={intern.id} member={intern} variant="intern" onOpen={openMember} />
+              ))}
+            </ul>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* Detailed Member Profile Modal Window */}
+      {/* ── Detailed Member Profile Modal ── */}
       <AnimatePresence>
         {selectedMember && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -544,6 +506,9 @@ export const Team: React.FC = () => {
 
             {/* Modal Card Window */}
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="team-member-modal-name"
               initial={{ opacity: 0, scale: 0.94, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 20 }}
@@ -554,6 +519,8 @@ export const Team: React.FC = () => {
               {/* Header with Background Accent */}
               <div className="relative p-6 sm:p-8 border-b border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-subtle)] to-[var(--bg-surface)]">
                 <button
+                  ref={closeBtnRef}
+                  type="button"
                   onClick={() => setSelectedMember(null)}
                   className="absolute top-5 right-5 p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
                   aria-label="Close detail modal"
@@ -584,12 +551,17 @@ export const Team: React.FC = () => {
                       </span>
                     </div>
 
-                    <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight">
+                    <h2 id="team-member-modal-name" className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight">
                       {selectedMember.name}
                     </h2>
                     <p className={`text-sm font-bold mt-1 ${getCategoryStyles(selectedMember.category).text}`}>
                       {selectedMember.role}
                     </p>
+                    {selectedMember.digiskillBatch && (
+                      <p className="text-xs text-[var(--text-muted)] mt-1">
+                        {selectedMember.digiskillBatch}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -632,6 +604,7 @@ export const Team: React.FC = () => {
               {/* Modal Footer */}
               <div className="p-5 sm:p-6 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button
+                  type="button"
                   onClick={() => setSelectedMember(null)}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-[var(--text-body)] hover:bg-[var(--bg-subtle)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
                 >
@@ -650,28 +623,6 @@ export const Team: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
-
-      {/* Talent Assembly Info */}
-      <section className="bg-[var(--bg-subtle)] py-16 px-6 lg:px-8 border-t border-[var(--border-subtle)]/70 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex p-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-sm mb-4">
-            <ShieldCheck className="w-6 h-6 text-[var(--brand-teal)]" />
-          </div>
-          <h3 className="font-display font-extrabold text-2xl text-[var(--text-heading)] mb-3">
-            How Talent is Assembled for Your Project
-          </h3>
-          <p className="text-sm text-[var(--text-body)] leading-relaxed max-w-xl mx-auto mb-6">
-            When you submit a project, our management team selects the specific domain leads and contributors required for your exact scope. No filler resources, no learning on your dime.
-          </p>
-          <Link
-            to="/contact"
-            className="inline-flex items-center space-x-2 text-sm font-bold text-[var(--brand-teal)] hover:underline"
-          >
-            <span>Have our team review your project scope</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
-    </div>
+    </>
   );
 };

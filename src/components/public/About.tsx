@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, ShieldCheck, Target, Zap, Rocket } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
-import { FounderBrainsShowcase } from './FounderBrainsShowcase';
+import { TeamSection } from './TeamSection';
 import { useApp } from '../../context/AppContext';
 
 export const About: React.FC = () => {
@@ -169,9 +169,6 @@ export const About: React.FC = () => {
         </div>
       </section>
 
-      
-      {/* Founders Showcase directly after Story & Mission per Item 11 */}
-      <FounderBrainsShowcase />
 
       {/* Core Values (Hustle. Create. Deliver.) */}
       <section className="bg-[var(--bg-page)] py-20 px-6 lg:px-8">
@@ -218,6 +215,11 @@ export const About: React.FC = () => {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Team (founders, specialists, interns) — merged from the former /team page */}
+      <section id="team" aria-label="Our team" className="team-section-root scroll-mt-20">
+        <TeamSection />
       </section>
 
       {/* CTA */}
