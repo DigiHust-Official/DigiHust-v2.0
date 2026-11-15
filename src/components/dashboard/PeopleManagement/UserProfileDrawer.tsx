@@ -31,7 +31,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { User, UserRole, UserStatus, GroupId, SplitOverride } from '../../../types';
-import { PRESET_AVATARS } from '../../portal/PortalNavbar';
+import { PRESET_AVATARS, SHORT_INFO_MAX, isValidPortfolioUrl } from '../../portal/PortalNavbar';
 import { compressAvatarFile } from '../../../lib/utils';
 
 interface UserProfileDrawerProps {
@@ -66,6 +66,9 @@ export const UserProfileDrawer: React.FC<UserProfileDrawerProps> = ({ user, onCl
   const [editSpecialties, setEditSpecialties] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [editShortInfo, setEditShortInfo] = useState('');
+  const [editPortfolioUrl, setEditPortfolioUrl] = useState('');
+  const [editPortfolioError, setEditPortfolioError] = useState<string | null>(null);
   const drawerFileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Status Change State
@@ -110,11 +113,21 @@ export const UserProfileDrawer: React.FC<UserProfileDrawerProps> = ({ user, onCl
     setEditSpecialties(user.specialties.join(', '));
     setEditPhone(user.phone || '');
     setEditAvatarUrl(user.avatarUrl || '');
+    setEditShortInfo(user.shortInfo || '');
+    setEditPortfolioUrl(user.portfolioUrl || '');
+    setEditPortfolioError(null);
     setIsEditing(true);
   };
 
   const saveEdit = () => {
+    if (!isValidPortfolioUrl(editPortfolioUrl)) {
+      setEditPortfolioError('Must be a valid https:// link');
+      document.getElementById('drawer-portfolio-url')?.focus();
+      return;
+    }
     updateUserProfile(user.id, {
+      shortInfo: editShortInfo.trim(),
+      portfolioUrl: editPortfolioUrl.trim(),
       title: editTitle,
       hourlyRate: editHourlyRate,
       bio: editBio,
@@ -403,6 +416,46 @@ export const UserProfileDrawer: React.FC<UserProfileDrawerProps> = ({ user, onCl
                         onChange={(e) => setEditPhone(e.target.value)}
                         className="w-full px-3 py-2 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] text-[var(--text-heading)] text-xs"
                       />
+                    </div>
+                    <div>
+                      <label htmlFor="drawer-short-info" className="block text-[11px] text-[var(--text-muted)] mb-1">Short Info (team card)</label>
+                      <input
+                        id="drawer-short-info"
+                        type="text"
+                        maxLength={SHORT_INFO_MAX}
+                        value={editShortInfo}
+                        onChange={(e) => setEditShortInfo(e.target.value.slice(0, SHORT_INFO_MAX))}
+                        aria-describedby="drawer-short-info-count"
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] text-[var(--text-heading)] text-xs"
+                      />
+                      <p id="drawer-short-info-count" className="mt-1 text-right text-[11px] text-[var(--text-muted)]" aria-live="polite">
+                        {editShortInfo.length}/{SHORT_INFO_MAX}
+                      </p>
+                    </div>
+                    <div>
+                      <label htmlFor="drawer-portfolio-url" className="block text-[11px] text-[var(--text-muted)] mb-1">Portfolio Link (optional)</label>
+                      <input
+                        id="drawer-portfolio-url"
+                        type="text"
+                        inputMode="url"
+                        value={editPortfolioUrl}
+                        onChange={(e) => {
+                          setEditPortfolioUrl(e.target.value);
+                          if (editPortfolioError && isValidPortfolioUrl(e.target.value)) setEditPortfolioError(null);
+                        }}
+                        onBlur={() => setEditPortfolioError(isValidPortfolioUrl(editPortfolioUrl) ? null : 'Must be a valid https:// link')}
+                        placeholder="https://..."
+                        aria-invalid={!!editPortfolioError}
+                        aria-describedby={editPortfolioError ? 'drawer-portfolio-url-error' : undefined}
+                        className={`w-full px-3 py-2 rounded-xl bg-[var(--bg-page)] border text-[var(--text-heading)] text-xs font-mono ${
+                          editPortfolioError ? 'border-rose-500' : 'border-[var(--border-subtle)]'
+                        }`}
+                      />
+                      {editPortfolioError && (
+                        <p id="drawer-portfolio-url-error" role="alert" className="mt-1 text-[11px] font-semibold text-rose-500">
+                          {editPortfolioError}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-[11px] text-[var(--text-muted)] mb-1">Skills & Specialties (comma separated)</label>

@@ -29,10 +29,23 @@ export interface TeamMember {
   email?: string;
   phone?: string;
   digiskillBatch?: string;
+  shortInfo?: string;
+  portfolioUrl?: string;
   rating?: number;
   completedProjectsCount?: number;
   isCeoMaster?: boolean;
 }
+
+const SHORT_INFO_MAX = 90;
+
+/** Cut text to max chars at a word boundary, adding "…" when shortened. */
+const truncateAtWord = (text: string, max: number): string => {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–-]+$/, '')}…`;
+};
 
 const CATS = ['All', 'Development', 'Creative', 'AI & Data', 'Marketing', 'Cybersecurity'] as const;
 
@@ -195,8 +208,8 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
           </h4>
           <span className="hc__accent" aria-hidden="true" />
           <p className="text-sm text-[var(--text-body)] leading-snug">{member.role}</p>
-          {member.digiskillBatch && (
-            <p className="text-xs text-[var(--text-muted)] mt-1">{member.digiskillBatch}</p>
+          {member.shortInfo && (
+            <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{member.shortInfo}</p>
           )}
 
           <button
@@ -348,7 +361,12 @@ export const TeamSection: React.FC = () => {
           img,
           email: u.email,
           phone: u.phone,
-          digiskillBatch: u.digiskillBatch || (isExec ? 'Founding Member' : 'Batch 05 Graduate'),
+          digiskillBatch: u.digiskillBatch || undefined,
+          // Short info; falls back to the member's own bio (never the generated one above)
+          shortInfo:
+            (u.shortInfo || '').trim() ||
+            ((u.bio || '').trim() ? truncateAtWord(u.bio as string, SHORT_INFO_MAX) : undefined),
+          portfolioUrl: u.portfolioUrl || undefined,
           rating: u.rating || 5.0,
           completedProjectsCount: u.completedProjectsCount || 0,
           isCeoMaster: u.isCeoMaster,

@@ -51,6 +51,8 @@ export interface User {
   title: string;
   specialties: string[];
   bio?: string;
+  shortInfo?: string; // one-line summary shown on public team cards (max 90 chars)
+  portfolioUrl?: string; // https:// link to the member's portfolio
   hourlyRate?: number;
   completedProjectsCount: number;
   totalEarnings: number;

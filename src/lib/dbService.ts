@@ -87,6 +87,8 @@ export const dbService = {
         status: user.status || 'active',
         join_year: user.joinYear || 2026,
         bio: user.bio || '',
+        short_info: user.shortInfo || null,
+        portfolio_url: user.portfolioUrl || null,
         phone: user.phone || '',
         member_id: user.memberId || 'DGH2600167',
         password_hash: user.passwordHash || '',
@@ -112,6 +114,19 @@ export const dbService = {
         const freshId = `DGH26${String(maxNum + 1).padStart(5, '0')}`;
         payload.member_id = freshId;
         user.memberId = freshId;
+        const retry = await supabase.from('users').upsert(payload);
+        error = retry.error;
+      }
+
+      // If short_info / portfolio_url columns don't exist yet (SQL not applied), retry without them
+      if (
+        error &&
+        (error.code === 'PGRST204' || error.code === '42703' ||
+          /short_info|portfolio_url/.test(error.message || ''))
+      ) {
+        console.warn('users.short_info / portfolio_url columns missing — run docs/ui-changes/sql/round2-user-profile-fields.sql. Saving profile without them.');
+        delete payload.short_info;
+        delete payload.portfolio_url;
         const retry = await supabase.from('users').upsert(payload);
         error = retry.error;
       }
@@ -937,6 +952,8 @@ function mapUserFromDb(row: any): User {
     status: row.status || 'active',
     joinYear: row.join_year || 2026,
     bio: row.bio || '',
+    shortInfo: row.short_info || '',
+    portfolioUrl: row.portfolio_url || '',
     phone: row.phone || '',
     memberId: row.member_id || 'DGH2600001',
     passwordHash: row.password_hash || '',
