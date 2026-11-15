@@ -753,17 +753,28 @@ export const TeamSection: React.FC = () => {
                       Close
                     </button>
                     <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                      {isSafeUrl(selectedMember.portfolioUrl) && (
+                      {isSafeUrl(selectedMember.portfolioUrl) ? (
                         <a
                           href={selectedMember.portfolioUrl!.trim()}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--brand-teal)] text-[var(--brand-teal)] text-sm font-bold hover:bg-[var(--brand-teal-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
                         >
-                          <span>See Portfolio</span>
+                          <span>View Portfolio</span>
                           <ExternalLink className="w-4 h-4" aria-hidden="true" />
                           <span className="sr-only">(opens in a new tab)</span>
                         </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          aria-disabled="true"
+                          title="Portfolio coming soon"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--brand-teal)] text-[var(--brand-teal)] text-sm font-bold opacity-50 cursor-not-allowed"
+                        >
+                          <span>View Portfolio</span>
+                          <span className="text-[var(--text-muted)] font-semibold">· Soon</span>
+                        </button>
                       )}
                       <Link
                         to={`/contact?inquiry=${encodeURIComponent(`Project Scope with ${selectedMember.name} (${selectedMember.role})`)}`}
