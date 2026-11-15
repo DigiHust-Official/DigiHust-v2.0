@@ -157,6 +157,12 @@
   pointer-events: none;
 }
 
+/* Transparent cutout: no backdrop and no frame, the person stands directly on the card */
+.hc__photo[data-mode='cutout'] {
+  background: transparent;
+  border-radius: 0;
+}
+
 /* Old photos with a background: fill the zone like a normal portrait */
 .hc__photo[data-mode='photo'] img {
   object-fit: cover;
@@ -180,6 +186,10 @@
   height: 100px;
   border-radius: 9999px;
   background: var(--brand-teal-subtle);
+}
+.hc__card--intern .hc__photo[data-mode='cutout'] {
+  background: transparent;
+  border-radius: 0;
 }
 .hc__card--intern .hc__photo[data-mode='fallback'] img {
   width: 100%;
