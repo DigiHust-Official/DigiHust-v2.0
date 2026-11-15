@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, type Variants } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { INITIAL_USERS } from '../../services/mockData';
@@ -86,27 +86,27 @@ export const AboutSection: React.FC = () => {
 
   const displayAvatars = ALLOWED_MEMBERS.slice(0, 5);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as const,
         staggerChildren: 0.08,
       },
     },
   };
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as const,
       },
     },
   };
@@ -244,7 +244,7 @@ export const AboutSection: React.FC = () => {
             variants={cardVariants}
           >
             {/* TOP Cluster */}
-            <div className="dh-about-card-top">
+            <div className="dh-about-card-top dh-about-card-top-with-btn">
               <div className="dh-about-card-label">
                 {t('about_card4_label') || 'Our approach'}
               </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { SEOHead } from '../seo/SEOHead';
 import { useApp } from '../../context/AppContext';
 import { formatImageUrl, handleImageError } from '../../lib/imageUrlHelper';
@@ -68,6 +69,7 @@ export const formatAuthor = (rawAuthor?: string): string => {
 
 export const Blog: React.FC = () => {
   const { siteContent } = useApp();
+  const shouldReduceMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState('All');
 
   // Merge CMS dynamic blog posts with defaults
@@ -98,33 +100,37 @@ export const Blog: React.FC = () => {
         description="Explore technical architecture guides, AI automation workflows, and cybersecurity benchmarks written by DigiHust domain specialists."
       />
 
-      {/* Header Banner */}
-      <section data-hero="true" className="bg-[var(--bg-subtle)] py-16 sm:py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto">
+      {/* ── 1. CENTER-ALIGNED HEADER BANNER ── */}
+      <section
+        data-hero="true"
+        className="bg-[var(--bg-subtle)] py-16 sm:py-20 px-6 lg:px-8 border-b border-[var(--border-subtle)] text-center"
+      >
+        <div className="max-w-7xl mx-auto flex flex-col items-center">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
+            className="max-w-[40rem] mx-auto text-center"
           >
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-5">
+            <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-[var(--text-heading)] mb-5 text-center tracking-tight">
               Insights & Knowledge Hub.
             </h1>
-            <p className="text-lg text-[var(--text-body)] max-w-2xl leading-relaxed">
+            <p className="text-lg text-[var(--text-body)] max-w-[40rem] mx-auto leading-relaxed text-center">
               Technical guides, architectural blueprints, and digital growth strategies authored directly by our domain leads.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Category Tabs */}
+      {/* ── CENTER-ALIGNED CATEGORY TABS ── */}
       <section className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] relative z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center space-x-2 py-4 overflow-x-auto">
+          <div className="flex items-center justify-start sm:justify-center space-x-2 py-4 overflow-x-auto scrollbar-none mx-auto w-fit max-w-full">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
                   activeCategory === cat
                     ? 'bg-[var(--brand-teal)] text-white shadow-md'
                     : 'text-[var(--text-body)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)]'
@@ -137,38 +143,96 @@ export const Blog: React.FC = () => {
         </div>
       </section>
 
-      {/* Blog Posts Grid */}
-      <section className="bg-[var(--bg-page)] py-16 px-6 lg:px-8">
+      {/* ── 2. COMPACT IMAGE-OVERLAY BLOG POST CARDS ── */}
+      <section className="bg-[var(--bg-page)] py-12 sm:py-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post, index) => (
-              <Link
-                key={post.slug}
-                to={`/blog/${post.slug}`}
-                className="group block overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] transition-transform duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] hover:border-[var(--brand-teal)] shadow-sm hover:shadow-lg"
-              >
-                <img
-                  src={formatImageUrl(post.image, post.category)}
-                  alt={post.title}
-                  width={800}
-                  height={450}
-                  loading={index < 3 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => handleImageError(e, undefined, post.category)}
-                  className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                />
-                <div className="p-4 pt-3">
-                  <h3 className="line-clamp-2 min-h-[2.75rem] font-display text-base font-semibold leading-snug text-[var(--text-heading)] group-hover:text-[var(--brand-teal)] transition-colors mb-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] min-h-[1.25rem] font-sans flex items-center">
-                    {formatAuthor(post.author)}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {filteredPosts.length === 0 ? (
+            <div className="text-center py-20 text-[var(--text-muted)] text-base">
+              No articles found in this category.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+              {filteredPosts.map((post, index) => {
+                const writerName = (post.author || 'DigiHust').replace(/^by\s+/i, '');
+
+                return (
+                  <motion.div
+                    key={post.slug}
+                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-20px' }}
+                    transition={{
+                      duration: 0.45,
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: shouldReduceMotion ? 0 : index * 0.07,
+                    }}
+                    className="h-full flex flex-col"
+                  >
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="group block relative w-full aspect-[4/5] min-h-[clamp(300px,38vh,380px)] rounded-[24px] overflow-hidden shadow-[0_20px_40px_-20px_rgba(0,0,0,0.35)] dark:ring-1 dark:ring-white/[0.08] dark:shadow-[0_25px_50px_-20px_rgba(0,0,0,0.65)] hover:-translate-y-1.5 hover:shadow-[0_25px_50px_-20px_rgba(0,0,0,0.45)] dark:hover:shadow-[0_30px_60px_-20px_rgba(0,0,0,0.85)] transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-teal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-page)] flex flex-col justify-end"
+                    >
+                      {/* Full-bleed Absolutely Positioned Cover Image */}
+                      {post.image ? (
+                        <img
+                          src={formatImageUrl(post.image, post.category)}
+                          alt={post.title}
+                          width={800}
+                          height={1000}
+                          loading={index < 3 ? 'eager' : 'lazy'}
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => handleImageError(e, undefined, post.category)}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.06]"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[var(--bg-surface)] to-[#080e14] flex items-center justify-center">
+                          <span className="text-4xl font-display font-bold text-[var(--brand-teal)]/40">
+                            {post.category ? post.category.charAt(0).toUpperCase() : 'D'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Smooth Bottom-Weighted Dark Gradient Overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background:
+                            'linear-gradient(to bottom, transparent 0%, transparent 35%, rgba(8,14,20,0.55) 60%, rgba(8,14,20,0.92) 100%)',
+                        }}
+                      />
+
+                      {/* Card Content (Bottom of card: Category -> Title -> Writer -> Read More) */}
+                      <div className="relative z-10 p-4 sm:p-[1.125rem] flex flex-col gap-2.5 w-full">
+                        {/* 1. Category: Small uppercase plain text, 0.6875rem-0.75rem, white at ~70% opacity, 0.08em tracking */}
+                        {post.category && (
+                          <p className="text-[11px] uppercase tracking-[0.08em] font-medium text-white/70 leading-none">
+                            {post.category}
+                          </p>
+                        )}
+
+                        {/* 2. Title: White, semibold, clamp(1rem, 1.3vw, 1.25rem), max 2 lines */}
+                        <h3 className="text-white font-semibold text-[clamp(1rem,1.3vw,1.25rem)] leading-snug line-clamp-2 drop-shadow-sm">
+                          {post.title}
+                        </h3>
+
+                        {/* 3. Writer: One plain line, "By {writer name}", 0.8125rem (13px), white at ~75% opacity, truncated */}
+                        <p className="text-[13px] text-white/75 truncate leading-none">
+                          By {writerName}
+                        </p>
+
+                        {/* 4. "Read more" Button: Compact (height 40px, text 0.875rem), white rounded-full pill, dark token text */}
+                        <div className="w-full h-[40px] rounded-full bg-white text-[#01161E] font-semibold text-sm flex items-center justify-center space-x-2 transition-transform duration-300 ease-out group-hover:scale-[1.02] shadow-sm select-none mt-1">
+                          <span>Read more</span>
+                          <ArrowRight className="w-4 h-4 text-[#01161E] transition-transform duration-200 ease-out group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -176,7 +240,7 @@ export const Blog: React.FC = () => {
       <section className="pb-24 px-6 lg:px-8 bg-[var(--bg-page)]">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
