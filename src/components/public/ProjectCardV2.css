@@ -1,467 +1,404 @@
-/* ── ProjectCardV2 Styles (Folder Card, Opaque Sliding Panel, Minimal Links) ── */
+/* ── ProjectCardV2: notched card, paper-strip category, flip-up back ──
+   Ported from docs/ui-changes/references/round2/home-project-card-prototype.jsx
+   Theme variables only (see src/index.css). */
 
-:root {
-  --dh-card-surface-light: #FFFFFF;
-  --dh-card-border-light: rgba(10, 31, 43, 0.08);
-  --dh-card-shadow-light: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 16px 40px rgba(10, 31, 43, 0.10);
-  --dh-card-title-light: #0A1F2B;
-  --dh-card-desc-light: #4A6070;
-  --dh-card-accent-light: #1F7A8C;
-
-  --dh-card-surface-dark: #0F2431;
-  --dh-card-border-dark: rgba(255, 255, 255, 0.08);
-  --dh-card-shadow-dark: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 44px rgba(0, 0, 0, 0.40);
-  --dh-card-title-dark: #F3F6FA;
-  --dh-card-desc-dark: #A9B8C6;
-  --dh-card-accent-dark: #2EC4D6;
-}
-
-/* ── Base Card Shell (Folder Card) ─────────────────────────────────── */
 .dh-card-v2 {
+  --dh-card-ease: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --dh-card-dur: 0.6s;
+
   position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border-radius: clamp(18px, 1.8vw, 24px);
-  padding: clamp(10px, 1vw, 14px);
-  box-sizing: border-box;
-  background-color: var(--dh-card-surface-light);
-  border: 1px solid var(--dh-card-border-light);
-  box-shadow: var(--dh-card-shadow-light);
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
-  --dh-card-surface: var(--dh-card-surface-light);
-  --dh-card-title: var(--dh-card-title-light);
-  --dh-card-desc: var(--dh-card-desc-light);
-  --dh-card-accent: var(--dh-card-accent-light);
-}
-
-html[data-theme="dark"] .dh-card-v2,
-html.dark .dh-card-v2,
-:root .dh-card-v2 {
-  background-color: var(--dh-card-surface-dark);
-  border: 1px solid var(--dh-card-border-dark);
-  box-shadow: var(--dh-card-shadow-dark);
-  --dh-card-surface: var(--dh-card-surface-dark);
-  --dh-card-title: var(--dh-card-title-dark);
-  --dh-card-desc: var(--dh-card-desc-dark);
-  --dh-card-accent: var(--dh-card-accent-dark);
-}
-
-html[data-theme="light"] .dh-card-v2,
-html.light .dh-card-v2 {
-  background-color: var(--dh-card-surface-light);
-  border: 1px solid var(--dh-card-border-light);
-  box-shadow: var(--dh-card-shadow-light);
-  --dh-card-surface: var(--dh-card-surface-light);
-  --dh-card-title: var(--dh-card-title-light);
-  --dh-card-desc: var(--dh-card-desc-light);
-  --dh-card-accent: var(--dh-card-accent-light);
-}
-
-/* Subtle elevation on hover with no accent border */
-.dh-card-v2:hover {
-  transform: translateY(-4px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.90), 0 20px 48px rgba(10, 31, 43, 0.14);
-}
-
-html[data-theme="dark"] .dh-card-v2:hover,
-html.dark .dh-card-v2:hover,
-:root .dh-card-v2:hover {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 52px rgba(0, 0, 0, 0.50);
-}
-
-/* ── Image Tile Container ────────────────────────────────────────── */
-.dh-card-v2__tile {
-  position: relative;
+  display: block;
   width: 100%;
-  border-radius: 20px;
-  overflow: hidden;
+  aspect-ratio: 16 / 10.5;
   box-sizing: border-box;
-  background-color: #081620;
+  container-type: inline-size;
+  perspective: 1100px;
+  filter: drop-shadow(var(--dh-work-card-shadow));
+  transition: transform var(--dh-card-dur) var(--dh-card-ease),
+              filter var(--dh-card-dur) var(--dh-card-ease);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* 16:9 on span-7 card and single column */
-.dh-card-v2--span-7 .dh-card-v2__tile {
-  aspect-ratio: 16 / 9;
-}
-
-/* Span-5 card shares row image height set by span-7 card */
+/* WorkGrid 7/5 rows (≥900px): the 5-span card stretches to the row height */
 @media (min-width: 900px) {
-  .dh-card-v2--span-5 .dh-card-v2__tile {
-    height: var(--row-img-h, calc(((100% - 24px) * 7 / 12 - 16px) * 9 / 16));
-    aspect-ratio: unset;
+  .dh-card-v2--span-5 {
+    aspect-ratio: auto;
+    height: 100%;
   }
 }
 
-@media (max-width: 899.98px) {
-  .dh-card-v2--span-5 .dh-card-v2__tile,
-  .dh-card-v2--span-7 .dh-card-v2__tile {
-    aspect-ratio: 16 / 9;
-    height: auto;
-  }
-}
-
-/* 1px Neutral Inner Ring inside Tile */
-.dh-card-v2__tile::after {
-  content: "";
+.dh-card-v2__clip-defs {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  width: 0;
+  height: 0;
+  overflow: hidden;
   pointer-events: none;
-  z-index: 15;
-  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.08);
 }
 
-html[data-theme="dark"] .dh-card-v2__tile::after,
-html.dark .dh-card-v2__tile::after,
-:root .dh-card-v2__tile::after {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="light"] .dh-card-v2__tile::after,
-html.light .dh-card-v2__tile::after {
-  box-shadow: inset 0 0 0 1px rgba(10, 31, 43, 0.08);
-}
-
-/* Soft bottom gradient overlay for unified photo collection appearance */
-.dh-card-v2__tile-gradient {
+/* ── Paper strip (sits behind the front, visible inside the notch) ── */
+.dh-card-v2__strip {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
+  top: 12px;
+  inset-inline-start: 16px;
   z-index: 5;
-  background: linear-gradient(180deg, transparent 60%, rgba(5, 13, 20, 0.28) 100%);
+  min-width: 158px;
+  max-width: calc(100% - 32px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding-block: 7px 16px;
+  padding-inline: 14px 26px;
+  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface) 70%, var(--bg-subtle) 100%);
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  box-shadow:
+    0 -2px 6px color-mix(in srgb, var(--dh-brand-navy) 4%, transparent),
+    inset 0 -4px 6px -2px color-mix(in srgb, var(--dh-brand-navy) 14%, transparent);
+  pointer-events: none;
+}
+
+.dh-card-v2__strip-text {
+  display: block;
+  /* Keep the label inside the notch opening (~41% of the card width) */
+  max-width: calc(40cqw - 30px);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Front ── */
+.dh-card-v2__front {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--dh-brand-navy);
+  transition: transform var(--dh-card-dur) var(--dh-card-ease);
 }
 
 .dh-card-v2__img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* ── Top-Start Folder Tab Notched into Image (No dot, no outline stroke) ── */
-.dh-card-v2__tab {
+.dh-card-v2__front-gradient {
   position: absolute;
-  top: 0;
-  inset-inline-start: 0;
-  z-index: 20;
-  height: 40px;
-  padding-inline: 14px 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  background-color: var(--dh-card-surface);
-  color: var(--dh-card-surface); /* For SVG fill="currentColor" */
-  border: none;
-  outline: none;
-  border-start-start-radius: inherit;
-  border-end-end-radius: 18px;
-  box-sizing: border-box;
-  pointer-events: none;
-  user-select: none;
-}
-
-.dh-card-v2__tab-text {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--dh-card-desc);
-  white-space: nowrap;
-}
-
-/* Concave Fillet Curve (Top Edge) */
-.dh-card-v2__tab-fillet-top {
-  position: absolute;
-  top: 0;
-  inset-inline-start: 100%;
-  width: 18px;
-  height: 18px;
-  color: inherit;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--dh-brand-navy) 95%, transparent) 0%,
+    color-mix(in srgb, var(--dh-brand-navy) 35%, transparent) 50%,
+    color-mix(in srgb, var(--dh-brand-navy) 15%, transparent) 100%
+  );
   pointer-events: none;
 }
 
-/* RTL Fillet Mirroring */
-[dir="rtl"] .dh-card-v2__tab-fillet-top,
-html[dir="rtl"] .dh-card-v2__tab-fillet-top {
-  transform: scaleX(-1);
-  transform-origin: left top;
-}
-
-/* ── Top-End Round Preview Icon (34px, neutral chip) ───────────── */
-.dh-card-v2__preview-icon {
+.dh-card-v2__badge {
   position: absolute;
-  top: 12px;
-  inset-inline-end: 12px;
-  z-index: 20;
-  width: 34px;
-  height: 34px;
+  top: 16px;
+  inset-inline-end: 16px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 22, 32, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  color: #FFFFFF;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.18s ease, border-color 0.18s ease;
+  background: color-mix(in srgb, var(--dh-brand-navy) 75%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--dh-primary-contrast) 20%, transparent);
+  color: var(--dh-primary-contrast);
 }
 
-.dh-card-v2__preview-icon:hover {
-  transform: scale(1.06);
-  background: rgba(8, 22, 32, 0.92);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #FFFFFF;
-}
-
-.dh-card-v2__preview-icon:focus-visible {
-  outline: 2px solid #2EC4D6;
-  outline-offset: 3px;
-}
-
-/* ── Sliding Hover Panel (over image tile only, premium 5 items) ── */
-.dh-card-v2__panel {
+.dh-card-v2__front-info {
   position: absolute;
-  inset: 0;
-  z-index: 10;
-  box-sizing: border-box;
-  padding: clamp(16px, 2.2vw, 28px);
-  background-color: #081620;
-  border-radius: inherit;
-  border: none;
-  box-shadow: none;
-  color: #F3F6FA;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 32px 20px 20px;
+  text-align: start;
+}
+
+.dh-card-v2__front-title {
+  margin: 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--dh-primary-contrast);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Client row (front + back) ── */
+.dh-card-v2__client {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  /* Exact transition copying hero Work button */
-  transform: translate3d(-101%, 0, 0);
-  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  will-change: transform;
+  gap: 6px;
+  margin-bottom: 4px;
+  min-width: 0;
 }
 
-/* Mirrored in RTL */
-[dir="rtl"] .dh-card-v2__panel,
-html[dir="rtl"] .dh-card-v2__panel {
-  transform: translate3d(101%, 0, 0);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .dh-card-v2:hover .dh-card-v2__panel,
-  .dh-card-v2:focus-within .dh-card-v2__panel {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Reduced motion disables sliding */
-@media (prefers-reduced-motion: reduce) {
-  .dh-card-v2__panel {
-    transition: none !important;
-  }
-}
-
-/* On touch devices or below 768px: no panel */
-@media (hover: none), (max-width: 767.98px) {
-  .dh-card-v2__panel {
-    display: none !important;
-  }
-}
-
-/* 1. Client Line with 28px Accent Bar */
-.dh-card-v2__panel-client {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.dh-card-v2__panel-client-bar {
-  width: 28px;
+.dh-card-v2__client-bar {
+  width: 16px;
   height: 2px;
-  background-color: #2EC4D6;
   border-radius: 999px;
+  background-color: var(--brand-teal);
   flex-shrink: 0;
 }
 
-.dh-card-v2__panel-client-name {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 11.5px;
+.dh-card-v2__client-name {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2EC4D6;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 240px;
+  min-width: 0;
 }
 
-/* 2. Project Title */
-.dh-card-v2__panel-title {
-  font-family: var(--font-display, 'Montserrat', sans-serif);
-  font-weight: 600;
-  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
-  line-height: 1.25;
-  color: #F3F6FA;
-  margin: 0 0 10px 0;
-  max-width: 95%;
-  word-break: break-word;
+.dh-card-v2__client-name--front {
+  color: var(--color-soft-periwinkle);
 }
 
-/* 3. Star Rating */
-.dh-card-v2__panel-rating-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
+.dh-card-v2__client-name--back {
+  color: var(--dh-on-navy-accent);
 }
 
-/* 4 & 5. Minimal Text-Link Actions */
-.dh-card-v2__panel-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-}
-
-.dh-card-v2__btn-minimal {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-size: 13px;
-  font-weight: 500;
-  height: 32px;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
-  color: #F3F6FA !important;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.18s ease, text-decoration-color 0.18s ease;
-}
-
-.dh-card-v2__btn-minimal:hover {
-  text-decoration-color: #2EC4D6;
-  color: #2EC4D6 !important;
-}
-
-.dh-card-v2__btn-minimal:focus-visible {
-  outline: 2px solid #2EC4D6;
-  outline-offset: 3px;
-  border-radius: 4px;
-  text-decoration-color: #2EC4D6;
-  color: #2EC4D6 !important;
-}
-
-/* ── Card Body (Below Image Tile) ────────────────────────────────── */
-.dh-card-v2__body {
+/* ── Back (flips up from the bottom edge) ── */
+.dh-card-v2__back {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* Start just below the notch: notch depth = 17% of height ≈ 11.2% of width */
+  padding: calc(11.2% + 12px) 22px 18px;
   display: flex;
   flex-direction: column;
-  padding-top: clamp(16px, 1.5vw, 22px);
-  padding-inline: clamp(8px, 0.8vw, 12px);
-  padding-bottom: clamp(14px, 1.4vw, 20px);
-  box-sizing: border-box;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: var(--dh-brand-navy);
+  color: var(--dh-primary-contrast);
+  transform: rotateX(-90deg);
+  transform-origin: bottom center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  transition: transform var(--dh-card-dur) var(--dh-card-ease);
 }
 
-.dh-card-v2__title {
-  font-family: var(--font-display, 'Montserrat', sans-serif);
-  font-weight: 600;
-  font-size: clamp(1.05rem, 1.3vw, 1.25rem);
-  line-height: 1.3;
-  color: var(--dh-card-title);
-  margin: 0 0 8px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.dh-card-v2__back-glow {
+  position: absolute;
+  top: -80px;
+  inset-inline-end: -80px;
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand-teal) 25%, transparent);
+  filter: blur(64px);
+  pointer-events: none;
 }
 
-.dh-card-v2__desc {
-  font-family: var(--font-text, 'Inter', sans-serif);
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--dh-card-desc);
+.dh-card-v2__back-body {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.dh-card-v2__back-title {
   margin: 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--dh-primary-contrast);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(14px * 1.6 * 2);
-  height: calc(14px * 1.6 * 2);
 }
 
-/* ── Fallback Actions & Meta on Touch / Small Mobile Screens ────── */
-.dh-card-v2__mobile-meta {
-  display: none;
+.dh-card-v2__back-desc {
+  margin: 6px 0 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--color-soft-periwinkle) 85%, transparent);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.dh-card-v2__mobile-actions {
-  display: none;
+/* ── Buttons ── */
+.dh-card-v2__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-@media (hover: none), (max-width: 767.98px) {
-  .dh-card-v2__mobile-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-    font-size: 12px;
-  }
+.dh-card-v2__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
 
-  .dh-card-v2__mobile-client {
-    font-family: var(--font-text, 'Inter', sans-serif);
-    font-weight: 600;
-    color: var(--dh-card-accent);
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-  }
+.dh-card-v2__btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .dh-card-v2__mobile-meta-dot {
-    opacity: 0.4;
-    color: var(--dh-card-desc);
-  }
+.dh-card-v2__btn:active {
+  transform: scale(0.98);
+}
 
-  .dh-card-v2__mobile-rating {
-    margin-bottom: 0 !important;
-  }
+.dh-card-v2__btn:focus-visible {
+  outline: 2px solid var(--dh-on-navy-accent);
+  outline-offset: 2px;
+}
 
-  .dh-card-v2__mobile-actions {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-top: 10px;
-    padding-top: 8px;
-  }
+.dh-card-v2__btn-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
 
-  .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal {
-    text-decoration-color: rgba(10, 31, 43, 0.35);
-    color: var(--dh-card-title) !important;
-  }
+html[dir="rtl"] .dh-card-v2__btn-icon--arrow {
+  transform: scaleX(-1);
+}
 
-  html[data-theme="dark"] .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal,
-  html.dark .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal,
-  :root .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal {
-    text-decoration-color: rgba(255, 255, 255, 0.35);
-    color: var(--dh-card-title) !important;
-  }
+.dh-card-v2__btn--primary {
+  background-color: var(--brand-teal);
+  border: 1px solid var(--brand-teal);
+  color: var(--dh-primary-contrast);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--brand-teal) 25%, transparent);
+}
 
-  .dh-card-v2__mobile-actions .dh-card-v2__btn-minimal:hover {
-    color: var(--dh-card-accent) !important;
-    text-decoration-color: var(--dh-card-accent);
+.dh-card-v2__btn--primary:hover {
+  background-color: var(--brand-teal-hover);
+  border-color: var(--brand-teal-hover);
+  color: var(--dh-primary-contrast);
+}
+
+.dh-card-v2__btn--outline {
+  background-color: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-soft-periwinkle) 30%, transparent);
+  color: var(--dh-primary-contrast);
+}
+
+.dh-card-v2__btn--outline:hover {
+  background-color: color-mix(in srgb, var(--dh-primary-contrast) 10%, transparent);
+  border-color: var(--dh-primary-contrast);
+  color: var(--dh-primary-contrast);
+}
+
+/* ── Open state: hover (pointer only), tap (.is-revealed), keyboard ── */
+@media (hover: hover) {
+  .dh-card-v2:hover {
+    transform: translateY(-6px) scale(1.02);
+    filter: drop-shadow(var(--dh-work-card-shadow-hover));
+  }
+  .dh-card-v2:hover .dh-card-v2__front {
+    transform: scale(0.96);
+  }
+  .dh-card-v2:hover .dh-card-v2__back {
+    transform: rotateX(0deg);
+    pointer-events: auto;
+  }
+}
+
+.dh-card-v2.is-revealed,
+.dh-card-v2:focus-within {
+  transform: translateY(-6px) scale(1.02);
+  filter: drop-shadow(var(--dh-work-card-shadow-hover));
+}
+
+.dh-card-v2.is-revealed .dh-card-v2__front,
+.dh-card-v2:focus-within .dh-card-v2__front {
+  transform: scale(0.96);
+}
+
+.dh-card-v2.is-revealed .dh-card-v2__back,
+.dh-card-v2:focus-within .dh-card-v2__back {
+  transform: rotateX(0deg);
+  pointer-events: auto;
+}
+
+/* ── Small cards (≈360px screens): keep the back content inside the card ── */
+@container (max-width: 340px) {
+  .dh-card-v2__back {
+    padding-inline: 18px;
+    padding-bottom: 14px;
+  }
+  .dh-card-v2__back-title {
+    font-size: 16px;
+    -webkit-line-clamp: 1;
+  }
+  .dh-card-v2__front-title {
+    font-size: 16px;
+  }
+}
+
+/* ── Reduced motion: no lift / scale / flip, the back fades in ── */
+@media (prefers-reduced-motion: reduce) {
+  .dh-card-v2,
+  .dh-card-v2__front {
+    transition: filter 0.2s ease;
+  }
+  .dh-card-v2__back {
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .dh-card-v2:hover,
+  .dh-card-v2.is-revealed,
+  .dh-card-v2:focus-within,
+  .dh-card-v2:hover .dh-card-v2__front,
+  .dh-card-v2.is-revealed .dh-card-v2__front,
+  .dh-card-v2:focus-within .dh-card-v2__front {
+    transform: none;
+  }
+  .dh-card-v2:hover .dh-card-v2__back,
+  .dh-card-v2.is-revealed .dh-card-v2__back,
+  .dh-card-v2:focus-within .dh-card-v2__back {
+    transform: none;
+    opacity: 1;
   }
 }

@@ -9,7 +9,8 @@
 .hc-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
+  column-gap: 1.5rem;
+  row-gap: 2rem;
   align-items: start;
   list-style: none;
   margin: 0;
@@ -22,39 +23,71 @@
   overflow-x: clip;
 }
 
-@media (min-width: 640px) {
-  .hc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Column counts leave enough side room for an edge card's swing at every width.
+   Specialists (max 240px): 1 / 2 / 3 / 4 / 5 at 0 / 560 / 1024 / 1280 / 1440 */
+@media (min-width: 560px) {
+  .hc-grid--member { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 1024px) {
-  .hc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hc-grid--member { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (min-width: 1280px) {
-  .hc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .hc-grid--member { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1440px) {
+  .hc-grid--member { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+/* Interns (max 210px): 1 / 2 / 3 / 4 / 5 at 0 / 480 / 768 / 1024 / 1280 */
+@media (min-width: 480px) {
+  .hc-grid--intern { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .hc-grid--intern { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .hc-grid--intern { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  .hc-grid--intern { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 .hc {
-  --string-len: 40px;
+  --string-len: 60px;
   --clip-size: 26px;
   position: relative;
   display: flex;
   justify-content: center;
 }
 
-/* Staggered hang heights like the reference, desktop only */
+/* Staggered hang heights like the reference, desktop only (follows the column count) */
 @media (min-width: 1024px) and (max-width: 1279.98px) {
-  .hc:nth-child(3n + 2) { --string-len: 72px; }
+  .hc-grid--member .hc:nth-child(3n + 2) { --string-len: 105px; }
+  .hc-grid--intern .hc:nth-child(even) { --string-len: 105px; }
+}
+@media (min-width: 1280px) and (max-width: 1439.98px) {
+  .hc-grid--member .hc:nth-child(even) { --string-len: 105px; }
 }
 @media (min-width: 1280px) {
-  .hc:nth-child(even) { --string-len: 72px; }
+  .hc-grid--intern .hc:nth-child(5n + 2),
+  .hc-grid--intern .hc:nth-child(5n + 4) { --string-len: 105px; }
+}
+@media (min-width: 1440px) {
+  .hc-grid--member .hc:nth-child(5n + 2),
+  .hc-grid--member .hc:nth-child(5n + 4) { --string-len: 105px; }
 }
 
 .hc__pendulum {
   position: relative;
   width: 100%;
-  max-width: 280px;
+  max-width: 240px;
   padding-top: var(--string-len);
   transform-origin: 50% 0%;
   will-change: transform;
+}
+
+.hc--intern .hc__pendulum {
+  max-width: 210px;
 }
 
 .hc__string {
@@ -91,31 +124,76 @@
   align-items: center;
   text-align: center;
   border-radius: 16px;
-  padding: calc(var(--clip-size) / 2 + 18px) 20px 22px;
+  padding: calc(var(--clip-size) / 2 + 16px) 14px 20px;
   cursor: pointer;
   user-select: none;
+  box-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.18);
+  transition: box-shadow 0.25s ease;
 }
 
+.hc__pendulum:hover .hc__card {
+  box-shadow: 0 22px 44px -18px rgb(0 0 0 / 0.3);
+}
+
+/* Photo zone: built for transparent cutout PNGs. The tint lives on the zone,
+   never on the image (no frame, border or rounding on the <img>). */
 .hc__photo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   width: 100%;
-  max-width: 200px;
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
+  height: 210px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--bg-subtle);
 }
 
-/* Intern variant: circular avatar on a soft tinted disc (per intern reference) */
+.hc__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  pointer-events: none;
+}
+
+/* Transparent cutout: no backdrop and no frame, the person stands directly on the card */
+.hc__photo[data-mode='cutout'] {
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Old photos with a background: fill the zone like a normal portrait */
+.hc__photo[data-mode='photo'] img {
+  object-fit: cover;
+  object-position: center 15%;
+}
+
+/* Generated initials avatar: a centred disc */
+.hc__photo[data-mode='fallback'] {
+  align-items: center;
+}
+.hc__photo[data-mode='fallback'] img {
+  width: 120px;
+  height: 120px;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+/* Intern variant: circular photo on a soft tinted disc */
 .hc__card--intern .hc__photo {
-  width: 112px;
-  height: 112px;
-  max-width: none;
+  width: 100px;
+  height: 100px;
   border-radius: 9999px;
   background: var(--brand-teal-subtle);
-  padding: 6px;
 }
-.hc__card--intern .hc__photo img {
-  border-radius: 9999px;
+.hc__card--intern .hc__photo[data-mode='cutout'] {
+  background: transparent;
+  border-radius: 0;
+}
+.hc__card--intern .hc__photo[data-mode='fallback'] img {
+  width: 100%;
+  height: 100%;
 }
 
 .hc__accent {
@@ -132,4 +210,77 @@
     transform: none !important;
     will-change: auto;
   }
+}
+
+/* ── Member profile modal (portalled to <body>) ─────────────────────────────
+ * Never taller than the viewport: header + footer fixed, only the body scrolls.
+ * <640px: bottom sheet. ≥640px: centred dialog (max-w-xl).
+ */
+.tm-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-bottom: 0;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.tm-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tm-modal__footer {
+  padding: 1rem 1.25rem max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .tm-modal {
+    max-width: 36rem;
+    border-radius: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .tm-modal__footer {
+    padding: 1.5rem;
+  }
+}
+
+/* Round avatar frame on a soft tint (always visible, unlike the cards) */
+.tm-modal__avatar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--brand-teal-subtle);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-teal) 20%, transparent);
+}
+
+@media (min-width: 640px) {
+  .tm-modal__avatar {
+    width: 104px;
+    height: 104px;
+  }
+}
+
+.tm-modal__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+.tm-modal__avatar[data-mode='photo'] img,
+.tm-modal__avatar[data-mode='fallback'] img {
+  object-fit: cover;
+  object-position: center 15%;
 }

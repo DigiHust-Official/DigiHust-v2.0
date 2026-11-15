@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   motion,
@@ -9,7 +10,7 @@ import {
   useReducedMotion,
   type AnimationPlaybackControls,
 } from 'framer-motion';
-import { ArrowRight, CheckCircle2, X, UserCheck } from 'lucide-react';
+import { ArrowRight, ExternalLink, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { realtimeSync } from '../../lib/realtimeSync';
 import { FounderBrainsShowcase } from './FounderBrainsShowcase';
@@ -29,10 +30,23 @@ export interface TeamMember {
   email?: string;
   phone?: string;
   digiskillBatch?: string;
+  shortInfo?: string;
+  portfolioUrl?: string;
   rating?: number;
   completedProjectsCount?: number;
   isCeoMaster?: boolean;
 }
+
+const SHORT_INFO_MAX = 90;
+
+/** Cut text to max chars at a word boundary, adding "…" when shortened. */
+const truncateAtWord = (text: string, max: number): string => {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–-]+$/, '')}…`;
+};
 
 const CATS = ['All', 'Development', 'Creative', 'AI & Data', 'Marketing', 'Cybersecurity'] as const;
 
@@ -98,6 +112,71 @@ const MOVE_THROTTLE_MS = 150;
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
+/* ── Card photo mode ────────────────────────────────────────────────────────
+ * cutout   transparent PNG → contain, standing on the bottom of the tinted zone
+ * photo    old photo with a background → cover, fills the zone
+ * fallback generated initials (ui-avatars) → centred disc
+ * Detection reads the alpha of the image's top corners once it has loaded
+ * (needs CORS; if that fails the image is reloaded without it as a photo).
+ */
+type AvatarMode = 'cutout' | 'photo' | 'fallback';
+const avatarModeCache = new Map<string, AvatarMode>();
+const isFallbackAvatar = (src: string) => src.includes('ui-avatars.com');
+
+const detectAvatarMode = (img: HTMLImageElement): AvatarMode => {
+  try {
+    const size = 16;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return 'photo';
+    ctx.drawImage(img, 0, 0, size, size);
+    const { data } = ctx.getImageData(0, 0, size, 1);
+    const topLeftAlpha = data[3];
+    const topRightAlpha = data[(size - 1) * 4 + 3];
+    return topLeftAlpha < 128 || topRightAlpha < 128 ? 'cutout' : 'photo';
+  } catch {
+    // Tainted canvas (no CORS) → treat as a normal photo
+    return 'photo';
+  }
+};
+
+const useAvatarMode = (src: string) => {
+  const known = isFallbackAvatar(src) ? 'fallback' : avatarModeCache.get(src);
+  const [mode, setMode] = useState<AvatarMode | undefined>(known);
+  const [useCors, setUseCors] = useState(known === undefined);
+
+  useEffect(() => {
+    const next = isFallbackAvatar(src) ? 'fallback' : avatarModeCache.get(src);
+    setMode(next);
+    setUseCors(next === undefined);
+  }, [src]);
+
+  const settle = (next: AvatarMode) => {
+    avatarModeCache.set(src, next);
+    setMode(next);
+  };
+
+  return {
+    // Styled as a cutout until known; the zone has a fixed size so nothing shifts
+    mode: mode ?? 'cutout',
+    crossOrigin: useCors ? ('anonymous' as const) : undefined,
+    onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (mode) return;
+      settle(useCors ? detectAvatarMode(e.currentTarget) : 'photo');
+    },
+    onError: () => {
+      if (useCors) {
+        // Retry once without CORS; it can't be inspected, so show it as a photo
+        setUseCors(false);
+        return;
+      }
+      if (!mode) settle('photo');
+    },
+  };
+};
+
 interface HangingCardProps {
   member: TeamMember;
   variant: 'member' | 'intern';
@@ -161,10 +240,11 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
     onOpen(member);
   };
 
-  const isHaris = member.id === 'usr-1787949460689' || member.name.toLowerCase().includes('haris');
+  const avatar = useAvatarMode(member.img);
+  const isIntern = variant === 'intern';
 
   return (
-    <motion.li className="hc" style={{ zIndex }}>
+    <motion.li className={`hc hc--${variant}`} style={{ zIndex }}>
       <motion.div
         className="hc__pendulum"
         style={reduceMotion ? undefined : { rotate, transformOrigin: '50% 0%' }}
@@ -176,27 +256,39 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
         <span className="hc__string" aria-hidden="true" />
         <span className="hc__clip" aria-hidden="true" />
         <article
-          className={`hc__card hc__card--${variant} bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-md hover:shadow-lg transition-shadow`}
+          className={`hc__card hc__card--${variant} bg-[var(--bg-surface)] border border-[var(--border-subtle)]`}
           onClick={handleCardClick}
         >
-          <div className="hc__photo">
+          <div className="hc__photo" data-mode={avatar.mode}>
+            {/* crossOrigin must precede src so the first request is made with CORS */}
             <img
+              crossOrigin={avatar.crossOrigin}
               src={member.img}
               alt={member.name}
               loading="lazy"
               decoding="async"
-              style={{ objectPosition: isHaris ? '41% 12%' : 'center 15%' }}
-              className="w-full h-full object-cover pointer-events-none"
+              onLoad={avatar.onLoad}
+              onError={avatar.onError}
             />
           </div>
 
-          <h4 className="font-display font-semibold text-[17px] leading-snug text-[var(--text-heading)] mt-4 break-words">
+          <h4
+            className={`font-display font-semibold leading-snug text-[var(--text-heading)] mt-4 break-words ${
+              isIntern ? 'text-[16px]' : 'text-[18px]'
+            }`}
+          >
             {member.name}
           </h4>
           <span className="hc__accent" aria-hidden="true" />
           <p className="text-sm text-[var(--text-body)] leading-snug">{member.role}</p>
-          {member.digiskillBatch && (
-            <p className="text-xs text-[var(--text-muted)] mt-1">{member.digiskillBatch}</p>
+          {member.shortInfo && (
+            <p
+              className={`text-xs leading-relaxed text-[var(--text-muted)] mt-1.5 ${
+                isIntern ? 'line-clamp-2' : 'line-clamp-3'
+              }`}
+            >
+              {member.shortInfo}
+            </p>
           )}
 
           <button
@@ -217,12 +309,47 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
   );
 };
 
+/** Profile modal avatar: always a round tinted frame; cutouts stand on its bottom. */
+const ModalAvatar: React.FC<{ src: string; name: string }> = ({ src, name }) => {
+  const avatar = useAvatarMode(src);
+  return (
+    <div className="tm-modal__avatar" data-mode={avatar.mode}>
+      <img
+        crossOrigin={avatar.crossOrigin}
+        src={src}
+        alt={name}
+        decoding="async"
+        onLoad={avatar.onLoad}
+        onError={avatar.onError}
+      />
+    </div>
+  );
+};
+
+const SHEET_QUERY = '(max-width: 639.98px)';
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const isSafeUrl = (url?: string) => !!url && /^https?:\/\//i.test(url.trim());
+
 export const TeamSection: React.FC = () => {
   const { siteContent, users } = useApp();
   const [filter, setFilter] = useState<string>('All');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  // Phones get a bottom sheet; wider screens a centred dialog
+  const [isSheet, setIsSheet] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SHEET_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(SHEET_QUERY);
+    const update = () => setIsSheet(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Real Pinned Member IDs directly from Supabase-backed siteContent
   const pinnedIds: string[] = useMemo(() => {
@@ -236,10 +363,28 @@ export const TeamSection: React.FC = () => {
     return unsub;
   }, []);
 
-  // Close modal on Escape key; lock body scroll; move focus into the dialog and restore it on close
+  // Close modal on Escape key; keep Tab inside the dialog; lock body scroll;
+  // move focus into the dialog and restore it on close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedMember(null);
+      if (e.key === 'Escape') {
+        setSelectedMember(null);
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      const inside = dialogRef.current.contains(active);
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     if (selectedMember) {
       document.body.style.overflow = 'hidden';
@@ -335,7 +480,7 @@ export const TeamSection: React.FC = () => {
         }
 
         // Authentic avatar URL from Supabase Storage with clean fallback
-        const img = u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=1F7A8C&color=fff`;
+        const img = u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=1F7A8C&color=fff&size=256`;
 
         return {
           id: u.id,
@@ -348,7 +493,12 @@ export const TeamSection: React.FC = () => {
           img,
           email: u.email,
           phone: u.phone,
-          digiskillBatch: u.digiskillBatch || (isExec ? 'Founding Member' : 'Batch 05 Graduate'),
+          digiskillBatch: u.digiskillBatch || undefined,
+          // Short info; falls back to the member's own bio (never the generated one above)
+          shortInfo:
+            (u.shortInfo || '').trim() ||
+            ((u.bio || '').trim() ? truncateAtWord(u.bio as string, SHORT_INFO_MAX) : undefined),
+          portfolioUrl: u.portfolioUrl || undefined,
           rating: u.rating || 5.0,
           completedProjectsCount: u.completedProjectsCount || 0,
           isCeoMaster: u.isCeoMaster,
@@ -455,7 +605,7 @@ export const TeamSection: React.FC = () => {
               </span>
             </div>
 
-            <ul className="hc-grid" role="list">
+            <ul className="hc-grid hc-grid--member" role="list">
               {filteredSpecialists.map((member) => (
                 <HangingCard key={member.id} member={member} variant="member" onOpen={openMember} />
               ))}
@@ -482,7 +632,7 @@ export const TeamSection: React.FC = () => {
               </span>
             </div>
 
-            <ul className="hc-grid" role="list">
+            <ul className="hc-grid hc-grid--intern" role="list">
               {filteredInterns.map((intern) => (
                 <HangingCard key={intern.id} member={intern} variant="intern" onOpen={openMember} />
               ))}
@@ -491,138 +641,157 @@ export const TeamSection: React.FC = () => {
         </div>
       )}
 
-      {/* ── Detailed Member Profile Modal ── */}
-      <AnimatePresence>
-        {selectedMember && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedMember(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            />
-
-            {/* Modal Card Window */}
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="team-member-modal-name"
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl shadow-2xl z-10 overflow-hidden my-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header with Background Accent */}
-              <div className="relative p-6 sm:p-8 border-b border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-subtle)] to-[var(--bg-surface)]">
-                <button
-                  ref={closeBtnRef}
-                  type="button"
+      {/* ── Detailed Member Profile Modal ──
+          Portalled to <body> above the fixed navbar (z 9980) and FloatingCTA (z 9990).
+          Header and footer stay put; only the body scrolls. <640px: bottom sheet. */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {selectedMember && (
+              <div className="fixed inset-0 z-[9995] flex items-end sm:items-center justify-center sm:p-4">
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => setSelectedMember(null)}
-                  className="absolute top-5 right-5 p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
-                  aria-label="Close detail modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                />
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-5 text-center sm:text-left">
-                  <img
-                    src={selectedMember.img}
-                    alt={selectedMember.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-[var(--brand-teal)]/20 shadow-md flex-shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1.5">
-                      <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${getCategoryStyles(selectedMember.category).text} ${getCategoryStyles(selectedMember.category).bg} ${getCategoryStyles(selectedMember.category).border}`}>
-                        {selectedMember.category}
-                      </span>
-                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center space-x-1 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>
-                          {selectedMember.tier === 'executive'
-                            ? 'Executive Leadership'
-                            : selectedMember.tier === 'intern'
-                            ? 'Intern'
-                            : 'Specialist'}
-                        </span>
-                      </span>
+                {/* Modal Card Window */}
+                <motion.div
+                  ref={dialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="team-member-modal-name"
+                  {...(reduceMotion
+                    ? {
+                        initial: { opacity: 0 },
+                        animate: { opacity: 1 },
+                        exit: { opacity: 0 },
+                        transition: { duration: 0.15 },
+                      }
+                    : isSheet
+                    ? {
+                        initial: { y: '100%' },
+                        animate: { y: 0 },
+                        exit: { y: '100%' },
+                        transition: { type: 'spring', damping: 34, stiffness: 320 },
+                      }
+                    : {
+                        initial: { opacity: 0, scale: 0.94, y: 20 },
+                        animate: { opacity: 1, scale: 1, y: 0 },
+                        exit: { opacity: 0, scale: 0.94, y: 20 },
+                        transition: { type: 'spring', damping: 25, stiffness: 350 },
+                      })}
+                  className="tm-modal relative z-10 bg-[var(--bg-surface)] shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header (fixed) */}
+                  <div className="relative flex-shrink-0 p-5 sm:p-8 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                    <button
+                      ref={closeBtnRef}
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      className="absolute top-3 right-3 sm:top-5 sm:right-5 p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                      aria-label="Close profile"
+                    >
+                      <X className="w-5 h-5" aria-hidden="true" />
+                    </button>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left">
+                      <ModalAvatar src={selectedMember.img} name={selectedMember.name} />
+                      <div className="min-w-0 flex-1 sm:pr-8">
+                        <h2
+                          id="team-member-modal-name"
+                          className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight break-words"
+                        >
+                          {selectedMember.name}
+                        </h2>
+                        <p className="text-sm font-bold mt-1 text-[var(--brand-teal)]">
+                          {selectedMember.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body (the only scrolling part) */}
+                  <div className="tm-modal__body p-5 sm:p-8 space-y-6">
+                    <div>
+                      <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-2.5">
+                        Profile & Background
+                      </h3>
+                      <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed whitespace-pre-line break-words">
+                        {selectedMember.bio}
+                      </p>
                     </div>
 
-                    <h2 id="team-member-modal-name" className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight">
-                      {selectedMember.name}
-                    </h2>
-                    <p className={`text-sm font-bold mt-1 ${getCategoryStyles(selectedMember.category).text}`}>
-                      {selectedMember.role}
-                    </p>
-                    {selectedMember.digiskillBatch && (
-                      <p className="text-xs text-[var(--text-muted)] mt-1">
-                        {selectedMember.digiskillBatch}
-                      </p>
-                    )}
+                    <div>
+                      <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-3">
+                        Specialties & Skills
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMember.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="text-xs px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-semibold shadow-xs"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Modal Body / Full Biography and Details */}
-              <div className="p-6 sm:p-8 space-y-6 max-h-[60vh] overflow-y-auto">
-                <div>
-                  <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-2.5">
-                    Profile & Background
-                  </h3>
-                  <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed whitespace-pre-line">
-                    {selectedMember.bio}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-3">
-                    Specialties & Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMember.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="text-xs px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-semibold shadow-xs"
+                  {/* Footer (fixed) */}
+                  <div className="tm-modal__footer flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-[var(--text-body)] hover:bg-[var(--bg-subtle)] border border-[var(--border-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                    >
+                      Close
+                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                      {isSafeUrl(selectedMember.portfolioUrl) ? (
+                        <a
+                          href={selectedMember.portfolioUrl!.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--brand-teal)] text-[var(--brand-teal)] text-sm font-bold hover:bg-[var(--brand-teal-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                        >
+                          <span>View Portfolio</span>
+                          <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          aria-disabled="true"
+                          title="Portfolio coming soon"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--brand-teal)] text-[var(--brand-teal)] text-sm font-bold opacity-50 cursor-not-allowed"
+                        >
+                          <span>View Portfolio</span>
+                          <span className="text-[var(--text-muted)] font-semibold">· Soon</span>
+                        </button>
+                      )}
+                      <Link
+                        to={`/contact?inquiry=${encodeURIComponent(`Project Scope with ${selectedMember.name} (${selectedMember.role})`)}`}
+                        onClick={() => setSelectedMember(null)}
+                        className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal)]/90 text-white text-sm font-bold shadow-md shadow-[var(--brand-teal)]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-all cursor-pointer"
                       >
-                        {skill}
-                      </span>
-                    ))}
+                        <span>Request Project</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--brand-teal)]/5 border border-[var(--brand-teal)]/20 flex items-start space-x-3">
-                  <UserCheck className="w-5 h-5 text-[var(--brand-teal)] flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-[var(--text-body)] leading-relaxed">
-                    <strong className="text-[var(--text-heading)] font-bold">Verified Member:</strong> Direct team contributor operating under DigiHust delivery standards and service level agreements.
-                  </div>
-                </div>
+                </motion.div>
               </div>
-
-              {/* Modal Footer */}
-              <div className="p-5 sm:p-6 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedMember(null)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-[var(--text-body)] hover:bg-[var(--bg-subtle)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
-                >
-                  Close Window
-                </button>
-                <Link
-                  to={`/contact?inquiry=${encodeURIComponent(`Project Scope with ${selectedMember.name} (${selectedMember.role})`)}`}
-                  onClick={() => setSelectedMember(null)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal)]/90 text-white text-sm font-bold shadow-md shadow-[var(--brand-teal)]/20 transition-all cursor-pointer"
-                >
-                  <span>Request Project</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 };

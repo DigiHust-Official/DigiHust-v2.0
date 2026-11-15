@@ -38,6 +38,19 @@ export const PRESET_AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
 ];
 
+export const SHORT_INFO_MAX = 90;
+
+/** Empty is allowed (field is optional); otherwise must parse as an https:// URL. */
+export const isValidPortfolioUrl = (value: string): boolean => {
+  const v = value.trim();
+  if (!v) return true;
+  try {
+    return new URL(v).protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export const PortalNavbar: React.FC = () => {
   const { currentUser, currentTier, logout, changePassword, updateUserProfile, showToast } = useApp();
   const location = useLocation();
@@ -60,6 +73,10 @@ export const PortalNavbar: React.FC = () => {
   const [profileAvatarUrl, setProfileAvatarUrl] = useState(currentUser?.avatarUrl || '');
   const [profilePhone, setProfilePhone] = useState(currentUser?.phone || '');
   const [profileBio, setProfileBio] = useState(currentUser?.bio || '');
+  const [profileShortInfo, setProfileShortInfo] = useState(currentUser?.shortInfo || '');
+  const [profilePortfolioUrl, setProfilePortfolioUrl] = useState(currentUser?.portfolioUrl || '');
+  const [portfolioUrlError, setPortfolioUrlError] = useState<string | null>(null);
+  const portfolioInputRef = useRef<HTMLInputElement>(null);
 
   // Keep state in sync with currentUser when it updates
   useEffect(() => {
@@ -69,6 +86,8 @@ export const PortalNavbar: React.FC = () => {
       setProfileAvatarUrl(currentUser.avatarUrl || '');
       setProfilePhone(currentUser.phone || '');
       setProfileBio(currentUser.bio || '');
+      setProfileShortInfo(currentUser.shortInfo || '');
+      setProfilePortfolioUrl(currentUser.portfolioUrl || '');
     }
   }, [currentUser]);
 
@@ -385,6 +404,9 @@ export const PortalNavbar: React.FC = () => {
                       setProfileAvatarUrl(currentUser.avatarUrl || '');
                       setProfilePhone(currentUser.phone || '');
                       setProfileBio(currentUser.bio || '');
+                      setProfileShortInfo(currentUser.shortInfo || '');
+                      setProfilePortfolioUrl(currentUser.portfolioUrl || '');
+                      setPortfolioUrlError(null);
                       setShowUserDropdown(false);
                       setEditProfileOpen(true);
                     }}
@@ -655,12 +677,19 @@ export const PortalNavbar: React.FC = () => {
               id="edit-profile-form"
               onSubmit={(e) => {
                 e.preventDefault();
+                if (!isValidPortfolioUrl(profilePortfolioUrl)) {
+                  setPortfolioUrlError('Must be a valid https:// link');
+                  portfolioInputRef.current?.focus();
+                  return;
+                }
                 updateUserProfile(currentUser.id, {
                   name: profileName,
                   title: profileTitle,
                   avatarUrl: profileAvatarUrl || currentUser.avatarUrl,
                   phone: profilePhone,
                   bio: profileBio,
+                  shortInfo: profileShortInfo.trim(),
+                  portfolioUrl: profilePortfolioUrl.trim(),
                 });
                 setEditProfileOpen(false);
                 showToast('Your profile and avatar picture have been updated!', 'success', 'Profile Saved');
@@ -830,6 +859,57 @@ export const PortalNavbar: React.FC = () => {
                     placeholder="+1 (555) 000-0000"
                     className="w-full bg-[var(--bg-page)] border border-[var(--border-subtle)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-heading)] focus:border-[var(--brand-teal)] focus:outline-none"
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="profile-short-info" className="block text-[11px] font-bold uppercase text-[var(--text-muted)] mb-1">
+                    Short Info
+                  </label>
+                  <input
+                    id="profile-short-info"
+                    type="text"
+                    maxLength={SHORT_INFO_MAX}
+                    value={profileShortInfo}
+                    onChange={(e) => setProfileShortInfo(e.target.value.slice(0, SHORT_INFO_MAX))}
+                    placeholder="e.g. Full-stack developer · React, Node · 3 years experience"
+                    aria-describedby="profile-short-info-help"
+                    className="w-full bg-[var(--bg-page)] border border-[var(--border-subtle)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-heading)] focus:border-[var(--brand-teal)] focus:outline-none"
+                  />
+                  <div id="profile-short-info-help" className="flex items-center justify-between gap-2 mt-1 text-[11px] text-[var(--text-muted)]">
+                    <span>Shown on your team card on the About page</span>
+                    <span aria-live="polite">{profileShortInfo.length}/{SHORT_INFO_MAX}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="profile-portfolio-url" className="block text-[11px] font-bold uppercase text-[var(--text-muted)] mb-1">
+                    Portfolio Link
+                  </label>
+                  <input
+                    id="profile-portfolio-url"
+                    ref={portfolioInputRef}
+                    type="text"
+                    inputMode="url"
+                    autoComplete="url"
+                    value={profilePortfolioUrl}
+                    onChange={(e) => {
+                      setProfilePortfolioUrl(e.target.value);
+                      if (portfolioUrlError && isValidPortfolioUrl(e.target.value)) setPortfolioUrlError(null);
+                    }}
+                    onBlur={() => setPortfolioUrlError(isValidPortfolioUrl(profilePortfolioUrl) ? null : 'Must be a valid https:// link')}
+                    placeholder="https://your-portfolio.com (optional)"
+                    aria-invalid={!!portfolioUrlError}
+                    aria-describedby={portfolioUrlError ? 'profile-portfolio-url-error' : undefined}
+                    className={`w-full bg-[var(--bg-page)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-heading)] font-mono focus:outline-none ${
+                      portfolioUrlError ? 'border-rose-500 focus:border-rose-500' : 'border-[var(--border-subtle)] focus:border-[var(--brand-teal)]'
+                    }`}
+                  />
+                  {portfolioUrlError && (
+                    <p id="profile-portfolio-url-error" role="alert" className="mt-1 text-[11px] font-semibold text-rose-500 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>{portfolioUrlError}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>

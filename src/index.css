@@ -161,6 +161,9 @@ html.dark {
   --dh-tag-text: #C9D0F5;
   --dh-focus-ring: #2EC4D6;
   --dh-brand-navy: #022B3A;
+  --dh-on-navy-accent: #2EC4D6;
+  --dh-work-card-shadow: 0 14px 26px rgba(0, 0, 0, 0.40);
+  --dh-work-card-shadow-hover: 0 24px 36px rgba(0, 0, 0, 0.55);
   --dh-gradient-brand: linear-gradient(135deg, #1F7A8C, #2EC4D6);
   --dh-mark: rgba(46, 196, 214, 0.32);
   --dh-card-face: #E6ECEF;
@@ -207,6 +210,9 @@ html.light {
   --dh-tag-text: #0A1F2B;
   --dh-focus-ring: #1F7A8C;
   --dh-brand-navy: #022B3A;
+  --dh-on-navy-accent: #2EC4D6;
+  --dh-work-card-shadow: 0 14px 26px rgba(2, 43, 58, 0.13);
+  --dh-work-card-shadow-hover: 0 24px 36px rgba(2, 43, 58, 0.22);
   --dh-gradient-brand: linear-gradient(135deg, #1F7A8C, #2EC4D6);
   --dh-card-face: #FBF9F4;
   --dh-card-ink: #0A1F2B;
