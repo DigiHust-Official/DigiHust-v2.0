@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { getValidProjects, normalizeProject, Project } from '../../data/workProjects';
-import { formatImageUrl } from '../../lib/imageUrlHelper';
+import { getShowcaseProjects, Project } from '../../data/workProjects';
 import { SectionHeading } from '../common/SectionHeading';
 import { WorkGrid } from './WorkGrid';
 import './WorkShowcaseSection.css';
@@ -13,29 +12,8 @@ export const WorkShowcaseSection: React.FC = () => {
   const { siteContent } = useApp();
   const { t } = useLanguage();
 
-  const rawCaseStudies = siteContent?.caseStudies || [];
-  const allProjects: Project[] = (rawCaseStudies && rawCaseStudies.length > 0)
-    ? rawCaseStudies.map((cs, idx) => normalizeProject({
-      id: cs.slug || cs.id,
-      category: cs.category || 'Web Development',
-      filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
-      title: cs.title,
-      client: cs.client,
-      description: cs.summary,
-      shortDescription: cs.summary,
-      cardImage: {
-        src: formatImageUrl(cs.imageUrl, cs.category),
-        alt: cs.title,
-      },
-      challenge: cs.challenge || '',
-      solution: cs.solution || '',
-      results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || ''}`] : ['100% On-Time Delivery'],
-      tags: cs.tags || ['React', 'Full Stack'],
-      img: formatImageUrl(cs.imageUrl, cs.category),
-      published: true,
-      order: idx,
-    }, idx))
-    : getValidProjects(siteContent);
+  // Shared with CaseStudyPage so every card's link resolves to a page
+  const allProjects: Project[] = getShowcaseProjects(siteContent);
 
   // Filter published only and sort by order
   const publishedProjects = allProjects

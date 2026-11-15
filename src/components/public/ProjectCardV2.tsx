@@ -25,8 +25,9 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
   const caseStudyLabel = t('work_v2_read_case_study') || t('work_v2_read_case') || 'Read case study';
   const previewUrl = project.previewUrl || project.projectUrl || getProjectLiveUrl(project);
   const hasPreview = Boolean(previewUrl && previewUrl.trim().length > 0);
+  // Every card links to its case study page; the page renders a minimal
+  // version when the project has no case study content yet.
   const caseStudySlug = project.slug || project.id;
-  const hasCaseStudy = Boolean(caseStudySlug && caseStudySlug.trim().length > 0);
 
   const rawRatingAriaTemplate = t('work_v3_rated_out_of') || 'Rated {rating} out of 5 stars';
   const ratingAria = project.clientRating !== undefined
@@ -123,33 +124,29 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
           )}
 
           {/* 4 & 5. Minimal Text-Link Actions */}
-          {(hasPreview || hasCaseStudy) && (
-            <div className="dh-card-v2__panel-actions">
-              {hasPreview && (
-                <a
-                  href={previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="dh-card-v2__btn-minimal"
-                  aria-label={`${previewLabel}: ${project.title}`}
-                >
-                  <span>{previewLabel}</span>
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                </a>
-              )}
+          <div className="dh-card-v2__panel-actions">
+            {hasPreview && (
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dh-card-v2__btn-minimal"
+                aria-label={`${previewLabel}: ${project.title}`}
+              >
+                <span>{previewLabel}</span>
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              </a>
+            )}
 
-              {hasCaseStudy && (
-                <Link
-                  to={`/work/${caseStudySlug}`}
-                  className="dh-card-v2__btn-minimal"
-                  aria-label={`${caseStudyLabel}: ${project.title}`}
-                >
-                  <span>{caseStudyLabel}</span>
-                  <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
-                </Link>
-              )}
-            </div>
-          )}
+            <Link
+              to={`/work/${caseStudySlug}`}
+              className="dh-card-v2__btn-minimal"
+              aria-label={`${caseStudyLabel}: ${project.title}`}
+            >
+              <span>{caseStudyLabel}</span>
+              <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -186,30 +183,26 @@ export const ProjectCardV2: React.FC<ProjectCardV2Props> = ({
         )}
 
         {/* Minimal Buttons on Touch / Small Mobile Screens */}
-        {(hasPreview || hasCaseStudy) && (
-          <div className="dh-card-v2__mobile-actions">
-            {hasPreview && (
-              <a
-                href={previewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="dh-card-v2__btn-minimal"
-              >
-                <span>{previewLabel}</span>
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              </a>
-            )}
-            {hasCaseStudy && (
-              <Link
-                to={`/work/${caseStudySlug}`}
-                className="dh-card-v2__btn-minimal"
-              >
-                <span>{caseStudyLabel}</span>
-                <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
-              </Link>
-            )}
-          </div>
-        )}
+        <div className="dh-card-v2__mobile-actions">
+          {hasPreview && (
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dh-card-v2__btn-minimal"
+            >
+              <span>{previewLabel}</span>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            </a>
+          )}
+          <Link
+            to={`/work/${caseStudySlug}`}
+            className="dh-card-v2__btn-minimal"
+          >
+            <span>{caseStudyLabel}</span>
+            <ArrowRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </article>
   );

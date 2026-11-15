@@ -9,7 +9,6 @@ const routePrefetchMap: Record<string, () => Promise<unknown>> = {
   '/portfolio': () => import('../components/public/Work'),
   '/how-it-works': () => import('../components/public/HowItWorks'),
   '/about': () => import('../components/public/About'),
-  '/team': () => import('../components/public/Team'),
   '/blog': () => import('../components/public/Blog'),
   '/careers': () => import('../components/public/Careers'),
   '/contact': () => import('../components/public/Contact'),

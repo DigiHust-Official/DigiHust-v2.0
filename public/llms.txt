@@ -11,7 +11,7 @@
 - https://www.digihust.tech/portfolio : Case Studies & Portfolio  Selected client deliveries across engineering, data, and design
 - https://www.digihust.tech/how-it-works : Methodology  4-step delivery process with strict milestone SLAs
 - https://www.digihust.tech/about : About DigiHust  Origin within the Digiskill ecosystem, mission, and company model
-- https://www.digihust.tech/team : Team & Specialists  Domain leads, software engineers, and founders Mahad Abbas and Muhammad Haseeb
+- https://www.digihust.tech/about#team : Team & Specialists  Domain leads, software engineers, and founders Mahad Abbas and Muhammad Haseeb
 - https://www.digihust.tech/blog : Insights Hub  Technical architecture deep dives, AI automation frameworks, and security checklists
 - https://www.digihust.tech/contact : Contact & Scope Intake  Transparent milestone quotes and 24-hour proposal turnaround
 - https://www.digihust.tech/careers : Careers  Opportunities for verified specialists to join technical squads

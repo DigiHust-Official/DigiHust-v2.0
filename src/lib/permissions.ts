@@ -28,11 +28,11 @@ export const PERMISSIONS = {
   canCreateUserAccount: (tier: UserRoleTier) => tier === 'ceo' || tier === 'manager',
   canDeleteUserAccount: (tier: UserRoleTier) => tier === 'ceo' || tier === 'manager',
 
-  // Live Website CMS (CEO Master or explicitly delegated staff)
-  canEditWebsiteContent: (tier: UserRoleTier, user?: User) => 
-    tier === 'ceo' || (user?.delegatedPermissions?.includes('cms_editor') ?? false),
-  canPublishLiveChanges: (tier: UserRoleTier, user?: User) => 
-    tier === 'ceo' || (user?.delegatedPermissions?.includes('cms_editor') ?? false),
+  // Live Website CMS: management only (same check as PortalDashboard.tsx isManagement)
+  canEditWebsiteContent: (tier: UserRoleTier, user?: User | null) =>
+    tier === 'ceo' || tier === 'manager' || user?.role === 'management',
+  canPublishLiveChanges: (tier: UserRoleTier, user?: User | null) =>
+    tier === 'ceo' || tier === 'manager' || user?.role === 'management',
 
   // Client Records & Data Isolation (Strict Privacy Wall)
   canViewFullClientRecord: (tier: UserRoleTier) => tier === 'ceo' || tier === 'manager',

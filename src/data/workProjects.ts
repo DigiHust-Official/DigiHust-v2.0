@@ -1,7 +1,39 @@
+import type { SiteContent, SiteCaseStudy } from '../types';
+import { formatImageUrl } from '../lib/imageUrlHelper';
+
 export interface GalleryItem {
   src: string;
   alt: string;
   caption?: string;
+}
+
+export interface CaseStudyStat {
+  value: string;
+  label: string;
+}
+
+export interface CaseStudyTool {
+  name: string;
+  iconUrl?: string;
+}
+
+export const PROCESS_ICON_OPTIONS = [
+  { key: 'search', label: 'Search / Research' },
+  { key: 'user', label: 'User / Define' },
+  { key: 'lightbulb', label: 'Lightbulb / Ideate' },
+  { key: 'pen', label: 'Pen / Design' },
+  { key: 'code', label: 'Code / Build' },
+  { key: 'check', label: 'Check / Test' },
+  { key: 'rocket', label: 'Rocket / Launch' },
+  { key: 'layers', label: 'Layers / System' },
+] as const;
+
+export type ProcessIconKey = typeof PROCESS_ICON_OPTIONS[number]['key'];
+
+export interface CaseStudyProcessStep {
+  title: string;
+  items: string[];
+  icon?: ProcessIconKey;
 }
 
 export interface CaseStudyData {
@@ -10,6 +42,16 @@ export interface CaseStudyData {
   solution?: string;
   results?: string;
   gallery?: GalleryItem[];
+  // Optional fields for the reference layout (all optional; empty = section hidden)
+  eyebrow?: string;
+  credit?: string;
+  date?: string;
+  subtitle?: string;
+  logo?: { src: string; alt: string };
+  roles?: string[];
+  stats?: CaseStudyStat[];
+  tools?: CaseStudyTool[];
+  process?: CaseStudyProcessStep[];
 }
 
 export interface Project {
@@ -71,6 +113,48 @@ export const getProjectLiveUrl = (project: { previewUrl?: string; projectUrl?: s
   return '';
 };
 
+const cleanStr = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+const cleanList = (v: unknown): string[] =>
+  Array.isArray(v) ? v.map(cleanStr).filter((s) => s.length > 0) : [];
+const isProcessIcon = (v: unknown): v is ProcessIconKey =>
+  PROCESS_ICON_OPTIONS.some((o) => o.key === v);
+
+/**
+ * Sanitizes the optional layout fields of a case study so partially filled
+ * CMS data never renders blank items. Unknown keys are kept as-is.
+ */
+export const normalizeCaseStudy = (cs: CaseStudyData): CaseStudyData => {
+  const logoSrc = cleanStr(cs.logo?.src);
+  return {
+    ...cs,
+    eyebrow: cleanStr(cs.eyebrow) || undefined,
+    credit: cleanStr(cs.credit) || undefined,
+    date: cleanStr(cs.date) || undefined,
+    subtitle: cleanStr(cs.subtitle) || undefined,
+    logo: logoSrc ? { src: logoSrc, alt: cleanStr(cs.logo?.alt) } : undefined,
+    roles: cleanList(cs.roles),
+    stats: Array.isArray(cs.stats)
+      ? cs.stats
+          .map((s) => ({ value: cleanStr(s?.value), label: cleanStr(s?.label) }))
+          .filter((s) => s.value || s.label)
+      : [],
+    tools: Array.isArray(cs.tools)
+      ? cs.tools
+          .map((t) => ({ name: cleanStr(t?.name), iconUrl: cleanStr(t?.iconUrl) || undefined }))
+          .filter((t) => t.name)
+      : [],
+    process: Array.isArray(cs.process)
+      ? cs.process
+          .map((p) => ({
+            title: cleanStr(p?.title),
+            items: cleanList(p?.items),
+            icon: isProcessIcon(p?.icon) ? p.icon : undefined,
+          }))
+          .filter((p) => p.title)
+      : [],
+  };
+};
+
 export const normalizeProject = (raw: any, index: number = 0): Project => {
   const title = raw.title || 'Untitled Project';
   const slug = raw.slug || toSlug(title) || `project-${raw.id || index}`;
@@ -82,7 +166,8 @@ export const normalizeProject = (raw: any, index: number = 0): Project => {
   const published = raw.published !== false;
   const order = typeof raw.order === 'number' ? raw.order : index;
 
-  let caseStudy: CaseStudyData | undefined = raw.caseStudy;
+  let caseStudy: CaseStudyData | undefined =
+    raw.caseStudy && typeof raw.caseStudy === 'object' ? normalizeCaseStudy(raw.caseStudy) : undefined;
   if (!caseStudy && (raw.summary || raw.challenge || raw.solution || raw.results)) {
     caseStudy = {
       summary: raw.summary || shortDescription,
@@ -400,4 +485,135 @@ export const getValidProjects = (siteContent?: any): Project[] => {
       .sort((a: Project, b: Project) => (a.order ?? 0) - (b.order ?? 0));
   }
   return PROJECTS.map((p, idx) => normalizeProject(p, idx));
+};
+
+/** Legacy CMS case study -> Project, exactly as the home page shows it. */
+const legacyToProject = (cs: SiteCaseStudy, idx: number): Project =>
+  normalizeProject({
+    id: cs.slug || cs.id,
+    category: cs.category || 'Web Development',
+    filterCat: cs.category?.includes('Design') || cs.category?.includes('Brand') ? 'Creative' : cs.category?.includes('AI') ? 'AI & Data' : 'Development',
+    title: cs.title,
+    client: cs.client,
+    description: cs.summary,
+    shortDescription: cs.summary,
+    cardImage: {
+      src: formatImageUrl(cs.imageUrl, cs.category),
+      alt: cs.title,
+    },
+    challenge: cs.challenge || '',
+    solution: cs.solution || '',
+    results: cs.impactMetric ? [`${cs.impactMetric} ${cs.impactLabel || ''}`.trim()] : [],
+    tags: cs.tags || [],
+    img: formatImageUrl(cs.imageUrl, cs.category),
+    projectUrl: cs.projectUrl || '',
+    published: true,
+    order: idx,
+  }, idx);
+
+/**
+ * Projects shown on the home page "Work" section and /portfolio.
+ * - After the admin imports the home-page projects into the Work tab
+ *   (`workSource === 'work'`), the Work list is the single source.
+ * - Before that, the legacy `siteContent.caseStudies` list is used
+ *   (sanitizeSiteContent keeps it non-empty); otherwise getValidProjects().
+ */
+export const getShowcaseProjects = (siteContent?: Partial<SiteContent> | null): Project[] => {
+  if (siteContent?.workSource === 'work') return getValidProjects(siteContent);
+  const legacy: SiteCaseStudy[] = siteContent?.caseStudies || [];
+  if (legacy.length === 0) return getValidProjects(siteContent);
+  return legacy.map(legacyToProject);
+};
+
+const truncateAtWord = (text: string, max: number): string => {
+  const clean = (text || '').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–—-]+$/, '')}…`;
+};
+
+/**
+ * Legacy home-page projects that are not yet in the Work list, converted into
+ * editable Work projects. Slugs equal the current home-card links, so existing
+ * URLs keep working. Fits the Work tab's limits (short description ≤ 140,
+ * case study summary ≤ 280). The old impact metric goes into Results.
+ */
+export const getLegacyProjectsToImport = (siteContent?: Partial<SiteContent> | null): Project[] => {
+  const legacy: SiteCaseStudy[] = siteContent?.caseStudies || [];
+  const existing: Project[] = (siteContent?.workProjects || []).map((p, i) => normalizeProject(p, i));
+  const takenSlugs = new Set(existing.map((p) => p.slug));
+  const takenIds = new Set(existing.map((p) => p.id));
+
+  return legacy
+    .map(legacyToProject)
+    .filter((p) => !takenSlugs.has(p.slug))
+    .map((p) => {
+      const id = takenIds.has(p.id) ? `${p.id}-home` : p.id;
+      takenIds.add(id);
+      const summary = (p.description || p.shortDescription || '').trim();
+      return {
+        ...p,
+        id,
+        shortDescription: truncateAtWord(summary, 140),
+        description: truncateAtWord(summary, 140),
+        caseStudy: {
+          summary: truncateAtWord(summary, 280),
+          challenge: p.challenge || '',
+          solution: p.solution || '',
+          results: (p.results || []).join('\n'),
+          gallery: [],
+        },
+      };
+    });
+};
+
+/**
+ * Full Work list after importing the home-page projects:
+ * the home projects first, in home-page order (an existing Work project with
+ * the same slug is reused and published, so its richer content is kept), then
+ * every other saved Work project in its current order. Built-in sample
+ * projects that were never saved are not added.
+ */
+export const buildHomeImportList = (siteContent?: Partial<SiteContent> | null): { list: Project[]; added: number } => {
+  const saved: Project[] = (siteContent?.workProjects || [])
+    .map((p, i) => normalizeProject(p, i))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const bySlug = new Map(saved.map((p) => [p.slug, p]));
+  const newOnes = new Map(getLegacyProjectsToImport(siteContent).map((p) => [p.slug, p]));
+
+  const homeSlugs = (siteContent?.caseStudies || []).map((cs, i) => legacyToProject(cs, i).slug);
+  const homeFirst: Project[] = homeSlugs
+    .map((slug) => {
+      const existing = bySlug.get(slug);
+      return existing ? { ...existing, published: true } : newOnes.get(slug);
+    })
+    .filter((p): p is Project => Boolean(p));
+  const homeSet = new Set(homeFirst.map((p) => p.slug));
+  const rest = saved.filter((p) => !homeSet.has(p.slug));
+
+  return {
+    list: [...homeFirst, ...rest].map((p, idx) => ({ ...p, order: idx })),
+    added: newOnes.size,
+  };
+};
+
+/**
+ * Resolves a /work/:slug or /portfolio/:slug param. Looks in the Work
+ * projects first (richest data, edited in the Work tab), then in the projects
+ * shown on the home page, so every home card resolves to a page.
+ */
+export const findProjectBySlug = (siteContent: Partial<SiteContent> | null | undefined, slug?: string): Project | undefined => {
+  if (!slug) return undefined;
+  const matches = (p: Project) => p.slug === slug || p.id === slug;
+  const direct = getValidProjects(siteContent).find(matches) || getShowcaseProjects(siteContent).find(matches);
+  if (direct) return direct;
+
+  // Old-style URL using a legacy entry's own slug/id (e.g. /work/autonomous-logistics-support-ai):
+  // resolve to the project that entry became (same title-based slug).
+  const legacy = (siteContent?.caseStudies || []).find((cs) => cs.slug === slug || cs.id === slug);
+  if (!legacy) return undefined;
+  const target = toSlug(legacy.title || '');
+  return getShowcaseProjects(siteContent).find((p) => p.slug === target)
+    || getValidProjects(siteContent).find((p) => p.slug === target);
 };

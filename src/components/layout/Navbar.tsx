@@ -48,13 +48,12 @@ export const Navbar: React.FC = () => {
   const isVerify =
     location.pathname.startsWith('/verify') || location.pathname.startsWith('/cert');
 
-  // Retain all 7 section links in exact order
+  // Section links in exact order (Team now lives on /about#team)
   const navLinks = [
     { label: t('nav_services') || 'Services', href: '/services' },
     { label: t('nav_work') || 'Work', href: '/portfolio' },
     { label: t('nav_how_it_works') || 'How It Works', href: '/how-it-works' },
     { label: t('nav_about') || 'About', href: '/about' },
-    { label: t('nav_team') || 'Team', href: '/team' },
     { label: t('nav_blog') || 'Blog', href: '/blog' },
     { label: 'Careers', href: '/careers' },
   ];

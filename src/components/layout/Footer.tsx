@@ -218,7 +218,7 @@ export const Footer: React.FC = () => {
                 One company. Specialized digital talent. Providing end-to-end web engineering, brand identity, AI workflows, and cybersecurity.
               </p>
               <p className="text-[11px] text-[var(--text-muted)]">
-                Founded by <Link to="/team" className="text-[var(--text-heading)] hover:text-[var(--brand-teal)] font-bold transition-colors underline underline-offset-2">Mahad Abbas</Link> & <Link to="/team" className="text-[var(--text-heading)] hover:text-[var(--brand-teal)] font-bold transition-colors underline underline-offset-2">Muhammad Haseeb</Link>.
+                Founded by <Link to="/about#team" className="text-[var(--text-heading)] hover:text-[var(--brand-teal)] font-bold transition-colors underline underline-offset-2">Mahad Abbas</Link> & <Link to="/about#team" className="text-[var(--text-heading)] hover:text-[var(--brand-teal)] font-bold transition-colors underline underline-offset-2">Muhammad Haseeb</Link>.
               </p>
               
               {/* Social Vector Icons */}
@@ -287,7 +287,7 @@ export const Footer: React.FC = () => {
                   { label: 'Selected Work', href: '/portfolio' },
                   { label: 'How We Work', href: '/how-it-works' },
                   { label: 'Our Story', href: '/about' },
-                  { label: 'Meet the Team', href: '/team' },
+                  { label: 'Meet the Team', href: '/about#team' },
                   { label: 'Knowledge Hub', href: '/blog' },
                   { label: 'Careers', href: '/careers' },
                   { label: 'Get a Quote', href: '/contact' },

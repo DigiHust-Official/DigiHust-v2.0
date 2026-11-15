@@ -11,6 +11,7 @@ import { PWAInstallPrompt } from './components/ui/PWAInstallPrompt';
 import { FloatingCTA } from './components/ui/FloatingCTA';
 import { GlobalLoaderOverlay } from './components/ui/GlobalLoaderOverlay';
 import { ProtectedRoute } from './components/portal/ProtectedRoute';
+import { PERMISSIONS } from './lib/permissions';
 
 // Home kept static for instant landing load
 import { Home } from './components/public/Home';
@@ -21,7 +22,6 @@ const Work = React.lazy(() => import('./components/public/Work').then(m => ({ de
 const CaseStudyPage = React.lazy(() => import('./components/public/CaseStudyPage').then(m => ({ default: m.CaseStudyPage })));
 const HowItWorks = React.lazy(() => import('./components/public/HowItWorks').then(m => ({ default: m.HowItWorks })));
 const About = React.lazy(() => import('./components/public/About').then(m => ({ default: m.About })));
-const Team = React.lazy(() => import('./components/public/Team').then(m => ({ default: m.Team })));
 const Blog = React.lazy(() => import('./components/public/Blog').then(m => ({ default: m.Blog })));
 const BlogPost = React.lazy(() => import('./components/public/BlogPost').then(m => ({ default: m.BlogPost })));
 const Contact = React.lazy(() => import('./components/public/Contact').then(m => ({ default: m.Contact })));
@@ -58,11 +58,28 @@ const MaintenancePage = React.lazy(() => import('./components/utility/Maintenanc
 const OfflinePage = React.lazy(() => import('./components/utility/OfflinePage').then(m => ({ default: m.OfflinePage })));
 
 // Helper to scroll to top on route navigation
+// If the URL has a #hash, scroll to that element instead (polls briefly because pages are lazy-loaded)
 const ScrollToTop: React.FC = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [pathname]);
+    if (!hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      return;
+    }
+    const id = decodeURIComponent(hash.slice(1));
+    const start = performance.now();
+    let raf = 0;
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ block: 'start' });
+        return;
+      }
+      if (performance.now() - start < 3000) raf = requestAnimationFrame(tryScroll);
+    };
+    tryScroll();
+    return () => cancelAnimationFrame(raf);
+  }, [pathname, hash]);
   return null;
 };
 
@@ -110,7 +127,7 @@ export const App: React.FC = () => {
                   <Route path="/work/:slug" element={<CaseStudyPage />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/team" element={<Team />} />
+                  <Route path="/team" element={<Navigate to="/about#team" replace />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/contact" element={<Contact />} />
@@ -156,7 +173,7 @@ export const App: React.FC = () => {
                   <Route path="/portal/directory" element={<ProtectedRoute><PeopleDirectoryView /></ProtectedRoute>} />
                   <Route path="/portal/announcements" element={<ProtectedRoute><AnnouncementsFeed /></ProtectedRoute>} />
                   <Route path="/portal/certificates" element={<ProtectedRoute><CertificateManager /></ProtectedRoute>} />
-                  <Route path="/portal/cms" element={<ProtectedRoute><SiteContentManager /></ProtectedRoute>} />
+                  <Route path="/portal/cms" element={<ProtectedRoute allow={PERMISSIONS.canEditWebsiteContent}><SiteContentManager /></ProtectedRoute>} />
                   <Route path="/portal/migration" element={<ProtectedRoute><PortalDashboard /></ProtectedRoute>} />
                   <Route path="/portal/ledger" element={<Navigate to="/portal/dashboard" replace />} />
                   <Route path="/portal/settings" element={<Navigate to="/portal/dashboard" replace />} />

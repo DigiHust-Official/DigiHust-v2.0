@@ -490,6 +490,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Auth Handlers
   const currentTier = getUserRoleTier(currentUser);
 
+  // ── SINGLE GATE FOR ALL site_content WRITES ──
+  // Only a logged-in admin (ceo / manager / role==='management') may persist CMS
+  // content (case studies included). Must be logged in: when logged out,
+  // currentUser falls back to the CEO seed account, so the role check alone is not enough.
+  // NOTE: client-side only; the database must enforce the same rule
+  // (docs/ui-changes/sql/case-study-rls.sql).
+  const canWriteSiteContent = (): boolean =>
+    isAuthenticated && PERMISSIONS.canEditWebsiteContent(currentTier, currentUser);
+
+  const persistSiteContent = (content: SiteContent): boolean => {
+    if (!canWriteSiteContent()) {
+      console.warn('[CMS] Blocked site_content write: current user is not an admin.');
+      return false;
+    }
+    dbService.saveSiteContent(content).then((res) => {
+      if (!res.success) {
+        showToast(
+          `Your changes were not saved to the database (${res.error || 'permission denied'}). Reload and try again, or contact an administrator.`,
+          'error',
+          'Save failed',
+          8000
+        );
+      }
+    });
+    return true;
+  };
+
   const loginWithMemberId = (identifier: string, password?: string): { success: boolean; error?: string } => {
     const cleanId = identifier.trim().toLowerCase();
 
@@ -828,13 +855,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         tm => tm.id !== targetUserId && tm.name.toLowerCase().trim() !== targetUser.name.toLowerCase().trim()
       );
       if (updatedTeamMembers.length !== siteContent.teamMembers.length) {
-        const updatedSiteContent = {
-          ...siteContent,
-          teamMembers: updatedTeamMembers
-        };
-        setSiteContent(updatedSiteContent);
-        dbService.saveSiteContent(updatedSiteContent);
-        realtimeSync.broadcast('CMS_UPDATED', updatedSiteContent);
+        setSiteContent((prev) => {
+          const updatedSiteContent = { ...prev, teamMembers: updatedTeamMembers };
+          if (persistSiteContent(updatedSiteContent)) {
+            realtimeSync.broadcast('CMS_UPDATED', updatedSiteContent);
+          }
+          return updatedSiteContent;
+        });
       }
     }
 
@@ -1353,12 +1380,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       createdAt: new Date().toISOString().split('T')[0]
     };
 
-    const newContent = {
-      ...siteContent,
-      certificateTemplates: [...(siteContent.certificateTemplates || certificateTemplates), newTpl]
-    };
-    setSiteContent(newContent);
-    dbService.saveSiteContent(newContent);
+    setSiteContent((prev) => {
+      const newContent = {
+        ...prev,
+        certificateTemplates: [...(prev.certificateTemplates || certificateTemplates), newTpl]
+      };
+      persistSiteContent(newContent);
+      return newContent;
+    });
 
     const auditEntry: SecurityAuditLog = {
       id: `audit-${Date.now()}`,
@@ -1376,21 +1405,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateCertificateTemplate = (templateId: string, updates: Partial<CertificateTemplate>) => {
-    const newContent = {
-      ...siteContent,
-      certificateTemplates: (siteContent.certificateTemplates || certificateTemplates).map(t => t.id === templateId ? { ...t, ...updates } : t)
-    };
-    setSiteContent(newContent);
-    dbService.saveSiteContent(newContent);
+    setSiteContent((prev) => {
+      const newContent = {
+        ...prev,
+        certificateTemplates: (prev.certificateTemplates || certificateTemplates).map(t => t.id === templateId ? { ...t, ...updates } : t)
+      };
+      persistSiteContent(newContent);
+      return newContent;
+    });
   };
 
   const deleteCertificateTemplate = (templateId: string) => {
-    const newContent = {
-      ...siteContent,
-      certificateTemplates: (siteContent.certificateTemplates || certificateTemplates).filter(t => t.id !== templateId)
-    };
-    setSiteContent(newContent);
-    dbService.saveSiteContent(newContent);
+    setSiteContent((prev) => {
+      const newContent = {
+        ...prev,
+        certificateTemplates: (prev.certificateTemplates || certificateTemplates).filter(t => t.id !== templateId)
+      };
+      persistSiteContent(newContent);
+      return newContent;
+    });
   };
 
   const generateMemberCertificate = (memberId: string, templateId?: string, overrides?: Partial<Certificate>): Certificate => {
@@ -1992,7 +2025,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // ── FULL-SCOPE LIVE WEBSITE CMS STUDIO ACTIONS (WITH DYNAMIC ADD & REMOVE) ──
 
   const updateSiteContent = (section: keyof SiteContent | Partial<SiteContent>, data?: any) => {
-    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    if (!canWriteSiteContent()) return;
 
     setSiteContent((prev) => {
       const newContent: SiteContent = typeof section === 'string'
@@ -2000,7 +2033,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         : { ...prev, ...section };
 
       safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
-      dbService.saveSiteContent(newContent);
+      persistSiteContent(newContent);
       realtimeSync.broadcast('CMS_UPDATED', newContent);
       return newContent;
     });
@@ -2019,7 +2052,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addItemToSiteContent = <K extends keyof SiteContent>(section: K, item: any) => {
-    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    if (!canWriteSiteContent()) return;
 
     const guaranteedItem = {
       ...item,
@@ -2033,7 +2066,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         [section]: [...currentList, guaranteedItem]
       };
       safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
-      dbService.saveSiteContent(newContent);
+      persistSiteContent(newContent);
       realtimeSync.broadcast('CMS_UPDATED', newContent);
       return newContent;
     });
@@ -2056,7 +2089,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     itemId: string,
     targetIndex?: number
   ) => {
-    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    if (!canWriteSiteContent()) return;
 
     setSiteContent((prev) => {
       const currentList = Array.isArray(prev[section]) ? ([...prev[section] as any[]]) : [];
@@ -2076,7 +2109,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       };
 
       safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
-      dbService.saveSiteContent(newContent);
+      persistSiteContent(newContent);
       realtimeSync.broadcast('CMS_UPDATED', newContent);
       return newContent;
     });
@@ -2100,7 +2133,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updatedItem: any,
     targetIndex?: number
   ) => {
-    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    if (!canWriteSiteContent()) return;
 
     setSiteContent((prev) => {
       const currentList = Array.isArray(prev[section]) ? ([...prev[section] as any[]]) : [];
@@ -2135,17 +2168,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       };
 
       safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(newContent));
-      dbService.saveSiteContent(newContent);
+      persistSiteContent(newContent);
       realtimeSync.broadcast('CMS_UPDATED', newContent);
       return newContent;
     });
   };
 
   const resetSiteContent = () => {
-    if (!PERMISSIONS.canEditWebsiteContent(currentTier, currentUser)) return;
+    if (!canWriteSiteContent()) return;
     setSiteContent(DEFAULT_SITE_CONTENT);
     safeSetItem(`${LOCAL_STORAGE_KEY}_site_content`, JSON.stringify(DEFAULT_SITE_CONTENT));
-    dbService.saveSiteContent(DEFAULT_SITE_CONTENT);
+    persistSiteContent(DEFAULT_SITE_CONTENT);
     realtimeSync.broadcast('CMS_UPDATED', DEFAULT_SITE_CONTENT);
 
     const auditEntry: SecurityAuditLog = {
@@ -2163,10 +2196,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // ── PINNED MEMBERS  Persisted to Supabase for cross-device sync ─────────
   const updatePinnedMembers = (pinnedIds: string[]) => {
-    const newContent = { ...siteContent, pinnedMemberIds: pinnedIds };
-    setSiteContent(newContent);
-    dbService.saveSiteContent(newContent);
-    realtimeSync.broadcast('CMS_UPDATED', newContent);
+    // Non-admins (and other tabs echoing a PINNED_UPDATED broadcast) only update
+    // their local view; they never write site_content.
+    const allowed = canWriteSiteContent();
+    // Build on the LATEST content (functional update), not a possibly stale closure,
+    // so pinning can never roll back newer CMS edits such as case studies.
+    setSiteContent((prev) => {
+      const newContent = { ...prev, pinnedMemberIds: pinnedIds };
+      if (allowed) {
+        persistSiteContent(newContent);
+        realtimeSync.broadcast('CMS_UPDATED', newContent);
+      }
+      return newContent;
+    });
     // Also sync to localStorage as fast local cache
     try { localStorage.setItem('digihust_pinned_members', JSON.stringify(pinnedIds)); } catch { }
   };

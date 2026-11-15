@@ -85,7 +85,7 @@ export const NotFoundPage: React.FC = () => {
           {[
             { label: 'Our Work', href: '/work' },
             { label: 'How We Work', href: '/how-it-works' },
-            { label: 'Our Team', href: '/team' },
+            { label: 'Our Team', href: '/about#team' },
             { label: 'Get a Quote', href: '/contact' },
           ].map((item) => (
             <Link

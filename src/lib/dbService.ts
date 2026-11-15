@@ -499,8 +499,9 @@ export const dbService = {
   },
 
   // ── 8. Site Content (CMS) with Safety Snapshot ──
-  async saveSiteContent(content: SiteContent) {
-    if (!isSupabaseConfigured || !supabase || !content) return;
+  async saveSiteContent(content: SiteContent): Promise<{ success: boolean; error?: string }> {
+    // Local/offline mode: nothing to persist remotely, not a failure.
+    if (!isSupabaseConfigured || !supabase || !content) return { success: true };
 
     // Safety Snapshot: store snapshot locally before writing to prevent irrecoverable loss
     try {
@@ -516,13 +517,20 @@ export const dbService = {
     }
 
     try {
-      await supabase.from('site_content').upsert({
+      // supabase-js does not throw on RLS/permission errors; it returns { error }.
+      const { error } = await supabase.from('site_content').upsert({
         id: 'primary_cms',
         data: content,
         updated_at: new Date().toISOString()
       });
-    } catch (err) {
+      if (error) {
+        console.error('Failed to save CMS site content in Supabase:', error);
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
       console.error('Failed to save CMS site content in Supabase:', err);
+      return { success: false, error: err?.message || 'Network error' };
     }
   },
 

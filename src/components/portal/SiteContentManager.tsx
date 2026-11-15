@@ -228,7 +228,7 @@ export const SiteContentManager: React.FC = () => {
           <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto mb-3" />
           <h2 className="font-display font-bold text-lg text-[var(--text-heading)] mb-1">Restricted Access</h2>
           <p className="text-xs text-[var(--text-body)] mb-4">
-            Only Executive CEO authority (or users with delegated CMS permissions) can access the Live Website CMS Studio.
+            Only management (CEO or managers) can access the Live Website CMS Studio.
           </p>
           <a
             href="/portal/dashboard"
@@ -356,7 +356,17 @@ export const SiteContentManager: React.FC = () => {
 
   const handleSaveCareers = (e: React.FormEvent) => {
     e.preventDefault();
-    updateSiteContent('careers', careersDraft);
+    const openPositions = (careersDraft.openPositions || []).map((pos) => ({
+      ...pos,
+      applyUrl: pos.applyUrl?.trim() || undefined,
+    }));
+    if (openPositions.some((pos) => pos.applyUrl && !pos.applyUrl.startsWith('https://'))) {
+      showToast('Every application form link must start with https://', 'error');
+      return;
+    }
+    const cleaned = { ...careersDraft, openPositions };
+    setCareersDraft(cleaned);
+    updateSiteContent('careers', cleaned);
     triggerSaved('Careers page updated live!');
   };
 
@@ -656,7 +666,7 @@ export const SiteContentManager: React.FC = () => {
           { id: 'work' as const,        label: '4. Work (Portfolio)', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'live',     tip: 'Manage 16:9 cards, sliding hover panels, and case study detail pages' },
           { id: 'caseStudies' as const, label: 'Legacy Case Studies', icon: <Briefcase className="w-3.5 h-3.5" />,    status: 'fallback', tip: 'Legacy portfolio items' },
           { id: 'testimonials' as const,label: '5. Testimonials',     icon: <Star className="w-3.5 h-3.5" />,         status: 'live',     tip: 'Client reviews shown on homepage' },
-          { id: 'team' as const,        label: '6. Team Profiles',    icon: <Users className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Team members shown on the /team page' },
+          { id: 'team' as const,        label: '6. Team Profiles',    icon: <Users className="w-3.5 h-3.5" />,        status: 'live',     tip: 'Team members shown in the team section of the About page' },
           { id: 'blog' as const,        label: '7. Blog & Insights',  icon: <FileText className="w-3.5 h-3.5" />,     status: 'live',     tip: 'Manage articles and technical guides on /blog and /blog/:slug' },
           { id: 'faqs' as const,        label: '8. FAQs',             icon: <HelpCircle className="w-3.5 h-3.5" />,   status: 'live',     tip: 'Frequently asked questions shown across the platform' },
           { id: 'about' as const,       label: '9. Company Story',    icon: <Info className="w-3.5 h-3.5" />,         status: 'live',     tip: 'Mission, vision, and company story shown on /about page' },
@@ -1594,6 +1604,34 @@ export const SiteContentManager: React.FC = () => {
         {/* ── TAB 3: CASE STUDIES & PROJECTS ── */}
       {activeTab === 'caseStudies' && (
         <div className="space-y-6">
+          {safeContent.workSource === 'work' ? (
+            <div role="note" className="p-4 rounded-2xl border border-[var(--brand-teal)] bg-[var(--brand-teal-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-xs text-[var(--text-body)]">
+                <span className="font-bold text-[var(--text-heading)]">Not used on the website anymore.</span>{' '}
+                The home page, /portfolio and case study pages now use &quot;4. Work (Portfolio)&quot;. Edit projects there.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('work')}
+                className="px-3.5 py-2 rounded-xl bg-[var(--brand-teal)] text-white text-xs font-bold shrink-0 w-fit"
+              >
+                Go to Work (Portfolio)
+              </button>
+            </div>
+          ) : (
+            <div role="note" className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-xs text-[var(--text-body)]">
+                These projects are on the home page, but their case study pages can only be fully edited in &quot;4. Work (Portfolio)&quot;. Import them there once (one click).
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('work')}
+                className="px-3.5 py-2 rounded-xl bg-[var(--brand-teal)] text-white text-xs font-bold shrink-0 w-fit"
+              >
+                Open Work (Portfolio)
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
             <h3 className="font-display font-extrabold text-base text-[var(--text-heading)]">Portfolio Projects & Case Studies ({(siteContent.caseStudies || []).length})</h3>
             <div className="flex items-center gap-2">
@@ -2246,7 +2284,7 @@ export const SiteContentManager: React.FC = () => {
                 Public Team Specialists & Domain Leads ({(siteContent.teamMembers || []).length})
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Manage the specialist profiles showcased on the public /team directory.
+                Manage the specialist profiles showcased on the team section of the About page.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -3307,11 +3345,12 @@ export const SiteContentManager: React.FC = () => {
                     newArr.splice(idx, 1);
                     setCareersDraft({ ...careersDraft, openPositions: newArr });
                   }}
+                  aria-label={`Remove position ${pos.title || idx + 1}`}
                   className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-rose-400"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pr-8">
                   <input
                     type="text"
                     placeholder="Job Title"
@@ -3346,6 +3385,40 @@ export const SiteContentManager: React.FC = () => {
                     className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-xs"
                   />
                 </div>
+                {(() => {
+                  const url = (pos.applyUrl || '').trim();
+                  const invalid = url !== '' && !url.startsWith('https://');
+                  const inputId = `career-apply-url-${idx}`;
+                  const hintId = `${inputId}-hint`;
+                  return (
+                    <div className="mt-3">
+                      <label htmlFor={inputId} className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">
+                        Application form link
+                      </label>
+                      <input
+                        id={inputId}
+                        type="url"
+                        inputMode="url"
+                        placeholder="Google Form link (https://forms.gle/...)"
+                        value={pos.applyUrl || ''}
+                        aria-invalid={invalid}
+                        aria-describedby={hintId}
+                        onChange={(e) => {
+                          const newArr = careersDraft.openPositions.map((p, i) => (i === idx ? { ...p, applyUrl: e.target.value } : p));
+                          setCareersDraft({ ...careersDraft, openPositions: newArr });
+                        }}
+                        className={`w-full bg-[var(--bg-surface)] border rounded-lg px-3 py-2 text-xs ${invalid ? 'border-rose-400' : 'border-[var(--border-subtle)]'}`}
+                      />
+                      <p id={hintId} className={`mt-1 text-[11px] ${invalid ? 'text-rose-400' : 'text-[var(--text-muted)]'}`}>
+                        {invalid
+                          ? 'Link must start with https://'
+                          : url
+                            ? 'Apply Now opens this form in a new tab.'
+                            : 'Without a link, Apply Now opens an email to digihust@gmail.com.'}
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
