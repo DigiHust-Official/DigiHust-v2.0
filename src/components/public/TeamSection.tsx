@@ -711,11 +711,6 @@ export const TeamSection: React.FC = () => {
                         <p className="text-sm font-bold mt-1 text-[var(--brand-teal)]">
                           {selectedMember.role}
                         </p>
-                        {selectedMember.digiskillBatch && (
-                          <p className="text-xs text-[var(--text-muted)] mt-1">
-                            {selectedMember.digiskillBatch}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
