@@ -157,11 +157,12 @@ export function useHeroHardScroll({
         stops.push(Math.round(top));
       }
 
-      // Stop 5: Feedback top
+      // Stop 5: Feedback top (subtract navbar height so section fills viewport below navbar)
       const fbEl = document.querySelector<HTMLElement>('[data-hard-stop="feedback"]');
       if (fbEl) {
-        const top = fbEl.getBoundingClientRect().top + window.scrollY;
-        stops.push(Math.round(top));
+        const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dh-nav-bottom')) || 64;
+        const top = fbEl.getBoundingClientRect().top + window.scrollY - navH;
+        stops.push(Math.max(0, Math.round(top)));
       }
 
       return stops;

@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView, useReducedMotion, type Variants } from 'framer-motion';
 import {
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   Code,
@@ -217,6 +218,303 @@ const containerVariants: Variants = {
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
+interface TestimonialData {
+  id?: string | number;
+  name: string;
+  role: string;
+  company?: string;
+  quote: string;
+  avatar?: string;
+  avatarUrl?: string;
+  rating?: number;
+}
+
+interface HomeTestimonialsSectionProps {
+  testimonials: TestimonialData[];
+  t: (key: string) => string;
+}
+
+const HomeTestimonialsSection: React.FC<HomeTestimonialsSectionProps> = ({ testimonials, t }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
+  const [cardStep, setCardStep] = useState(300);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateMetrics = () => {
+      if (!trackRef.current) return;
+      const firstCard = trackRef.current.querySelector<HTMLElement>('[data-testimonial-card]');
+      if (firstCard) {
+        const rect = firstCard.getBoundingClientRect();
+        // 24px gap (gap-6)
+        setCardStep(rect.width + 24);
+      }
+    };
+    updateMetrics();
+    window.addEventListener('resize', updateMetrics);
+    return () => window.removeEventListener('resize', updateMetrics);
+  }, [testimonials]);
+
+  const maxIndex = Math.max(0, testimonials.length - 1);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+  };
+
+  const handleDragEnd = (
+    _: unknown,
+    info: { offset: { x: number }; velocity: { x: number } }
+  ) => {
+    const swipeThreshold = 50;
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -250) {
+      handleNext();
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > 250) {
+      handlePrev();
+    }
+  };
+
+  const progressPercent = testimonials.length > 1
+    ? ((currentIndex + 1) / testimonials.length) * 100
+    : 100;
+
+  return (
+    <section
+      id="feedback"
+      data-hard-stop="feedback"
+      style={{
+        scrollMarginTop: 'var(--dh-nav-bottom, 64px)',
+        scrollPaddingTop: 'var(--dh-nav-bottom, 64px)',
+        height: 'calc(100svh - var(--dh-nav-bottom, 64px))',
+        minHeight: 'calc(100svh - var(--dh-nav-bottom, 64px))',
+        background: 'linear-gradient(to bottom, var(--bg-page), color-mix(in srgb, var(--brand-teal) 3.5%, var(--bg-page)))',
+      }}
+      className="flex flex-col justify-between px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12 border-t border-[var(--border-subtle)] overflow-hidden relative select-none"
+    >
+      <style>{`
+        #feedback {
+          --testimonial-even-bg: color-mix(in srgb, var(--brand-teal) 9%, var(--bg-surface));
+          --testimonial-even-border: color-mix(in srgb, var(--brand-teal) 22%, var(--border-subtle));
+        }
+        .dark #feedback, [data-theme="dark"] #feedback {
+          --testimonial-even-bg: color-mix(in srgb, black 32%, var(--bg-surface));
+          --testimonial-even-border: rgba(255, 255, 255, 0.1);
+        }
+      `}</style>
+
+      {/* Header Block: Centered title & subtitle, sized with clamp() */}
+      <div className="text-center mb-2 sm:mb-4 lg:mb-6 max-w-4xl mx-auto flex-none">
+        <h2 className="font-display font-extrabold text-[clamp(1.5rem,2.8vw,2.25rem)] text-[var(--text-heading)] mb-2 leading-tight tracking-tight">
+          {t('testimonials_heading')}
+        </h2>
+        <p className="text-[var(--text-body)] text-[clamp(0.8125rem,1.1vw,0.9375rem)] max-w-[56rem] mx-auto leading-relaxed text-center">
+          {t('testimonials_sub')}
+        </p>
+      </div>
+
+      {/* Carousel Block: flex-1, vertically centered */}
+      <div className="w-full max-w-7xl mx-auto flex-1 min-h-0 flex flex-col justify-center">
+        <div className="flex flex-col md:flex-row items-center md:items-center gap-6 sm:gap-8 md:gap-10 lg:gap-14 w-full">
+          {/* Left Column (about 26-28% width on desktop, compact on mobile) */}
+          <div className="w-full md:w-[28%] lg:w-[27%] flex-shrink-0 flex flex-col sm:flex-row md:flex-col justify-between items-start sm:items-center md:items-start gap-4 sm:gap-6 self-stretch">
+            {/* Quote icon ABOVE the heading */}
+            <div className="flex flex-col items-start gap-3 sm:gap-4">
+              {/* Solid rounded quote mark icon (about clamp(56px, 5vw, 80px) in accent token) */}
+              <div
+                className="w-[clamp(56px,5vw,80px)] h-[clamp(44px,4vw,64px)] text-[var(--brand-teal)] opacity-30 dark:opacity-25 flex-shrink-0"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 72 60"
+                  fill="currentColor"
+                  className="w-full h-full"
+                >
+                  <path d="M0 34.286C0 15.357 12.857 2.143 30.857 0l3.429 8.571C22.286 10.714 15.429 17.571 14.571 27.429H30.857V60H0V34.286zm37.714 0C37.714 15.357 50.571 2.143 68.571 0l3.429 8.571c-12 2.143-18.857 9-19.714 18.858H68.571V60H37.714V34.286z" />
+                </svg>
+              </div>
+
+              {/* Heading below quote icon in clamp(1.75rem, 2.6vw, 2.75rem), line-height 1.15 */}
+              <h3 className="font-sans font-light text-[clamp(1.75rem,2.6vw,2.75rem)] text-[var(--text-heading)] leading-[1.15] tracking-tight">
+                What our<br className="hidden sm:inline" /> clients are<br className="hidden sm:inline" /> saying
+              </h3>
+            </div>
+
+            {/* Navigation controls row: prev arrow, thin progress bar, next arrow */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 mt-[clamp(1.5rem,4vh,3rem)]">
+              <button
+                type="button"
+                onClick={handlePrev}
+                disabled={currentIndex === 0}
+                aria-label="Previous testimonial"
+                className="w-12 h-12 rounded-full flex items-center justify-center border border-[var(--border-subtle)] text-[var(--text-heading)] hover:bg-[var(--bg-surface)] hover:border-[var(--brand-teal)]/40 disabled:opacity-25 disabled:cursor-not-allowed transition-all active:scale-95 flex-shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 text-[var(--text-heading)]" />
+              </button>
+
+              {/* Thin progress bar: 4px thick */}
+              <div className="w-28 sm:w-36 md:w-44 h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden relative flex-shrink-0">
+                <div
+                  className="h-full bg-[var(--brand-teal)] rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={currentIndex >= maxIndex}
+                aria-label="Next testimonial"
+                className="w-12 h-12 rounded-full flex items-center justify-center border border-[var(--border-subtle)] text-[var(--text-heading)] hover:bg-[var(--bg-surface)] hover:border-[var(--brand-teal)]/40 disabled:opacity-25 disabled:cursor-not-allowed transition-all active:scale-95 flex-shrink-0"
+              >
+                <ArrowRight className="w-5 h-5 text-[var(--text-heading)]" />
+              </button>
+            </div>
+          </div>
+
+          {/* Right Side Carousel Track (about 72-74% width, bleeds off right edge) */}
+          <div
+            className="w-full md:w-[72%] lg:w-[73%] flex-1 min-w-0 overflow-hidden relative py-2 md:-mr-[max(0px,calc((100vw-80rem)/2))] md:pr-6"
+            tabIndex={0}
+            aria-label="Client testimonials carousel"
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowLeft') handlePrev();
+              else if (e.key === 'ArrowRight') handleNext();
+            }}
+          >
+            <motion.div
+              ref={trackRef}
+              className="flex gap-6 cursor-grab active:cursor-grabbing select-none items-stretch"
+              animate={{ x: -currentIndex * cardStep }}
+              transition={{ type: 'spring' as const, stiffness: 280, damping: 28 }}
+              drag="x"
+              dragDirectionLock
+              dragConstraints={{ left: -maxIndex * cardStep, right: 0 }}
+              dragElastic={0.15}
+              onDragEnd={handleDragEnd}
+            >
+              {testimonials.map((tItem, idx) => {
+                const isEven = idx % 2 === 1;
+                const initials = (tItem.name || 'DH')
+                  .split(' ')
+                  .map((n: string) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2);
+
+                const isHovered = hoveredCardIndex === idx;
+                const cardBg = isEven ? 'var(--testimonial-even-bg)' : 'var(--bg-surface)';
+                const cardBorder = isEven ? 'var(--testimonial-even-border)' : 'var(--border-subtle)';
+
+                return (
+                  <div
+                    key={tItem.id || tItem.name || idx}
+                    data-testimonial-card
+                    className="flex-shrink-0 w-[clamp(260px,24vw,340px)] flex flex-col group/card relative"
+                  >
+                    {/* Speech Bubble Card: taller content-safe height */}
+                    <div
+                      className="relative rounded-[20px] p-[clamp(1.25rem,1.8vw,1.75rem)] pb-[clamp(1.75rem,2.2vw,2.25rem)] shadow-sm transition-shadow hover:shadow-md min-h-[clamp(300px,44vh,440px)] flex flex-col justify-between border"
+                      style={{
+                        backgroundColor: cardBg,
+                        borderColor: cardBorder,
+                      }}
+                      onMouseEnter={() => setHoveredCardIndex(idx)}
+                      onMouseLeave={() => setHoveredCardIndex(null)}
+                      onClick={() => setHoveredCardIndex(isHovered ? null : idx)}
+                    >
+                      {/* Quote Text */}
+                      <blockquote className="font-sans font-normal text-[clamp(0.8125rem,0.95vw,0.9375rem)] leading-[1.6] text-[var(--text-body)] line-clamp-9 overflow-hidden select-text">
+                        &ldquo;{tItem.quote}&rdquo;
+                      </blockquote>
+
+                      {/* Speech-bubble tail notch pointing down-left */}
+                      <div className="absolute -bottom-[10px] left-7 w-[18px] h-[11px] pointer-events-none">
+                        <svg
+                          viewBox="0 0 18 11"
+                          className="w-full h-full overflow-visible"
+                          aria-hidden="true"
+                        >
+                          <polygon
+                            points="0,0 18,0 3,11 0,8"
+                            fill={cardBg}
+                          />
+                          <polyline
+                            points="0,0 0,8 3,11 18,0"
+                            fill="none"
+                            stroke={cardBorder}
+                            strokeWidth="1.2"
+                          />
+                          <line
+                            x1="0.5"
+                            y1="0"
+                            x2="17.5"
+                            y2="0"
+                            stroke={cardBg}
+                            strokeWidth="2.5"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Expanded Popover on Hover/Focus/Tap with zero layout shift */}
+                      {isHovered && (
+                        <div
+                          className="absolute inset-0 z-20 rounded-[20px] p-[clamp(1.25rem,1.8vw,1.75rem)] pb-[clamp(1.75rem,2.2vw,2.25rem)] shadow-xl flex flex-col justify-between overflow-y-auto cursor-auto border"
+                          style={{
+                            backgroundColor: cardBg,
+                            borderColor: cardBorder,
+                          }}
+                          role="tooltip"
+                        >
+                          <blockquote className="font-sans font-normal text-[clamp(0.8125rem,0.95vw,0.9375rem)] leading-[1.6] text-[var(--text-body)] select-text">
+                            &ldquo;{tItem.quote}&rdquo;
+                          </blockquote>
+                          <div className="text-[11px] text-[var(--text-muted)] pt-3 border-t border-[var(--border-subtle)]/60 flex items-center justify-between">
+                            <span>Client Feedback</span>
+                            <span className="font-mono text-[10px] opacity-75">Click to close</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Below Card: Author Row (outside card, under tail) */}
+                    <div className="mt-4 pl-1 flex items-center gap-3.5">
+                      {tItem.avatarUrl || tItem.avatar ? (
+                        <img
+                          src={tItem.avatarUrl || tItem.avatar}
+                          alt={tItem.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-[var(--brand-teal)]/40 flex-shrink-0 shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-[var(--brand-teal)]/15 dark:bg-[var(--brand-teal)]/25 text-[var(--brand-teal)] dark:text-cyan-300 font-display font-bold text-xs sm:text-sm flex items-center justify-center ring-2 ring-[var(--brand-teal)]/40 flex-shrink-0 shadow-sm">
+                          {initials}
+                        </div>
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-[0.9375rem] text-[var(--text-heading)] truncate">
+                          {tItem.name}
+                        </div>
+                        <div className="text-[0.75rem] text-[var(--text-muted)] truncate max-w-[220px]">
+                          {tItem.role}{tItem.company ? `, ${tItem.company}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export const Home: React.FC = () => {
@@ -514,107 +812,7 @@ export const Home: React.FC = () => {
       <WorkShowcaseSection />
 
       {/* ── SECTION 5: CLIENT FEEDBACK ── */}
-      <section id="feedback" data-hard-stop="feedback" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <div className="inline-block relative">
-              <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-heading)] mb-3">
-                {t('testimonials_heading')}
-              </h2>
-            </div>
-            <p className="text-[var(--text-body)] text-sm">
-              {t('testimonials_sub')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 pt-4 items-stretch">
-            {testimonials.slice(0, 3).map((tItem: any, idx: number) => {
-              const isMiddle = idx === 1;
-              const initials = (tItem.name || 'DH')
-                .split(' ')
-                .map((n: string) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2);
-
-              return (
-                <figure
-                  key={tItem.id || tItem.name || idx}
-                  className={`relative rounded-[20px] shadow-md p-7 pt-12 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl select-none ${
-                    isMiddle
-                      ? 'bg-[#E3EFF3] dark:bg-[#0c4458] text-[var(--text-body)] dark:text-white border border-[#1F7A8C]/35 dark:border-[#22A0B4]/40 shadow-lg'
-                      : 'bg-[var(--bg-surface)] text-[var(--text-body)] border border-[var(--border-subtle)]'
-                  }`}
-                >
-                  {/* Overlapping 72px Circular Avatar (-top-9) with 4px surface-colored ring */}
-                  <div className="absolute -top-9 left-7">
-                    {tItem.avatarUrl || tItem.avatar ? (
-                      <img
-                        src={tItem.avatarUrl || tItem.avatar}
-                        alt={tItem.name}
-                        width={72}
-                        height={72}
-                        loading="lazy"
-                        decoding="async"
-                        className={`w-[72px] h-[72px] rounded-full object-cover ring-4 ${
-                          isMiddle ? 'ring-[#E3EFF3] dark:ring-[#0c4458]' : 'ring-[var(--bg-surface)]'
-                        } shadow-md`}
-                      />
-                    ) : (
-                      <div
-                        className={`w-[72px] h-[72px] rounded-full flex items-center justify-center font-display font-bold text-lg ring-4 ${
-                          isMiddle
-                            ? 'bg-[#1F7A8C] text-white ring-[#E3EFF3] dark:ring-[#0c4458]'
-                            : 'bg-[#1F7A8C]/15 dark:bg-cyan-400/20 text-[#1F7A8C] dark:text-cyan-300 ring-[var(--bg-surface)]'
-                        } shadow-md`}
-                      >
-                        {initials}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body with Accent Quote Glyph */}
-                  <div>
-                    {/* Brand Accent Quote Glyph in Outfit */}
-                    <div
-                      className={`font-display font-extrabold leading-none mb-3 select-none ${
-                        isMiddle
-                          ? 'text-[#1F7A8C] dark:text-cyan-300 text-5xl sm:text-6xl'
-                          : 'text-[var(--brand-teal-text)] text-4xl sm:text-5xl'
-                      }`}
-                      aria-hidden="true"
-                    >
-                      &ldquo;
-                    </div>
-
-                    <blockquote
-                      className={`font-sans text-[15px] sm:text-[16px] leading-[1.6] mb-6 ${
-                        isMiddle ? 'text-[var(--text-body)] dark:text-white/90' : 'text-[var(--text-body)]'
-                      }`}
-                    >
-                      &ldquo;{tItem.quote}&rdquo;
-                    </blockquote>
-                  </div>
-
-                  {/* Figcaption with semibold name and muted role */}
-                  <figcaption
-                    className={`pt-4 border-t ${
-                      isMiddle ? 'border-[#1F7A8C]/20 dark:border-white/15' : 'border-[var(--border-subtle)]'
-                    }`}
-                  >
-                    <div className={`font-semibold text-sm ${isMiddle ? 'text-[var(--text-heading)] dark:text-white' : 'text-[var(--text-heading)]'}`}>
-                      {tItem.name}
-                    </div>
-                    <div className={`text-xs ${isMiddle ? 'text-[var(--text-muted)] dark:text-white/70' : 'text-[var(--text-muted)]'}`}>
-                      {tItem.role}{tItem.company ? `, ${tItem.company}` : ''}
-                    </div>
-                  </figcaption>
-                </figure>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <HomeTestimonialsSection testimonials={testimonials} t={t} />
 
       {/* ── SECTION 6: FREQUENTLY ASKED QUESTIONS ── */}
       <section id="home-faq" className="py-24 px-6 lg:px-8 border-t border-[var(--border-subtle)] bg-[var(--bg-page)] relative">
