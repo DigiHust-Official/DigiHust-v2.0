@@ -111,6 +111,71 @@ const MOVE_THROTTLE_MS = 150;
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
+/* ── Card photo mode ────────────────────────────────────────────────────────
+ * cutout   transparent PNG → contain, standing on the bottom of the tinted zone
+ * photo    old photo with a background → cover, fills the zone
+ * fallback generated initials (ui-avatars) → centred disc
+ * Detection reads the alpha of the image's top corners once it has loaded
+ * (needs CORS; if that fails the image is reloaded without it as a photo).
+ */
+type AvatarMode = 'cutout' | 'photo' | 'fallback';
+const avatarModeCache = new Map<string, AvatarMode>();
+const isFallbackAvatar = (src: string) => src.includes('ui-avatars.com');
+
+const detectAvatarMode = (img: HTMLImageElement): AvatarMode => {
+  try {
+    const size = 16;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return 'photo';
+    ctx.drawImage(img, 0, 0, size, size);
+    const { data } = ctx.getImageData(0, 0, size, 1);
+    const topLeftAlpha = data[3];
+    const topRightAlpha = data[(size - 1) * 4 + 3];
+    return topLeftAlpha < 128 || topRightAlpha < 128 ? 'cutout' : 'photo';
+  } catch {
+    // Tainted canvas (no CORS) → treat as a normal photo
+    return 'photo';
+  }
+};
+
+const useAvatarMode = (src: string) => {
+  const known = isFallbackAvatar(src) ? 'fallback' : avatarModeCache.get(src);
+  const [mode, setMode] = useState<AvatarMode | undefined>(known);
+  const [useCors, setUseCors] = useState(known === undefined);
+
+  useEffect(() => {
+    const next = isFallbackAvatar(src) ? 'fallback' : avatarModeCache.get(src);
+    setMode(next);
+    setUseCors(next === undefined);
+  }, [src]);
+
+  const settle = (next: AvatarMode) => {
+    avatarModeCache.set(src, next);
+    setMode(next);
+  };
+
+  return {
+    // Styled as a cutout until known; the zone has a fixed size so nothing shifts
+    mode: mode ?? 'cutout',
+    crossOrigin: useCors ? ('anonymous' as const) : undefined,
+    onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
+      if (mode) return;
+      settle(useCors ? detectAvatarMode(e.currentTarget) : 'photo');
+    },
+    onError: () => {
+      if (useCors) {
+        // Retry once without CORS; it can't be inspected, so show it as a photo
+        setUseCors(false);
+        return;
+      }
+      if (!mode) settle('photo');
+    },
+  };
+};
+
 interface HangingCardProps {
   member: TeamMember;
   variant: 'member' | 'intern';
@@ -174,10 +239,11 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
     onOpen(member);
   };
 
-  const isHaris = member.id === 'usr-1787949460689' || member.name.toLowerCase().includes('haris');
+  const avatar = useAvatarMode(member.img);
+  const isIntern = variant === 'intern';
 
   return (
-    <motion.li className="hc" style={{ zIndex }}>
+    <motion.li className={`hc hc--${variant}`} style={{ zIndex }}>
       <motion.div
         className="hc__pendulum"
         style={reduceMotion ? undefined : { rotate, transformOrigin: '50% 0%' }}
@@ -189,27 +255,39 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
         <span className="hc__string" aria-hidden="true" />
         <span className="hc__clip" aria-hidden="true" />
         <article
-          className={`hc__card hc__card--${variant} bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-md hover:shadow-lg transition-shadow`}
+          className={`hc__card hc__card--${variant} bg-[var(--bg-surface)] border border-[var(--border-subtle)]`}
           onClick={handleCardClick}
         >
-          <div className="hc__photo">
+          <div className="hc__photo" data-mode={avatar.mode}>
+            {/* crossOrigin must precede src so the first request is made with CORS */}
             <img
+              crossOrigin={avatar.crossOrigin}
               src={member.img}
               alt={member.name}
               loading="lazy"
               decoding="async"
-              style={{ objectPosition: isHaris ? '41% 12%' : 'center 15%' }}
-              className="w-full h-full object-cover pointer-events-none"
+              onLoad={avatar.onLoad}
+              onError={avatar.onError}
             />
           </div>
 
-          <h4 className="font-display font-semibold text-[17px] leading-snug text-[var(--text-heading)] mt-4 break-words">
+          <h4
+            className={`font-display font-semibold leading-snug text-[var(--text-heading)] mt-4 break-words ${
+              isIntern ? 'text-[16px]' : 'text-[18px]'
+            }`}
+          >
             {member.name}
           </h4>
           <span className="hc__accent" aria-hidden="true" />
           <p className="text-sm text-[var(--text-body)] leading-snug">{member.role}</p>
           {member.shortInfo && (
-            <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{member.shortInfo}</p>
+            <p
+              className={`text-xs leading-relaxed text-[var(--text-muted)] mt-1.5 ${
+                isIntern ? 'line-clamp-2' : 'line-clamp-3'
+              }`}
+            >
+              {member.shortInfo}
+            </p>
           )}
 
           <button
@@ -348,7 +426,7 @@ export const TeamSection: React.FC = () => {
         }
 
         // Authentic avatar URL from Supabase Storage with clean fallback
-        const img = u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=1F7A8C&color=fff`;
+        const img = u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=1F7A8C&color=fff&size=256`;
 
         return {
           id: u.id,
@@ -473,7 +551,7 @@ export const TeamSection: React.FC = () => {
               </span>
             </div>
 
-            <ul className="hc-grid" role="list">
+            <ul className="hc-grid hc-grid--member" role="list">
               {filteredSpecialists.map((member) => (
                 <HangingCard key={member.id} member={member} variant="member" onOpen={openMember} />
               ))}
@@ -500,7 +578,7 @@ export const TeamSection: React.FC = () => {
               </span>
             </div>
 
-            <ul className="hc-grid" role="list">
+            <ul className="hc-grid hc-grid--intern" role="list">
               {filteredInterns.map((intern) => (
                 <HangingCard key={intern.id} member={intern} variant="intern" onOpen={openMember} />
               ))}
