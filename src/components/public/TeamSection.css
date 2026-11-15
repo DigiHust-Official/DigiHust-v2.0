@@ -211,3 +211,76 @@
     will-change: auto;
   }
 }
+
+/* ── Member profile modal (portalled to <body>) ─────────────────────────────
+ * Never taller than the viewport: header + footer fixed, only the body scrolls.
+ * <640px: bottom sheet. ≥640px: centred dialog (max-w-xl).
+ */
+.tm-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-bottom: 0;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.tm-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tm-modal__footer {
+  padding: 1rem 1.25rem max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .tm-modal {
+    max-width: 36rem;
+    border-radius: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .tm-modal__footer {
+    padding: 1.5rem;
+  }
+}
+
+/* Round avatar frame on a soft tint (always visible, unlike the cards) */
+.tm-modal__avatar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--brand-teal-subtle);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-teal) 20%, transparent);
+}
+
+@media (min-width: 640px) {
+  .tm-modal__avatar {
+    width: 104px;
+    height: 104px;
+  }
+}
+
+.tm-modal__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+.tm-modal__avatar[data-mode='photo'] img,
+.tm-modal__avatar[data-mode='fallback'] img {
+  object-fit: cover;
+  object-position: center 15%;
+}

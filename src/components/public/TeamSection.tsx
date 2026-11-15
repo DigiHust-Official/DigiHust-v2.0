@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   motion,
@@ -9,7 +10,7 @@ import {
   useReducedMotion,
   type AnimationPlaybackControls,
 } from 'framer-motion';
-import { ArrowRight, CheckCircle2, X, UserCheck } from 'lucide-react';
+import { ArrowRight, ExternalLink, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { realtimeSync } from '../../lib/realtimeSync';
 import { FounderBrainsShowcase } from './FounderBrainsShowcase';
@@ -308,12 +309,47 @@ const HangingCard: React.FC<HangingCardProps> = ({ member, variant, onOpen }) =>
   );
 };
 
+/** Profile modal avatar: always a round tinted frame; cutouts stand on its bottom. */
+const ModalAvatar: React.FC<{ src: string; name: string }> = ({ src, name }) => {
+  const avatar = useAvatarMode(src);
+  return (
+    <div className="tm-modal__avatar" data-mode={avatar.mode}>
+      <img
+        crossOrigin={avatar.crossOrigin}
+        src={src}
+        alt={name}
+        decoding="async"
+        onLoad={avatar.onLoad}
+        onError={avatar.onError}
+      />
+    </div>
+  );
+};
+
+const SHEET_QUERY = '(max-width: 639.98px)';
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const isSafeUrl = (url?: string) => !!url && /^https?:\/\//i.test(url.trim());
+
 export const TeamSection: React.FC = () => {
   const { siteContent, users } = useApp();
   const [filter, setFilter] = useState<string>('All');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  // Phones get a bottom sheet; wider screens a centred dialog
+  const [isSheet, setIsSheet] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SHEET_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(SHEET_QUERY);
+    const update = () => setIsSheet(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Real Pinned Member IDs directly from Supabase-backed siteContent
   const pinnedIds: string[] = useMemo(() => {
@@ -327,10 +363,28 @@ export const TeamSection: React.FC = () => {
     return unsub;
   }, []);
 
-  // Close modal on Escape key; lock body scroll; move focus into the dialog and restore it on close
+  // Close modal on Escape key; keep Tab inside the dialog; lock body scroll;
+  // move focus into the dialog and restore it on close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedMember(null);
+      if (e.key === 'Escape') {
+        setSelectedMember(null);
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      const inside = dialogRef.current.contains(active);
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     if (selectedMember) {
       document.body.style.overflow = 'hidden';
@@ -587,138 +641,151 @@ export const TeamSection: React.FC = () => {
         </div>
       )}
 
-      {/* ── Detailed Member Profile Modal ── */}
-      <AnimatePresence>
-        {selectedMember && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedMember(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            />
-
-            {/* Modal Card Window */}
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="team-member-modal-name"
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl shadow-2xl z-10 overflow-hidden my-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header with Background Accent */}
-              <div className="relative p-6 sm:p-8 border-b border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-subtle)] to-[var(--bg-surface)]">
-                <button
-                  ref={closeBtnRef}
-                  type="button"
+      {/* ── Detailed Member Profile Modal ──
+          Portalled to <body> above the fixed navbar (z 9980) and FloatingCTA (z 9990).
+          Header and footer stay put; only the body scrolls. <640px: bottom sheet. */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {selectedMember && (
+              <div className="fixed inset-0 z-[9995] flex items-end sm:items-center justify-center sm:p-4">
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => setSelectedMember(null)}
-                  className="absolute top-5 right-5 p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
-                  aria-label="Close detail modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                />
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-5 text-center sm:text-left">
-                  <img
-                    src={selectedMember.img}
-                    alt={selectedMember.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-[var(--brand-teal)]/20 shadow-md flex-shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1.5">
-                      <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${getCategoryStyles(selectedMember.category).text} ${getCategoryStyles(selectedMember.category).bg} ${getCategoryStyles(selectedMember.category).border}`}>
-                        {selectedMember.category}
-                      </span>
-                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center space-x-1 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>
-                          {selectedMember.tier === 'executive'
-                            ? 'Executive Leadership'
-                            : selectedMember.tier === 'intern'
-                            ? 'Intern'
-                            : 'Specialist'}
-                        </span>
-                      </span>
+                {/* Modal Card Window */}
+                <motion.div
+                  ref={dialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="team-member-modal-name"
+                  {...(reduceMotion
+                    ? {
+                        initial: { opacity: 0 },
+                        animate: { opacity: 1 },
+                        exit: { opacity: 0 },
+                        transition: { duration: 0.15 },
+                      }
+                    : isSheet
+                    ? {
+                        initial: { y: '100%' },
+                        animate: { y: 0 },
+                        exit: { y: '100%' },
+                        transition: { type: 'spring', damping: 34, stiffness: 320 },
+                      }
+                    : {
+                        initial: { opacity: 0, scale: 0.94, y: 20 },
+                        animate: { opacity: 1, scale: 1, y: 0 },
+                        exit: { opacity: 0, scale: 0.94, y: 20 },
+                        transition: { type: 'spring', damping: 25, stiffness: 350 },
+                      })}
+                  className="tm-modal relative z-10 bg-[var(--bg-surface)] shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header (fixed) */}
+                  <div className="relative flex-shrink-0 p-5 sm:p-8 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                    <button
+                      ref={closeBtnRef}
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      className="absolute top-3 right-3 sm:top-5 sm:right-5 p-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                      aria-label="Close profile"
+                    >
+                      <X className="w-5 h-5" aria-hidden="true" />
+                    </button>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left">
+                      <ModalAvatar src={selectedMember.img} name={selectedMember.name} />
+                      <div className="min-w-0 flex-1 sm:pr-8">
+                        <h2
+                          id="team-member-modal-name"
+                          className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight break-words"
+                        >
+                          {selectedMember.name}
+                        </h2>
+                        <p className="text-sm font-bold mt-1 text-[var(--brand-teal)]">
+                          {selectedMember.role}
+                        </p>
+                        {selectedMember.digiskillBatch && (
+                          <p className="text-xs text-[var(--text-muted)] mt-1">
+                            {selectedMember.digiskillBatch}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body (the only scrolling part) */}
+                  <div className="tm-modal__body p-5 sm:p-8 space-y-6">
+                    <div>
+                      <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-2.5">
+                        Profile & Background
+                      </h3>
+                      <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed whitespace-pre-line break-words">
+                        {selectedMember.bio}
+                      </p>
                     </div>
 
-                    <h2 id="team-member-modal-name" className="font-display font-extrabold text-2xl sm:text-3xl text-[var(--text-heading)] leading-tight">
-                      {selectedMember.name}
-                    </h2>
-                    <p className={`text-sm font-bold mt-1 ${getCategoryStyles(selectedMember.category).text}`}>
-                      {selectedMember.role}
-                    </p>
-                    {selectedMember.digiskillBatch && (
-                      <p className="text-xs text-[var(--text-muted)] mt-1">
-                        {selectedMember.digiskillBatch}
-                      </p>
-                    )}
+                    <div>
+                      <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-3">
+                        Specialties & Skills
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMember.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="text-xs px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-semibold shadow-xs"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Modal Body / Full Biography and Details */}
-              <div className="p-6 sm:p-8 space-y-6 max-h-[60vh] overflow-y-auto">
-                <div>
-                  <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-2.5">
-                    Profile & Background
-                  </h3>
-                  <p className="text-sm sm:text-base text-[var(--text-body)] leading-relaxed whitespace-pre-line">
-                    {selectedMember.bio}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-extrabold text-[var(--brand-teal)] uppercase tracking-wider mb-3">
-                    Specialties & Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMember.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="text-xs px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] text-[var(--text-heading)] border border-[var(--border-subtle)] font-semibold shadow-xs"
+                  {/* Footer (fixed) */}
+                  <div className="tm-modal__footer flex-shrink-0 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-[var(--text-body)] hover:bg-[var(--bg-subtle)] border border-[var(--border-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                    >
+                      Close
+                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                      {isSafeUrl(selectedMember.portfolioUrl) && (
+                        <a
+                          href={selectedMember.portfolioUrl!.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--brand-teal)] text-[var(--brand-teal)] text-sm font-bold hover:bg-[var(--brand-teal-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-colors cursor-pointer"
+                        >
+                          <span>See Portfolio</span>
+                          <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </a>
+                      )}
+                      <Link
+                        to={`/contact?inquiry=${encodeURIComponent(`Project Scope with ${selectedMember.name} (${selectedMember.role})`)}`}
+                        onClick={() => setSelectedMember(null)}
+                        className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal)]/90 text-white text-sm font-bold shadow-md shadow-[var(--brand-teal)]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-teal)] transition-all cursor-pointer"
                       >
-                        {skill}
-                      </span>
-                    ))}
+                        <span>Request Project</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[var(--brand-teal)]/5 border border-[var(--brand-teal)]/20 flex items-start space-x-3">
-                  <UserCheck className="w-5 h-5 text-[var(--brand-teal)] flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-[var(--text-body)] leading-relaxed">
-                    <strong className="text-[var(--text-heading)] font-bold">Verified Member:</strong> Direct team contributor operating under DigiHust delivery standards and service level agreements.
-                  </div>
-                </div>
+                </motion.div>
               </div>
-
-              {/* Modal Footer */}
-              <div className="p-5 sm:p-6 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedMember(null)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold text-[var(--text-body)] hover:bg-[var(--bg-subtle)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
-                >
-                  Close Window
-                </button>
-                <Link
-                  to={`/contact?inquiry=${encodeURIComponent(`Project Scope with ${selectedMember.name} (${selectedMember.role})`)}`}
-                  onClick={() => setSelectedMember(null)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl bg-[var(--brand-teal)] hover:bg-[var(--brand-teal)]/90 text-white text-sm font-bold shadow-md shadow-[var(--brand-teal)]/20 transition-all cursor-pointer"
-                >
-                  <span>Request Project</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 };
